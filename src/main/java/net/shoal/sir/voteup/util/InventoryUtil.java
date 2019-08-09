@@ -12,9 +12,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +25,7 @@ public class InventoryUtil {
 
     private static LocaleUtil locale;
 
-    public static ChestMenu buildChestMenu(FileConfiguration data) {
+    public static ChestMenu buildChestMenu(File dataFile) {
         locale = VoteUp.getInstance().getLocale();
         locale.debug("&7调用 buildChestMenu 方法.");
 
@@ -35,8 +37,10 @@ public class InventoryUtil {
         Sound open = null;
         Sound close = null;
 
-        if(data != null) {
-            id = CommonUtil.getNoExFileName(data.getName());
+        if(dataFile != null) {
+            FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
+
+            id = CommonUtil.getNoExFileName(dataFile.getName());
             ConfigurationSection setting = data.getConfigurationSection("Setting");
             locale.debug("&7读取菜单设置数据.");
             if(setting != null) {

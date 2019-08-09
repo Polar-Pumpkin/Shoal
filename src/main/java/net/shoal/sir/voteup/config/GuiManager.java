@@ -31,19 +31,19 @@ public class GuiManager {
     @Getter private Map<String, ChestMenu> guiMap = new HashMap<>();
 
     public void load() {
-//        locale.debug("&7开始加载 Gui 配置文件.");
+        locale.debug("&7开始加载 Gui 配置文件.");
         if(!dataFolder.exists()) {
             dataFolder.mkdirs();
             VoteUp.getInstance().saveResource("Guis/CreateMenu.yml", false);
             locale.debug("&7Gui 配置文件夹无效, 生成文件夹并释放默认配置文件.");
         }
-        /*File[] votes = dataFolder.listFiles(pathname -> pathname.getName().endsWith(".yml"));
+        File[] votes = dataFolder.listFiles(pathname -> pathname.getName().endsWith(".yml"));
         locale.debug("&7获取 Gui 配置文件列表.");
 
         if(votes != null && votes.length > 0) {
             locale.debug("&7Gui 配置文件列表中存在有效配置文件.");
             for (File dataFile : votes) {
-                guiMap.put(CommonUtil.getNoExFileName(dataFile.getName()), InventoryUtil.buildChestMenu(YamlConfiguration.loadConfiguration(dataFile)));
+                guiMap.put(CommonUtil.getNoExFileName(dataFile.getName()), InventoryUtil.buildChestMenu(dataFile));
                 locale.debug("&7加载 Gui 配置: &c" + CommonUtil.getNoExFileName(dataFile.getName()));
             }
             Bukkit.getLogger().info(locale.buildMessage(VoteUp.getInstance().getLocaleKey(), MessageType.INFO, "&7共加载 &c" + guiMap.size() + " &7项 Gui 配置."));
@@ -51,7 +51,7 @@ public class GuiManager {
         } else {
             locale.debug("&7Gui 配置文件列表为空.");
             Bukkit.getLogger().info(locale.buildMessage(VoteUp.getInstance().getLocaleKey(), MessageType.WARN, "&7没有 Gui 配置可供加载."));
-        }*/
+        }
     }
 
     public ChestMenu checkGui(String inventoryName) {
@@ -73,7 +73,7 @@ public class GuiManager {
         }*/
         File dataFile = new File(dataFolder.getAbsolutePath() + File.separator + key + ".yml");
         if(dataFile.exists()) {
-            return InventoryUtil.buildChestMenu(YamlConfiguration.loadConfiguration(dataFile));
+            return InventoryUtil.buildChestMenu(dataFile);
         }
         locale.debug("&7目标菜单未加载: &c" + key + " &9-> &cnull");
         return InventoryUtil.buildChestMenu(null);

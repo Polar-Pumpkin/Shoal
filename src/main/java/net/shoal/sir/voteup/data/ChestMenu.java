@@ -2,6 +2,8 @@ package net.shoal.sir.voteup.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import net.shoal.sir.voteup.enums.Placeholder;
+import net.shoal.sir.voteup.util.PlaceholderUtil;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.inventory.Inventory;
@@ -27,10 +29,10 @@ public @Data @AllArgsConstructor class ChestMenu implements Cloneable {
         this.close = menu.getClose();
     }
 
-    public MenuItem getItem(ItemStack item) {
+    public MenuItem getItem(ItemStack item, Vote data) {
         for(MenuItem menuItem : items) {
             if(item != null && item.getType() != Material.AIR) {
-                if(item.equals(menuItem.getItem())) {
+                if(item.equals(PlaceholderUtil.applyPlaceholder(menuItem.getItem().clone(), data))) {
                     return menuItem;
                 }
             }

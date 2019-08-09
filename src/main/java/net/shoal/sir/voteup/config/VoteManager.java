@@ -139,9 +139,7 @@ public class VoteManager {
     public void save(Map<VoteDataType, Object> data) {
         String id = (String) data.get(VoteDataType.ID);
         voteMap.put(id, new Vote(data));
-        if(creatingVoteMap.containsKey(id)) {
-            creatingVoteMap.remove(id);
-        }
+        creatingVoteMap.remove(id);
         saveToFile(data);
     }
 
