@@ -1,0 +1,5 @@
+Debug: false
+Language: English
+DurabilityCost:
+  Normal: 10
+  Flying: 20

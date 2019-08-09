@@ -1,0 +1,5 @@
+Plugin:
+  Prefix: "&7[&6&lVote Up&7] "
+  INFO: "&a&l&o>> "
+  WARN: "&e&l&o>> "
+  ERROR: "&c&l&o>> "

@@ -1,0 +1,11 @@
+name: LimitedRiptide
+version: ${project.version}
+main: net.shoal.sir.limitedriptide.LimitedRiptide
+api-version: 1.13
+authors: [EntityParrot_]
+commands:
+  limitedriptide:
+    aliases:
+      - lr
+      - limitedr
+      - lriptide

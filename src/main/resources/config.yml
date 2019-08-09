@@ -1,0 +1,6 @@
+Debug: false
+Language: Chinese
+Sound:
+  Vote:
+    Start: VILLAGER_YES
+    End: BLOCK_ANVIL_HIT
