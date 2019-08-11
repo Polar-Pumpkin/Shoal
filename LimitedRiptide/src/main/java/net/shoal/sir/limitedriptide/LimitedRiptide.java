@@ -60,9 +60,9 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
                     if(sender.hasPermission("LimitedRiptide.set")) {
                         if(args.length == 3) {
                             if("normal".equalsIgnoreCase(args[1])) {
-                                setCost(sender, Integer.valueOf(args[2]), false);
+                                setCost(sender, Integer.parseInt(args[2]), false);
                             } else if("flying".equalsIgnoreCase(args[1])) {
-                                setCost(sender, Integer.valueOf(args[2]), true);
+                                setCost(sender, Integer.parseInt(args[2]), true);
                             } else {
                                 sender.sendMessage(locale.getMessage(localeKey, MessageType.WARN, "Command", "Help.Set"));
                             }
@@ -96,6 +96,21 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
                         sender.sendMessage(locale.getMessage(localeKey, MessageType.WARN, "Command", "Help.Help"));
                     }
                     break;
+                case "debug":
+                    if(sender.hasPermission("LimitedRiptide.debug")) {
+                        FileConfiguration config = getConfig();
+                        boolean result = !config.getBoolean("Debug");
+                        config.set("Debug", result);
+                        sender.sendMessage(
+                                locale.getMessage(localeKey, MessageType.INFO, "Command", "ToggleDebug")
+                                        .replace("%debug%", (
+                                                result ? ChatColor.translateAlternateColorCodes('&', "&a&lENABLED") : ChatColor.translateAlternateColorCodes('&', "&c&lDISABLED")
+                                                )
+                                        )
+                        );
+                        saveConfig();
+                    }
+                    break;
                 default:
                     sender.sendMessage(locale.getMessage(localeKey, MessageType.ERROR, "Command", "Help.Unknown"));
                     break;
@@ -110,36 +125,42 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
 
     @EventHandler
     public void onInteract(PlayerRiptideEvent event) {
-        locale.debug("&a&l> &7PlayerRiptideEvent activated: (&aPlayer&7) &c" + event.getPlayer().getName());
+        locale.debug("&7PlayerRiptideEvent activated: (&aPlayer&7) &c" + event.getPlayer().getName());
         PlayerInventory userInv = event.getPlayer().getInventory();
         ItemStack trident = event.getItem();
-        locale.debug("&a&l> &7Item information: " + trident.toString());
+        locale.debug("&7Item information: " + trident.toString());
         boolean isMainHand = userInv.getItemInMainHand().getType() == Material.TRIDENT;
-        locale.debug("&e&l> &7Is trident in main hand? " + (isMainHand ? "&a&lYes" : "&c&lNo"));
+        locale.debug("&7Is trident in main hand? " + (isMainHand ? "&a&lYes" : "&c&lNo"));
         boolean isGliding = glidingPlayers.get(event.getPlayer());
-        locale.debug("&e&l> &7Is player flying with Elytra? " + (isGliding ? "&a&lYes" : "&c&lNo"));
-        Damageable meta = (Damageable) trident.getItemMeta();
-        int resultDurability = meta.getDamage() + (isGliding ? config.getInt("DurabilityCost.Flying") : config.getInt("DurabilityCost.Normal"));
-        locale.debug("&d&l> &7After reducing the durability value is: &c&l" + resultDurability);
+        locale.debug("&7Is player flying with Elytra? " + (isGliding ? "&a&lYes" : "&c&lNo"));
+        ItemMeta itemMeta = trident.getItemMeta();
+        locale.debug("&7Is target trident's ItemMeta null? " + (itemMeta == null ? "&a&lYes" : "&c&lNo"));
+        Damageable meta = (Damageable) (itemMeta == null ? Bukkit.getItemFactory().getItemMeta(Material.TRIDENT) : itemMeta);
+        if(meta != null) {
+            int resultDurability = meta.getDamage() + (isGliding ? config.getInt("DurabilityCost.Flying") : config.getInt("DurabilityCost.Normal"));
+            locale.debug("&7After reducing the durability value is: &c&l" + resultDurability);
 
-        if(resultDurability < 250) {
-            meta.setDamage(resultDurability);
-            trident.setItemMeta((ItemMeta) meta);
-            sendItem(userInv, trident, isMainHand);
-            locale.debug("&a&l> &7Trident has been returned to the player after reducing the durability.");
+            if(resultDurability < 250) {
+                meta.setDamage(resultDurability);
+                trident.setItemMeta((ItemMeta) meta);
+                sendItem(userInv, trident, isMainHand);
+                locale.debug("&7Trident has been returned to the player after reducing the durability.");
+            } else {
+                sendItem(userInv, new ItemStack(Material.AIR), isMainHand);
+                locale.debug("&7Trident has been broken.");
+            }
         } else {
-            sendItem(userInv, new ItemStack(Material.AIR), isMainHand);
-            locale.debug("&c&l> &7Trident has been broken.");
+            locale.debug("&c&lERROR! &7After validating, ItemMeta still was null!");
         }
     }
 
     @EventHandler
     public void onGliding(EntityToggleGlideEvent event) {
         if(event.getEntity() instanceof Player) {
-            locale.debug("&a&l> &7EntityToggleGlideEvent activated: (&aPlayer&7) &c" + event.getEntity().getName());
-            locale.debug("&e&l> &7Is player gliding with Elytra? " + (event.isGliding() ? "&a&lYes" : "&c&lNo"));
+            locale.debug("&7EntityToggleGlideEvent activated: (&aPlayer&7) &c" + event.getEntity().getName());
+            locale.debug("&7Is player gliding with Elytra? " + (event.isGliding() ? "&a&lYes" : "&c&lNo"));
             glidingPlayers.put((Player) event.getEntity(), event.isGliding());
-            locale.debug("&a&l> &7" + event.getEntity().getName() + "'s gliding status has been logged.");
+            locale.debug("&7" + event.getEntity().getName() + "'s gliding status has been logged.");
         }
     }
 

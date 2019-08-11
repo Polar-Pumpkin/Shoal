@@ -2,6 +2,7 @@ package net.shoal.sir.voteup.util;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.Placeholder;
 import net.shoal.sir.voteup.enums.VoteDataType;
 import org.bukkit.ChatColor;
@@ -23,6 +24,9 @@ public class PlaceholderUtil {
             case ID:
                 result = data.getId();
                 break;
+            case STATUS:
+                result = data.isStatus() ? "&a&l进行中" : "&c&l已关闭";
+                break;
             case TYPE:
                 switch (data.getType()) {
                     case NORMAL:
@@ -35,11 +39,38 @@ public class PlaceholderUtil {
                         result = "读取数据遇到错误.(未知投票种类)";
                 }
                 break;
+            case AMOUNT:
+                result = String.valueOf(data.getAmount());
+                break;
             case TITLE:
                 result = data.getTitle();
                 break;
+            case DESCRIPTION:
+                if(!data.getDescription().isEmpty()) {
+                    result = "暂不支持此类信息显示.";
+                } else {
+                    result = "无.";
+                }
+                break;
+            case CHOICE_ACCEPT:
+            case CHOICE_NEUTRAL:
+            case CHOICE_REFUSE:
+                result = data.getChoices().getChoice(ChoiceType.valueOf(type.toString().replace("CHOICE_", "")));
+                break;
+            case CHOICE_ACCEPT_NAME:
+            case CHOICE_NEUTRAL_NAME:
+            case CHOICE_REFUSE_NAME:
+                result = ChoiceType.valueOf(
+                        type.toString()
+                                .replace("CHOICE_", "")
+                                .replace("_NAME", "")
+                ).getName();
+                break;
             case STARTER:
                 result = data.getStarter();
+                break;
+            case STARTTIME:
+                result = TimeUtil.getDescriptiveTime(data.getStartTime());
                 break;
             case AUTOCAST:
                 if(!data.getAutoCast().isEmpty()) {
@@ -51,20 +82,31 @@ public class PlaceholderUtil {
             case DURATION:
                 result = TimeUtil.getDescriptiveDuration(data.getDuration());
                 break;
-            case DESCRIPTION:
-                if(!data.getDescription().isEmpty()) {
-                    result = "暂不支持此类信息显示.";
-                } else {
-                    result = "无.";
-                }
+            case PARTICIPANT_ACCEPT_AMOUNT:
+            case PARTICIPANT_NEUTRAL_AMOUNT:
+            case PARTICIPANT_REFUSE_AMOUNT:
+                result = String.valueOf(
+                        data.getParticipant().get(
+                                ChoiceType.valueOf(
+                                        type.toString()
+                                                .replace("PARTICIPANT_", "")
+                                                .replace("_AMOUNT", "")
+                                )
+                        ).size()
+                );
                 break;
             case ID_NAME:
+            case STATUS_NAME:
             case TYPE_NAME:
+            case AMOUNT_NAME:
             case TITLE_NAME:
-            case STARTER_NAME:
-            case AUTOCAST_NAME:
-            case DURATION_NAME:
             case DESCRIPTION_NAME:
+            case CHOICE_NAME:
+            case STARTER_NAME:
+            case STARTTIME_NAME:
+            case DURATION_NAME:
+            case PARTICIPANT_NAME:
+            case AUTOCAST_NAME:
                 result = VoteDataType.valueOf(type.toString().replace("_NAME", "")).getName();
                 break;
             default:

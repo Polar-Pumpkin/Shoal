@@ -4,13 +4,14 @@ Plugin:
   WARN: "&e&l>> "
   ERROR: "&c&l>> "
   HelpMessage:
-    - "&9&lLimited Riptide &8&o(v1.2-RELEASE)"
+    - "&9&lLimited Riptide &8&o(v1.4-RELEASE)"
     - ""
     - "&7&l作者: &cEntityParrot_"
     - "&7&l命令列表:"
     - "  &d/lr set normal&7/&dflying &7<&c数值&7> &9- &7设置每次激活 Riptide 附魔所消耗的耐久值."
     - "  &d/lr reload &9- &7重载插件配置文件."
     - "  &d/lr help &9- &7查看插件帮助."
+    - "  &d/lr debug &9- &7切换 Debug 模式."
 Command:
   Help:
     Set: "&7指令参数不正确, 正确用法: &d/lr set normal&7/&dflying &7<&c数值&7> &9- &7设置每次行为所消耗的三叉戟耐久值."
@@ -19,6 +20,7 @@ Command:
     Unknown: "&7未知指令, 请检查命令拼写或输入 &d/lr help &7来查看帮助."
   NoPermission: "&7您没有执行此命令所需的权限节点."
   ReloadSuccess: "&7重载配置文件成功."
+  ToggleDebug: "&7Debug 模式已%debug%&7."
   Set:
     Success: "&7设置成功(&c%mode%&7): &a%value%&7."
     ReachMaxDurability: "&7设置成功(&c%mode%&7), 但请注意, 设置的值 &e%value% &7大于三叉戟最大耐久值(&c250&7)."

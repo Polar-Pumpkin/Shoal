@@ -1,6 +1,6 @@
 Setting:
   Title: "创建投票"
-  Row: 1
+  Row: 2
 Items:
   SET_TITLE:
     ItemStack:
@@ -13,7 +13,7 @@ Items:
         - "&9▶ &7%TITLE_NAME%:"
         - "&8▶ &a%TITLE%"
         - ""
-        - "&a▶ &7&o左键单击以设置值"
+        - "&a▶ &7&o单击以设置值"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
@@ -32,7 +32,7 @@ Items:
         - "&9▶ &7%TYPE_NAME%:"
         - "&8▶ &a%TYPE%"
         - ""
-        - "&a▶ &7&o左键单击以切换类型"
+        - "&a▶ &7&o单击以切换类型"
       Enchants:
         DAMAGE_ALL: 10
       ItemFlag:
@@ -40,6 +40,21 @@ Items:
         - "HIDE_ENCHANTS"
     Position:
       X: 3
+      Y: 1
+  SET_AMOUNT:
+    ItemStack:
+      Display: "%AMOUNT_NAME%"
+      Material: ZOMBIE_HEAD
+      Lore:
+        - ""
+        - "&9▶ &7%AMOUNT_NAME%:"
+        - "&8▶ &a%AMOUNT%"
+        - ""
+        - "&a▶ &7&o单击以设置值"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 4
       Y: 1
   MODIFY_DESCRIPTION:
     ItemStack:
@@ -50,29 +65,45 @@ Items:
         - "&9▶ &7%DESCRIPTION_NAME%:"
         - "&8▶ &a%DESCRIPTION%"
         - ""
-        - "&a▶ &7&o左键单击以添加一行描述"
-        - "&a▶ &7&o右键单击以删除一行描述"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
-    Position:
-      X: 4
-      Y: 1
-  SET_DURATION:
-    ItemStack:
-      Display: "%DURATION_NAME%"
-      Material: WRITABLE_BOOK
-      Lore:
-        - ""
-        - "&9▶ &7%DURATION_NAME%:"
-        - "&8▶ &a%DURATION%"
-        - ""
-        - "&a▶ &7&o左键单击以设置值"
+        - "&a▶ &7&o单击以编辑描述"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
       X: 5
       Y: 1
-  SET_AUTOCAST:
+  SET_DURATION:
+    ItemStack:
+      Display: "%DURATION_NAME%"
+      Material: OAK_SIGN
+      Lore:
+        - ""
+        - "&9▶ &7%DURATION_NAME%:"
+        - "&8▶ &a%DURATION%"
+        - ""
+        - "&a▶ &7&o单击以设置值"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 6
+      Y: 1
+  SET_CHOICE:
+    ItemStack:
+      Display: "%CHOICE_NAME%"
+      Material: WHITE_WOOL
+      Lore:
+        - ""
+        - "&9▶ &7%CHOICE_NAME%:"
+        - "&8▶ &7%CHOICE_ACCEPT_NAME% &a▶ &c%CHOICE_ACCEPT%"
+        - "&8▶ &7%CHOICE_NEUTRAL_NAME% &e▶ &c%CHOICE_NEUTRAL%"
+        - "&8▶ &7%CHOICE_REFUSE_NAME% &c▶ &c%CHOICE_REFUSE%"
+        - ""
+        - "&a▶ &7&o单击以设置值"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 7
+      Y: 1
+  MODIFY_AUTOCAST:
     ItemStack:
       Display: "%AUTOCAST_NAME%"
       Material: COMMAND_BLOCK
@@ -81,12 +112,11 @@ Items:
         - "&9▶ &7%AUTOCAST_NAME%:"
         - "&8▶ &a%AUTOCAST%"
         - ""
-        - "&a▶ &7&o左键单击以添加自动执行命令"
-        - "&a▶ &7&o右键单击以删除自动执行命令"
+        - "&a▶ &7&o单击以编辑自动执行命令"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
-      X: 6
+      X: 8
       Y: 1
   VOTE_START:
     ItemStack:
@@ -96,12 +126,16 @@ Items:
         - "&b▶ &7当前投票概览"
         - ""
         - "&9▶ &7%ID_NAME%: &c%ID%"
-        - "&9▶ &7%STARTER_NAME%: &c%STARTER%"
+        - "&9▶ &7%TYPE_NAME%: &c%TYPE%"
         - "&9▶ &7%TITLE_NAME%:"
         - "&8▶ &a%TITLE%"
-        - "&9▶ &7%TYPE_NAME%: &c%TYPE%"
         - "&9▶ &7%DESCRIPTION_NAME%:"
         - "&8▶ &a%DESCRIPTION%"
+        - "&9▶ &7%CHOICE_NAME%:"
+        - "&8▶ &7%CHOICE_ACCEPT_NAME% &a▶ &c%CHOICE_ACCEPT%"
+        - "&8▶ &7%CHOICE_NEUTRAL_NAME% &e▶ &c%CHOICE_NEUTRAL%"
+        - "&8▶ &7%CHOICE_REFUSE_NAME% &c▶ &c%CHOICE_REFUSE%"
+        - "&9▶ &7%STARTER_NAME%: &c%STARTER%"
         - "&9▶ &7%DURATION_NAME%: &c%DURATION%"
         - "&9▶ &7%AUTOCAST_NAME%:"
         - "&8▶ &a%AUTOCAST%"
@@ -109,4 +143,4 @@ Items:
         - "HIDE_ATTRIBUTES"
     Position:
       X: 9
-      Y: 1
+      Y: 2

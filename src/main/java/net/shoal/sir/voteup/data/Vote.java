@@ -18,6 +18,7 @@ public @Data @AllArgsConstructor class Vote {
     private int amount;
     private String title;
     private List<String> description;
+    private VoteChoice choices;
     private String starter;
     private long startTime;
     private String duration;
@@ -33,6 +34,7 @@ public @Data @AllArgsConstructor class Vote {
         voteData.put(VoteDataType.AMOUNT, amount);
         voteData.put(VoteDataType.TITLE, title);
         voteData.put(VoteDataType.DESCRIPTION, description);
+        voteData.put(VoteDataType.CHOICE, choices);
         voteData.put(VoteDataType.STARTER, starter);
         voteData.put(VoteDataType.STARTTIME, startTime);
         voteData.put(VoteDataType.DURATION, duration);
@@ -53,6 +55,7 @@ public @Data @AllArgsConstructor class Vote {
         this.amount = (int) data.get(VoteDataType.AMOUNT);
         this.title = (String) data.get(VoteDataType.TITLE);
         this.description = (List<String>) data.get(VoteDataType.DESCRIPTION);
+        this.choices = (VoteChoice) data.get(VoteDataType.CHOICE);
         this.starter = (String) data.get(VoteDataType.STARTER);
         this.startTime = (long) data.get(VoteDataType.STARTTIME);
         this.duration = (String) data.get(VoteDataType.DURATION);

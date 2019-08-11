@@ -3,9 +3,7 @@ package net.shoal.sir.voteup.config;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.enums.ExecutorType;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
-import net.shoal.sir.voteup.itemexecutor.createmenu.ModifyDescription;
-import net.shoal.sir.voteup.itemexecutor.createmenu.SetTitle;
-import net.shoal.sir.voteup.itemexecutor.createmenu.SwitchType;
+import net.shoal.sir.voteup.itemexecutor.createmenu.*;
 import net.shoal.sir.voteup.util.LocaleUtil;
 
 import java.util.HashMap;
@@ -34,6 +32,10 @@ public class ExecutorManager {
         registerExecutor(ExecutorType.SET_TITLE, new SetTitle());
         registerExecutor(ExecutorType.SWITCH_TYPE, new SwitchType());
         registerExecutor(ExecutorType.MODIFY_DESCRIPTION, new ModifyDescription());
+        registerExecutor(ExecutorType.SET_DURATION, new SetDuration());
+        registerExecutor(ExecutorType.SET_CHOICE, new SetChoice());
+        registerExecutor(ExecutorType.SET_AMOUNT, new SetAmount());
+        registerExecutor(ExecutorType.MODIFY_AUTOCAST, new ModifyAutocast());
     }
 
     public MenuItemExecutor getExecutor(ExecutorType type) {

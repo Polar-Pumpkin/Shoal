@@ -1,6 +1,7 @@
 package net.shoal.sir.limitedriptide.utils;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.shoal.sir.limitedriptide.enums.MessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 public class LocaleUtil {
 
+    @Getter @Setter private String defaultLocaleKey = "Chinese";
     private Plugin plugin;
     private File dataFolder;
     @Getter private Map<String, FileConfiguration> locales = new HashMap<>();
@@ -28,19 +30,28 @@ public class LocaleUtil {
     public void init() {
         if(!dataFolder.exists()) {
             dataFolder.mkdirs();
-            plugin.saveResource("Locales/English.yml", false);
-            Bukkit.getLogger().info("&e&l> &7Language folder not found, has been automatically generated.");
+            plugin.saveResource("Locales/" + defaultLocaleKey + ".yml", false);
+            Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&7[&b&lEP's &aLocale Tool&7] &e&l> &7Language folder not found, has been automatically generated."));
         } else {
-            File[] localeDataFiles = dataFolder.listFiles(pathname -> {
-                String fileName = pathname.getName();
-                return fileName.endsWith(".yml");
-            });
+            if(dataFolder.listFiles() == null || dataFolder.listFiles().length == 0) {
+                plugin.saveResource("Locales/" + defaultLocaleKey + ".yml", false);
+            }
+        }
+        load();
+    }
 
+    private void load() {
+        File[] localeDataFiles = dataFolder.listFiles(pathname -> {
+            String fileName = pathname.getName();
+            return fileName.endsWith(".yml");
+        });
+
+        if(localeDataFiles != null) {
             for(File dataFile : localeDataFiles) {
                 locales.put(CommonUtil.getNoExFileName(dataFile.getName()), YamlConfiguration.loadConfiguration(dataFile));
             }
-            Bukkit.getLogger().info("&a&l> &7Loading language folder successful, " + localeDataFiles.length + " locale(s) loaded in total.");
         }
+        Bukkit.getLogger().info(ChatColor.translateAlternateColorCodes('&', "&7[&b&lEP's &aLocale Tool&7] &a&l> &7Loading language data successful, " + locales.size() + " locale(s) loaded in total."));
     }
 
     public void debug(String message) {
@@ -50,7 +61,7 @@ public class LocaleUtil {
     }
 
     public String getMessage(String key, MessageType type, String section, String path) {
-        FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get("English");
+        FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get(defaultLocaleKey);
 
         if(data.getKeys(false).contains(section)) {
             String message = data.getConfigurationSection(section).getString(path);
@@ -63,7 +74,7 @@ public class LocaleUtil {
     }
 
     public String buildMessage(String key, MessageType type, String message) {
-        FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get("English");
+        FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get(defaultLocaleKey);
         String pluginPrefix = type != MessageType.DEBUG ? data.getString("Plugin.Prefix") : "&9[&d" + plugin.getName() + "&9]&7(&d&lDEBUG&7) ";
         String typePrefix = type != MessageType.DEBUG ? data.getString("Plugin." + type.toString()) : "&d&l>> ";
 
@@ -74,6 +85,6 @@ public class LocaleUtil {
         if(locales.containsKey(key)) {
             return locales.get(key).getStringList("Plugin.HelpMessage");
         }
-        return locales.get("English").getStringList("Plugin.HelpMessage");
+        return locales.get(defaultLocaleKey).getStringList("Plugin.HelpMessage");
     }
 }

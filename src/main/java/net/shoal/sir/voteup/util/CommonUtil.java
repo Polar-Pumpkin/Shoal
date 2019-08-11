@@ -2,8 +2,10 @@ package net.shoal.sir.voteup.util;
 
 import com.google.common.collect.Lists;
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.data.Vote;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
@@ -115,5 +117,16 @@ public class CommonUtil {
 
     public static String color(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
+    }
+
+    public static void message(String text, Player user) {
+        user.sendMessage(color(text));
+    }
+
+    public static void message(String text, String playerName) {
+        Player target = Bukkit.getPlayer(playerName);
+        if(target != null && target.isOnline()) {
+            target.sendMessage(color(text));
+        }
     }
 }

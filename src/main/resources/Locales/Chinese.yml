@@ -3,3 +3,7 @@ Plugin:
   INFO: "&a&l&o>> "
   WARN: "&e&l&o>> "
   ERROR: "&c&l&o>> "
+Vote:
+  Start:
+    Subtitle: "&7投票 &c%TITLE% &7已开始"
+    Broadcast: "&7投票 &c%TITLE% &7已开始.(点我查看)"

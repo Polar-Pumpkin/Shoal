@@ -2,6 +2,7 @@ package net.shoal.sir.voteup.config;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.data.VoteChoice;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
@@ -12,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class VoteManager {
     public void load() {
         if(!dataFolder.exists()) {
             dataFolder.mkdirs();
-            Bukkit.getLogger().info(locale.buildMessage(VoteUp.getInstance().getLocaleKey(), MessageType.WARN, "&7未找到投票记录文件夹, 已自动生成."));
+            Bukkit.getLogger().info(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未找到投票记录文件夹, 已自动生成."));
         } else {
             File[] votes = dataFolder.listFiles(pathname -> pathname.getName().endsWith(".yml"));
 
@@ -74,6 +74,7 @@ public class VoteManager {
                                     data.getInt("Amount"),
                                     CommonUtil.color(Objects.requireNonNull(data.getString("Title"))),
                                     desc,
+                                    new VoteChoice(data.getConfigurationSection("Choice")),
                                     data.getString("Starter"),
                                     data.getLong("StartTime"),
                                     data.getString("Duration"),
@@ -82,9 +83,9 @@ public class VoteManager {
                             )
                     );
                 }
-                Bukkit.getLogger().info(locale.buildMessage(VoteUp.getInstance().getLocaleKey(), MessageType.INFO, "&7共加载 &c" + voteMap.size() + " &7项投票记录."));
+                Bukkit.getLogger().info(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7共加载 &c" + voteMap.size() + " &7项投票记录."));
             } else {
-                Bukkit.getLogger().info(locale.buildMessage(VoteUp.getInstance().getLocaleKey(), MessageType.WARN, "&7没有投票纪录可供加载."));
+                Bukkit.getLogger().info(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7没有投票纪录可供加载."));
             }
         }
     }
@@ -96,22 +97,23 @@ public class VoteManager {
         return null;
     }
 
-    public Vote startCreateVote(Player starter) {
+    public Vote startCreateVote(String starter) {
         Map<VoteDataType, Object> newVote = new HashMap<>();
-        String id = starter.getName() + "." + (voteMap.size() + 1);
+        String id = starter + "." + (voteMap.size() + 1);
 
         newVote.put(VoteDataType.ID, id);
         newVote.put(VoteDataType.STATUS, true);
         newVote.put(VoteDataType.TYPE, VoteType.NORMAL);
         newVote.put(VoteDataType.AMOUNT, 0);
-        newVote.put(VoteDataType.TITLE, starter.getName() + "的投票");
+        newVote.put(VoteDataType.TITLE, starter + "的投票");
         newVote.put(VoteDataType.DESCRIPTION, new ArrayList<>());
-        newVote.put(VoteDataType.STARTER, starter.getName());
+        newVote.put(VoteDataType.CHOICE, new VoteChoice((ConfigurationSection) null));
+        newVote.put(VoteDataType.STARTER, starter);
         newVote.put(VoteDataType.STARTTIME, System.currentTimeMillis());
         newVote.put(VoteDataType.DURATION, "1d");
         newVote.put(VoteDataType.AUTOCAST, new ArrayList<>());
 
-        creatingVoteMap.put(starter.getName(), newVote);
+        creatingVoteMap.put(starter, newVote);
         return new Vote(newVote);
     }
 
@@ -123,8 +125,12 @@ public class VoteManager {
             voteData.put(type, value);
             locale.debug("&7已覆盖值: &c" + type.toString() + " &9-> " + value);
             creatingVoteMap.put(playerName, voteData);
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7设置" + type.getName() + "成功: &c" + value.toString()), playerName);
+            SoundManager.getInstance().success(playerName);
             return true;
         }
+        CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7设置" + type.getName() + "失败, 您的 ID 下没有待发布的投票."), playerName);
+        SoundManager.getInstance().fail(playerName);
         locale.debug("&7设置值失败, 目标玩家不存在待发布的投票, 操作无效.");
         return false;
     }
@@ -149,15 +155,26 @@ public class VoteManager {
         FileConfiguration voteData = YamlConfiguration.loadConfiguration(dataFile);
 
         voteData.set("Status", data.get(VoteDataType.STATUS));
-        voteData.set("Type", data.get(VoteDataType.TYPE));
+        voteData.set("Type", data.get(VoteDataType.TYPE).toString());
         voteData.set("Amount", data.get(VoteDataType.AMOUNT));
-        voteData.set("Title", data.get(VoteDataType.TITLE));
-        voteData.set("Description", data.get(VoteDataType.DESCRIPTION));
+        voteData.set("Title", ((String) data.get(VoteDataType.TITLE)).replace("§", "&"));
+
+        List<String> desc = (List<String>) data.get(VoteDataType.DESCRIPTION);
+        desc.replaceAll(s -> s.replace("§", "&"));
+        voteData.set("Description", desc);
+
+        Map<ChoiceType, String> choices = ((VoteChoice) data.get(VoteDataType.CHOICE)).getChoices();
+        for(ChoiceType key : choices.keySet()) {
+            voteData.set("Choice." + key.toString(), choices.get(key).replace("§", "&"));
+        }
+
         voteData.set("Starter", data.get(VoteDataType.STARTER));
         voteData.set("StartTime", data.get(VoteDataType.STARTTIME));
         voteData.set("Duration", data.get(VoteDataType.DURATION));
 
-        voteData.set("AutoCast", data.get(VoteDataType.AUTOCAST));
+        List<String> casts = (List<String>) data.get(VoteDataType.AUTOCAST);
+        casts.replaceAll(s -> s.replace("§", "&"));
+        voteData.set("AutoCast", casts);
 
         try {
             voteData.save(dataFile);

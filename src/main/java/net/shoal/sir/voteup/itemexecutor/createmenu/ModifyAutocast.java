@@ -10,7 +10,7 @@ import net.shoal.sir.voteup.util.PlaceholderUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class ModifyDescription implements MenuItemExecutor {
+public class ModifyAutocast implements MenuItemExecutor {
 
     private Player user;
 
@@ -22,12 +22,12 @@ public class ModifyDescription implements MenuItemExecutor {
         SoundManager.getInstance().ding(user.getName());
         ChatAPIUtil.sendEditableList(
                 user,
-                creating.getDescription(),
-                PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的简述信息 &6&l>>>"), creating),
+                creating.getAutoCast(),
+                PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的自动执行命令列表 &6&l>>>"), creating),
                 "&a&l[+] ",
-                "/vote modify desc add ",
+                "/vote modify autocast add ",
                 "&c&l[-] ",
-                "/vote modify desc del ",
+                "/vote modify autocast del ",
                 "&a&l>>> &7返回编辑菜单",
                 "/vote create back"
         );

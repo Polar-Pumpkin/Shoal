@@ -7,6 +7,7 @@ public enum VoteDataType {
     AMOUNT("需求同意人数"),
     TITLE("投票标题"),
     DESCRIPTION("投票简述"),
+    CHOICE("投票选项"),
     STARTER("发起者"),
     STARTTIME("发起时间"),
     DURATION("持续时间"),

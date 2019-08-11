@@ -2,8 +2,9 @@ package net.shoal.sir.voteup;
 
 import lombok.Getter;
 import net.shoal.sir.voteup.command.CommandHandler;
-import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.ExecutorManager;
+import net.shoal.sir.voteup.config.GuiManager;
+import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -16,7 +17,7 @@ public final class VoteUp extends JavaPlugin {
 
     @Getter private static VoteUp instance;
     @Getter private LocaleUtil locale;
-    @Getter private String localeKey;
+    public static String LOCALE;
 
     @Override
     public void onEnable() {
@@ -34,8 +35,8 @@ public final class VoteUp extends JavaPlugin {
     public void init() {
         reloadConfig();
         locale = new LocaleUtil(this);
-        localeKey = getConfig().getString("Language");
-
+        LOCALE = getConfig().getString("Language");
+        SoundManager.getInstance().init();
         ExecutorManager.getInstance().load();
         GuiManager.getInstance().load();
         VoteManager.getInstance().load();

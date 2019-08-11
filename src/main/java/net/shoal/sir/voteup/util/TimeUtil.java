@@ -22,7 +22,7 @@ public class TimeUtil {
      *            时间戳 单位为毫秒
      * @return 时间字符串
      */
-    public static String getDescriptionTimeFromTimestamp(long timestamp) {
+    public static String getDescriptiveTime(long timestamp) {
         long currentTime = System.currentTimeMillis();
         long timeGap = (currentTime - timestamp) / 1000;// 与现在时间相差秒数
         String timeStr = null;
@@ -55,7 +55,7 @@ public class TimeUtil {
      * @param dateFormat 日期格式,如yyyy年MM月dd日 HH:mm:ss
      * @return 格式化后的日期字符串
      */
-    public static String timeToFormatDate(Long time, String dateFormat) {
+    public static String getTime(Long time, String dateFormat) {
         SimpleDateFormat format = new SimpleDateFormat(dateFormat);
         return format.format(time);
     }
@@ -65,7 +65,7 @@ public class TimeUtil {
      * @param time
      * @return
      */
-    public static String timeToDate(Long time) {
+    public static String getTime(Long time) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
         return format.format(time);
     }
@@ -75,7 +75,7 @@ public class TimeUtil {
      * @return
      */
     public static String getCurrentDate(){
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(new Date());
     }
 
@@ -96,7 +96,7 @@ public class TimeUtil {
      * @return
      */
     public static String getFormatDate(Date date){
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(date);
     }
 
@@ -106,7 +106,7 @@ public class TimeUtil {
      * @return
      */
     public static String getFormatDate(Date date,String dateFormat){
-        SimpleDateFormat sdf=new SimpleDateFormat(dateFormat);
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
         return sdf.format(date);
     }
     /**
@@ -119,7 +119,7 @@ public class TimeUtil {
      */
     public static String getPreDate(String field,int amount){
         calendar.setTime(new Date());
-        if(field!=null&&!field.equals("")){
+        if(field != null && !field.equals("")){
             if(field.equals("y")){
                 calendar.add(Calendar.YEAR, amount);
             }else if(field.equals("M")){
@@ -145,7 +145,7 @@ public class TimeUtil {
      */
     public static String getPreDate(Date date,String field,int amount){
         calendar.setTime(date);
-        if(field!=null&&!field.equals("")){
+        if(field != null && !field.equals("")){
             if(field.equals("y")){
                 calendar.add(Calendar.YEAR, amount);
             }else if(field.equals("M")){
@@ -167,10 +167,10 @@ public class TimeUtil {
      * @return
      * @throws ParseException
      */
-    public static String getPreDate(String date) throws ParseException {
-        Date d=new SimpleDateFormat().parse(date);
-        String preD=getPreDate(d,"d",1);
-        Date preDate=new SimpleDateFormat().parse(preD);
+    public static String getYesterday(String date) throws ParseException {
+        Date d = new SimpleDateFormat().parse(date);
+        String preD = getPreDate(d,"d",1);
+        Date preDate = new SimpleDateFormat().parse(preD);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(preDate);
     }

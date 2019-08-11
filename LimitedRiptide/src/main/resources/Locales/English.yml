@@ -4,13 +4,14 @@ Plugin:
   WARN: "&e&l>> "
   ERROR: "&c&l>> "
   HelpMessage:
-    - "&9&lLimited Riptide &8&o(v1.2-RELEASE)"
+    - "&9&lLimited Riptide &8&o(v1.4-RELEASE)"
     - ""
     - "&7&lAuthor: &cEntityParrot_"
     - "&7&lCommand List:"
     - "  &d/lr set normal&7/&dflying &7<&camount&7> &9- &7set the cost of durability of trident when Riptide enchantment has been activated."
     - "  &d/lr reload &9- &7reload plugin's config."
     - "  &d/lr help &9- &7check plugin's help information."
+    - "  &d/lr debug &9- &7toggle debug mode."
 Command:
   Help:
     Set: "&7Incorrect command parameters, usage: &d/lr set normal&7/&dflying &7<&camount&7> &9- &7set the cost of durability of trident when Riptide enchantment has been activated."
@@ -19,6 +20,7 @@ Command:
     Unknown: "&7Unknown command, use &d/lr help &7for help."
   NoPermission: "&7You don't has permission to do that."
   ReloadSuccess: "&7reload successfully."
+  ToggleDebug: "&7Debug mode has been %debug%&7."
   Set:
     Success: "&7Successful setup(&c%mode%&7): &a%value%&7."
     ReachMaxDurability: "&7Successful setup(&c%mode%&7), but please note that &e%value% &7Greater than trident's maximum durability(&c250&7)."

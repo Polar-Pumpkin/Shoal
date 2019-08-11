@@ -9,35 +9,28 @@ import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.NumericPrompt;
 import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
-public class SetTitlePrompt extends StringPrompt {
+public class SetAmountPrompt extends NumericPrompt {
 
     private LocaleUtil locale;
 
     private Player user;
     private String voteID;
 
-    public SetTitlePrompt(Player player) {
+    public SetAmountPrompt(Player player) {
         this.user = player;
         this.voteID = player.getName();
     }
 
     @Override
-    public String getPromptText(ConversationContext context) {
+    protected Prompt acceptValidatedInput(ConversationContext context, Number input) {
         locale = VoteUp.getInstance().getLocale();
-        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7请输入投票标题(&9支持颜色代码&7).");
-    }
-
-    @Override
-    public Prompt acceptInput(ConversationContext context, String input) {
-        locale = VoteUp.getInstance().getLocale();
-        locale.debug("&7(SetTitlePrompt) 会话输入值已验证通过.");
-        String title = CommonUtil.color(input);
-        locale.debug("&7新标题(输入值): &c" + title);
-        boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.TITLE, title);
+        locale.debug("&7(SetAmountPrompt) 会话输入值已验证通过.");
+        locale.debug("&7新人数要求(输入值): &c" + input);
+        boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.AMOUNT, input);
         locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
         CommonUtil.openInventory(
                 user,
@@ -45,6 +38,12 @@ public class SetTitlePrompt extends StringPrompt {
                         GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
                         VoteManager.getInstance().getCreatingVote(voteID))
         );
-        return Prompt.END_OF_CONVERSATION;
+        return null;
+    }
+
+    @Override
+    public String getPromptText(ConversationContext context) {
+        locale = VoteUp.getInstance().getLocale();
+        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7请输入需求同意人数(正整数).");
     }
 }

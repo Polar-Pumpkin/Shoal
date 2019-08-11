@@ -2,11 +2,9 @@ package net.shoal.sir.voteup.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.shoal.sir.voteup.enums.Placeholder;
 import net.shoal.sir.voteup.util.PlaceholderUtil;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -15,7 +13,8 @@ public @Data @AllArgsConstructor class ChestMenu implements Cloneable {
 
     private String id;
     private String title;
-    private Inventory inventory;
+    private int row;
+//    private Inventory inventory;
     private List<MenuItem> items;
     private Sound open;
     private Sound close;
@@ -23,7 +22,8 @@ public @Data @AllArgsConstructor class ChestMenu implements Cloneable {
     public ChestMenu(ChestMenu menu) {
         this.id = menu.getId();
         this.title = menu.getTitle();
-        this.inventory = menu.getInventory();
+        this.row = menu.getRow();
+//        this.inventory = menu.getInventory();
         this.items = menu.getItems();
         this.open = menu.getOpen();
         this.close = menu.getClose();
