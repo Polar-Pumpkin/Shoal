@@ -12,11 +12,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class SetDuration implements MenuItemExecutor {
 
-    private Player user;
-
     @Override
-    public boolean execute(InventoryClickEvent event) {
-        user = (Player) event.getWhoClicked();
+    public boolean execute(InventoryClickEvent event, Object value) {
+        Player user = (Player) event.getWhoClicked();
         CommonUtil.closeInventory(user);
         user.playSound(user.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);
         Conversation conversation = new ConversationFactory(VoteUp.getInstance())

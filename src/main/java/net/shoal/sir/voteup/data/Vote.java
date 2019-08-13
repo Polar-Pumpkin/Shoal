@@ -24,6 +24,8 @@ public @Data @AllArgsConstructor class Vote {
     private String duration;
     private Map<ChoiceType, Map<String, String>> participant;
     private List<String> autoCast;
+    private String pass;
+    private String reject;
 
     public Map<VoteDataType, Object> data() {
         Map<VoteDataType, Object> voteData = new HashMap<>();
@@ -40,6 +42,8 @@ public @Data @AllArgsConstructor class Vote {
         voteData.put(VoteDataType.DURATION, duration);
         voteData.put(VoteDataType.PARTICIPANT, participant);
         voteData.put(VoteDataType.AUTOCAST, autoCast);
+        voteData.put(VoteDataType.PASS, pass);
+        voteData.put(VoteDataType.REJECT, reject);
 
         return voteData;
     }
@@ -61,5 +65,7 @@ public @Data @AllArgsConstructor class Vote {
         this.duration = (String) data.get(VoteDataType.DURATION);
         this.participant = (Map<ChoiceType, Map<String, String>>) data.get(VoteDataType.PARTICIPANT);
         this.autoCast = (List<String>) data.get(VoteDataType.AUTOCAST);
+        this.pass = (String) data.get(VoteDataType.PASS);
+        this.reject = (String) data.get(VoteDataType.REJECT);
     }
 }

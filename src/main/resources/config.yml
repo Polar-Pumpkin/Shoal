@@ -1,10 +1,11 @@
 Debug: false
 Language: Chinese
 Sound:
+  Enable: true
   Action:
     Start: ENTITY_ARROW_HIT_PLAYER
     Success: ENTITY_VILLAGER_YES
     Failure: BLOCK_ANVIL_DESTROY
   Vote:
-    Start: ENTITY_VILLAGER_YES
+    Start: ENTITY_ARROW_HIT_PLAYER
     End: BLOCK_ANVIL_HIT

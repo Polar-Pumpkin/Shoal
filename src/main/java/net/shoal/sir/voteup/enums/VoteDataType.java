@@ -12,7 +12,9 @@ public enum VoteDataType {
     STARTTIME("发起时间"),
     DURATION("持续时间"),
     PARTICIPANT("参加者"),
-    AUTOCAST("自动执行");
+    AUTOCAST("自动执行"),
+    PASS("通过时显示内容"),
+    REJECT("未通过时显示内容");
 
     private final String name;
     VoteDataType(String type) {

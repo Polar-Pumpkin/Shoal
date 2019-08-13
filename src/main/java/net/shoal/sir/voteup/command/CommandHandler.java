@@ -1,9 +1,6 @@
 package net.shoal.sir.voteup.command;
 
-import net.shoal.sir.voteup.command.subcommands.Create;
-import net.shoal.sir.voteup.command.subcommands.DebugMode;
-import net.shoal.sir.voteup.command.subcommands.Help;
-import net.shoal.sir.voteup.command.subcommands.Reload;
+import net.shoal.sir.voteup.command.subcommands.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,6 +17,8 @@ public class CommandHandler implements CommandExecutor {
         registerSubcommand("create", new Create());
         registerSubcommand("reload", new Reload());
         registerSubcommand("debug", new DebugMode());
+        registerSubcommand("modify", new Modify());
+        registerSubcommand("view", new View());
     }
 
     private void registerSubcommand(String command, Subcommand executor) {

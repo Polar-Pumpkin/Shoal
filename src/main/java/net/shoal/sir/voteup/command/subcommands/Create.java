@@ -14,15 +14,11 @@ import org.bukkit.entity.Player;
 
 public class Create implements Subcommand {
 
-    private LocaleUtil locale;
-
-    private Player user;
-
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        locale = VoteUp.getInstance().getLocale();
+        LocaleUtil locale = VoteUp.getInstance().getLocale();
         if(sender instanceof Player) {
-            user = (Player) sender;
+            Player user = (Player) sender;
             Vote data = null;
 
             switch(args.length) {
@@ -58,7 +54,8 @@ public class Create implements Subcommand {
                         user,
                         InventoryUtil.parsePlaceholder(
                                 GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                                data
+                                data,
+                                user
                         )
                 );
             }

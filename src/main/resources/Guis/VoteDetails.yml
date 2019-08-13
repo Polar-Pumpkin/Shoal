@@ -1,0 +1,72 @@
+Setting:
+  Title: "投票信息: "
+  Row: 4
+Items:
+  GLASS:
+    ItemStack:
+      Display: ""
+      Material: GRAY_STAINED_GLASS_PANE
+      Lore: []
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 1-4,6-9
+      Y: 1
+  VOTE_INFO:
+    ItemStack:
+      Display: "&b&l投票信息"
+      Material: PLAYER_HEAD
+      Lore:
+        - "&b▶ &7当前投票概览"
+        - ""
+        - "&9▶ &7投票ID: &c%ID%"
+        - "&9▶ &7投票状态: &c%STATUS%"
+        - "&9▶ &7投票类型: &c%TYPE%"
+        - "&9▶ &7投票标题:"
+        - "&8▶ &a%TITLE%"
+        - "&9▶ &7投票简述:"
+        - "&8▶ &a%DESCRIPTION%"
+        - "&9▶ &7发起人: &c%STARTER%"
+        - "&9▶ &7持续时间: &c%DURATION%"
+        - "&9▶ &7发布于 &c%STARTTIME%"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 5
+      Y: 1
+  VOTE_ACCEPT:
+    ItemStack:
+      Display: "&7投票: &a&l同意"
+      Material: LIME_STAINED_GLASS_PANE
+      Lore:
+        - "&b▶ &a%CHOICE_ACCEPT%"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 1-3
+      Y: 2-4
+    ViewPermission: "VoteUp.vote.accept"
+  VOTE_NEUTRAL:
+    ItemStack:
+      Display: "&7投票: &e&l中立"
+      Material: YELLOW_STAINED_GLASS_PANE
+      Lore:
+        - "&b▶ &e%CHOICE_NEUTRAL%"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 4-6
+      Y: 2-4
+    ViewPermission: "VoteUp.vote.neutral"
+  VOTE_REFUSE:
+    ItemStack:
+      Display: "&7投票: &c&l反对"
+      Material: RED_STAINED_GLASS_PANE
+      Lore:
+        - "&b▶ &c%CHOICE_REFUSE%"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 7-9
+      Y: 2-4
+    ViewPermission: "VoteUp.vote.refuse"

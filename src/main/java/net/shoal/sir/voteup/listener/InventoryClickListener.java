@@ -14,32 +14,27 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class InventoryClickListener implements Listener {
 
-    private LocaleUtil locale;
-    private VoteManager vm;
-
-    private Player user;
-    private ChestMenu gui;
-    private MenuItem item;
-
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        locale = VoteUp.getInstance().getLocale();
-        vm = VoteManager.getInstance();
-        user = (Player) event.getWhoClicked();
-        gui = GuiManager.getInstance().checkGui(event.getView().getTitle());
+        LocaleUtil locale = VoteUp.getInstance().getLocale();
+        VoteManager vm = VoteManager.getInstance();
+        Player user = (Player) event.getWhoClicked();
+        ChestMenu gui = GuiManager.getInstance().checkGui(event.getView().getTitle());
 
         if(gui != null) {
             locale.debug("&7触发 &cInventoryClickEvent &7事件, 且经检验, 被点击界面为本插件所属: &c" + gui.getTitle());
             event.setCancelled(true);
             locale.debug("&7取消事件 &c" + (event.isCancelled() ? "成功" : "失败"));
-            item = gui.getItem(event.getCurrentItem(), ("CreateMenu".equalsIgnoreCase(gui.getId()) ? vm.getCreatingVote(user.getName()) : vm.getVote(user.getName())));
+            String id = event.getView().getTitle().replace(gui.getTitle(), "");
+            locale.debug("&7获取到的投票 ID 为: &c" + id);
+            MenuItem item = gui.getItem(event.getCurrentItem(), ("CreateMenu".equalsIgnoreCase(gui.getId()) ? vm.getCreatingVote(user.getName()) : vm.getVote(id)));
             locale.debug("&7尝试获取被点击物品的 MenuItem 对象, 获取到的对象 &c" + (item != null ? "不为" : "为") + " &7null");
             if(item != null) {
                 locale.debug("&7MenuItem ID: &c" + item.getId());
                 MenuItemExecutor executor = item.getExecutor();
                 locale.debug("&7菜单物品动作执行器是否有效: &c" + (executor != null ? "是" : "否"));
                 if(executor != null) {
-                    executor.execute(event);
+                    executor.execute(event, id);
                 } else {
                     locale.debug("&7菜单物品动作执行器无效, 点击操作已忽略.");
                 }

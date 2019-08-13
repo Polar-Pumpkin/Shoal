@@ -8,5 +8,13 @@ public enum ExecutorType {
     SET_DURATION,
     SET_CHOICE,
     MODIFY_AUTOCAST,
+    SET_RESULT,
     VOTE_START,
+
+    VOTE_ACCEPT,
+    VOTE_NEUTRAL,
+    VOTE_REFUSE,
+
+    GLASS,
+    VOTE_INFO,
 }

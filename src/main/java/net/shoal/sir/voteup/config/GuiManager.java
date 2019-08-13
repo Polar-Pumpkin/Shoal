@@ -16,6 +16,7 @@ import java.util.Map;
 public class GuiManager {
 
     public static final String CREATE_MENU = "CreateMenu";
+    public static final String VOTE_DETAIL = "VoteDetails";
 
     private static LocaleUtil locale;
     private static GuiManager instance;
@@ -61,12 +62,19 @@ public class GuiManager {
             VoteUp.getInstance().saveResource("Guis/CreateMenu.yml", false);
             locale.debug("&7释放默认配置文件: &cCreateMenu.yml");
         }
+        if(!new File(dataFolder.getAbsolutePath() + File.separator + VOTE_DETAIL + ".yml").exists()) {
+            VoteUp.getInstance().saveResource("Guis/VoteDetails.yml", false);
+            locale.debug("&7释放默认配置文件: &VoteDetails.yml");
+        }
     }
 
     public ChestMenu checkGui(String inventoryName) {
         for(String key : guiMap.keySet()) {
             ChestMenu target = guiMap.get(key);
             if(inventoryName.equalsIgnoreCase(target.getTitle())) {
+                return target;
+            }
+            if(inventoryName.contains(target.getTitle())) {
                 return target;
             }
         }

@@ -33,7 +33,9 @@ public @Data @AllArgsConstructor class ChestMenu implements Cloneable {
         for(MenuItem menuItem : items) {
             if(item != null && item.getType() != Material.AIR) {
                 if(item.equals(PlaceholderUtil.applyPlaceholder(menuItem.getItem().clone(), data))) {
-                    return menuItem;
+                    MenuItem clone = menuItem.clone();
+                    clone.setId(data.getId() + "," + clone.getId());
+                    return clone;
                 }
             }
         }

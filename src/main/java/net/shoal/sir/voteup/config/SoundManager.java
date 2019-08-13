@@ -37,6 +37,10 @@ public class SoundManager {
         playSound(playerName, setting.getString("Action.Start"));
     }
 
+    public void voteEvent(boolean isStart) {
+        Bukkit.getOnlinePlayers().forEach(player -> playSound(player.getName(), (isStart ? setting.getString("Vote.Start") : setting.getString("Vote.End"))));
+    }
+
     public void playSound(String playerName, String sound) {
         Player target = Bukkit.getPlayerExact(playerName);
         if(target != null && target.isOnline()) {

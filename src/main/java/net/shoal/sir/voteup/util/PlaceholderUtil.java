@@ -1,7 +1,10 @@
 package net.shoal.sir.voteup.util;
 
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.config.CacheManager;
+import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.enums.CacheLogType;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.Placeholder;
 import net.shoal.sir.voteup.enums.VoteDataType;
@@ -109,27 +112,50 @@ public class PlaceholderUtil {
             case AUTOCAST_NAME:
                 result = VoteDataType.valueOf(type.toString().replace("_NAME", "")).getName();
                 break;
+
+            case RESULT:
+                result = VoteManager.getInstance().isPassed(data.getId()) ? data.getPass() : data.getReject();
+                break;
+            case RESULT_NAME:
+                result = "投票结果显示内容";
+                break;
+            case RESULT_PASS:
+                result = data.getPass();
+                break;
+            case RESULT_PASS_NAME:
+                result = VoteDataType.PASS.getName();
+                break;
+            case RESULT_REJECT:
+                result = data.getReject();
+                break;
+            case RESULT_REJECT_NAME:
+                result = VoteDataType.REJECT.getName();
+                break;
+
+            case CACHE_LOG_AMOUNT_VOTE_END:
+                result = String.valueOf(CacheManager.getInstance().getLogAmount(CacheLogType.valueOf(type.toString().replace("CACHE_LOG_AMOUNT_", ""))));
+                break;
             default:
                 result = "读取数据遇到错误.(未知变量)";
         }
 
-        locale.debug("&7目标变量值: &c" + result);
+//        locale.debug("&7目标变量值: &c" + result);
         return ChatColor.translateAlternateColorCodes('&', result);
     }
 
     public static String check(String text, Vote data) {
         String result = text;
-        locale.debug("&7调用 (PlaceholderUtil) check 方法, 目标文本: &c" + result);
+//        locale.debug("&7调用 (PlaceholderUtil) check 方法, 目标文本: &c" + result);
         for(Placeholder placeholder : Placeholder.values()) {
             String placeholderName = "%" + placeholder.toString() + "%";
             if(result.contains(placeholderName)) {
-                locale.debug("&7目标文本包含变量: &7" + placeholderName);
+//                locale.debug("&7目标文本包含变量: &7" + placeholderName);
                 String placeholderResult = parse(placeholder, data);
 
                 result = result.replace(placeholderName, placeholderResult);
             }
         }
-        locale.debug("&7最终返回文本: &c" + result);
+//        locale.debug("&7最终返回文本: &c" + result);
         return result;
     }
 

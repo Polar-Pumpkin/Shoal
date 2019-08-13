@@ -73,8 +73,9 @@ public class CommonUtil {
                 }
             }
 
-            if(itemSection.isConfigurationSection("ItemFlag")) {
-                for(String key : itemSection.getStringList("ItemFlag")) {
+            List<String> itemFlag = itemSection.getStringList("ItemFlag");
+            if(itemFlag != null && !itemFlag.isEmpty()) {
+                for(String key : itemFlag) {
                     meta.addItemFlags(ItemFlag.valueOf(key.toUpperCase()));
                 }
             }
@@ -126,7 +127,16 @@ public class CommonUtil {
     public static void message(String text, String playerName) {
         Player target = Bukkit.getPlayer(playerName);
         if(target != null && target.isOnline()) {
-            target.sendMessage(color(text));
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    target.sendMessage(color(text));
+                }
+            }.runTaskLater(VoteUp.getInstance(), 1);
         }
+    }
+
+    public static void broadcastTitle(String title, String subtitle) {
+        Bukkit.getOnlinePlayers().forEach(player -> player.sendTitle(color(title), color(subtitle), 1 * 20, 5 * 20, 3 * 20));
     }
 }

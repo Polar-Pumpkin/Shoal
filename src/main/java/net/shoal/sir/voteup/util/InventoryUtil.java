@@ -1,5 +1,6 @@
 package net.shoal.sir.voteup.util;
 
+import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.ExecutorManager;
 import net.shoal.sir.voteup.data.ChestMenu;
@@ -13,6 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -68,13 +70,16 @@ public class InventoryUtil {
                 ConfigurationSection target = items.getConfigurationSection(key);
                 ItemStack item = CommonUtil.buildItem(Objects.requireNonNull(target));
                 locale.debug("&7构建物品数据: &c" + item.toString());
-                int x = target.getInt("Position.X");
-                int y = target.getInt("Position.Y");
+                String x = target.getString("Position.X");
+                String y = target.getString("Position.Y");
                 locale.debug("&7物品坐标: (&c" + x + "&7, &c" + y + "&7)");
 //                result.setItem(Position.getPositon(x, y), item);
                 MenuItemExecutor executor = ExecutorManager.getInstance().getExecutor(ExecutorType.valueOf(key.toUpperCase()));
                 locale.debug("&7菜单物品动作执行器是否有效: &c" + (executor != null ? "是" : "否"));
-                itemList.add(new MenuItem(key, item, executor, x, y));
+                String perm;
+                perm = target.getString("ViewPermission");
+                locale.debug("&7菜单物品可视权限: &c" + perm);
+                itemList.add(new MenuItem(key, item, executor, x, y, perm));
                 locale.debug("&7已添加物品至菜单物品列表.");
             }
             locale.debug("&7共加载 &c" + itemList.size() + " &7项菜单物品.");
@@ -83,26 +88,40 @@ public class InventoryUtil {
         return new ChestMenu(id, title, row, itemList, open, close);
     }
 
-    public static Inventory parsePlaceholder(ChestMenu data, Vote voteData) {
+    public static Inventory parsePlaceholder(ChestMenu data, Vote voteData, Player user) {
         locale = VoteUp.getInstance().getLocale();
         locale.debug("&7调用 parsePlaceholder 方法.");
         locale.debug("&7菜单参数是否有效: &c" + (data != null ? "是" : "否"));
         locale.debug("&7菜单数据: &c" + data.toString());
         locale.debug("&7投票数据: &c" + voteData.toString());
-        Inventory inventory = constructInventory(data);
+        Inventory inventory = constructInventory(data, user, voteData.getId());
         for (MenuItem item : data.getItems()) {
-            inventory.setItem(
-                    Position.getPositon(item.getXPosition(), item.getYPosition()),
-                    PlaceholderUtil.applyPlaceholder(item.getItem().clone(), voteData)
-            );
+            for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
+                inventory.setItem(
+                        position,
+                        PlaceholderUtil.applyPlaceholder(item.getItem().clone(), voteData)
+                );
+            }
         }
         return inventory;
     }
 
-    public static Inventory constructInventory(ChestMenu gui) {
-        Inventory result = Bukkit.createInventory(null, gui.getRow() * 9, gui.getTitle());
+    public static Inventory constructInventory(ChestMenu gui, @NonNull Player user, String additionTitle) {
+        Inventory result = Bukkit.createInventory(null, gui.getRow() * 9, gui.getTitle() + additionTitle);
         for(MenuItem item : gui.getItems()) {
-            result.setItem(Position.getPositon(item.getXPosition(), item.getYPosition()), item.getItem().clone());
+            String perm = item.getPermission();
+            if(perm != null && !perm.equalsIgnoreCase("")) {
+                if(user.hasPermission(perm)) {
+                    for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
+                        result.setItem(position, item.getItem().clone());
+                    }
+                }
+            } else {
+                for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
+                    result.setItem(position, item.getItem().clone());
+                }
+            }
+
         }
         return result;
     }

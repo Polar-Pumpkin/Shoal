@@ -4,13 +4,13 @@ Setting:
 Items:
   SET_TITLE:
     ItemStack:
-      Display: "%TITLE_NAME%"
+      Display: "投票标题"
       Material: PLAYER_HEAD
       Lore:
-        - "&9▶ &7%ID_NAME%: &c%ID%"
-        - "&9▶ &7%STARTER_NAME%: &c%STARTER%"
+        - "&9▶ &7投票ID: &c%ID%"
+        - "&9▶ &7发起人: &c%STARTER%"
         - ""
-        - "&9▶ &7%TITLE_NAME%:"
+        - "&9▶ &7当前标题:"
         - "&8▶ &a%TITLE%"
         - ""
         - "&a▶ &7&o单击以设置值"
@@ -19,9 +19,10 @@ Items:
     Position:
       X: 1
       Y: 1
+    ViewPermission: "VoteUp.create.title"
   SWITCH_TYPE:
     ItemStack:
-      Display: "%TYPE_NAME%"
+      Display: "投票类型"
       Material: NETHER_STAR
       Lore:
         - "&e▶ &9&lNORMAL"
@@ -29,7 +30,7 @@ Items:
         - "&e▶ &9&lREACHAMOUNT"
         - "&e▶ &7&o在投票结束前同意人数需达到指定数量."
         - ""
-        - "&9▶ &7%TYPE_NAME%:"
+        - "&9▶ &7当前类型:"
         - "&8▶ &a%TYPE%"
         - ""
         - "&a▶ &7&o单击以切换类型"
@@ -41,13 +42,14 @@ Items:
     Position:
       X: 3
       Y: 1
+    ViewPermission: "VoteUp.create.type"
   SET_AMOUNT:
     ItemStack:
-      Display: "%AMOUNT_NAME%"
+      Display: "同意人数目标"
       Material: ZOMBIE_HEAD
       Lore:
         - ""
-        - "&9▶ &7%AMOUNT_NAME%:"
+        - "&9▶ &7当前值:"
         - "&8▶ &a%AMOUNT%"
         - ""
         - "&a▶ &7&o单击以设置值"
@@ -56,13 +58,14 @@ Items:
     Position:
       X: 4
       Y: 1
+    ViewPermission: "VoteUp.create.amount"
   MODIFY_DESCRIPTION:
     ItemStack:
-      Display: "%DESCRIPTION_NAME%"
+      Display: "投票简述"
       Material: WRITABLE_BOOK
       Lore:
         - ""
-        - "&9▶ &7%DESCRIPTION_NAME%:"
+        - "&9▶ &7当前内容:"
         - "&8▶ &a%DESCRIPTION%"
         - ""
         - "&a▶ &7&o单击以编辑描述"
@@ -71,13 +74,14 @@ Items:
     Position:
       X: 5
       Y: 1
+    ViewPermission: "VoteUp.create.description"
   SET_DURATION:
     ItemStack:
-      Display: "%DURATION_NAME%"
+      Display: "投票持续时间"
       Material: OAK_SIGN
       Lore:
         - ""
-        - "&9▶ &7%DURATION_NAME%:"
+        - "&9▶ &7当前值:"
         - "&8▶ &a%DURATION%"
         - ""
         - "&a▶ &7&o单击以设置值"
@@ -86,16 +90,17 @@ Items:
     Position:
       X: 6
       Y: 1
+    ViewPermission: "VoteUp.create.duration"
   SET_CHOICE:
     ItemStack:
-      Display: "%CHOICE_NAME%"
+      Display: "投票选项内容"
       Material: WHITE_WOOL
       Lore:
         - ""
-        - "&9▶ &7%CHOICE_NAME%:"
-        - "&8▶ &7%CHOICE_ACCEPT_NAME% &a▶ &c%CHOICE_ACCEPT%"
-        - "&8▶ &7%CHOICE_NEUTRAL_NAME% &e▶ &c%CHOICE_NEUTRAL%"
-        - "&8▶ &7%CHOICE_REFUSE_NAME% &c▶ &c%CHOICE_REFUSE%"
+        - "&9▶ &7当前值:"
+        - "&8▶ &7同意 &a▶ &c%CHOICE_ACCEPT%"
+        - "&8▶ &7中立 &e▶ &c%CHOICE_NEUTRAL%"
+        - "&8▶ &7反对 &c▶ &c%CHOICE_REFUSE%"
         - ""
         - "&a▶ &7&o单击以设置值"
       ItemFlag:
@@ -103,13 +108,14 @@ Items:
     Position:
       X: 7
       Y: 1
+    ViewPermission: "VoteUp.create.choice"
   MODIFY_AUTOCAST:
     ItemStack:
-      Display: "%AUTOCAST_NAME%"
+      Display: "自动执行"
       Material: COMMAND_BLOCK
       Lore:
         - ""
-        - "&9▶ &7%AUTOCAST_NAME%:"
+        - "&9▶ &7当前内容:"
         - "&8▶ &a%AUTOCAST%"
         - ""
         - "&a▶ &7&o单击以编辑自动执行命令"
@@ -118,6 +124,24 @@ Items:
     Position:
       X: 8
       Y: 1
+    ViewPermission: "VoteUp.create.autocast"
+  SET_RESULT:
+    ItemStack:
+      Display: "投票结果显示"
+      Material: OAK_SIGN
+      Lore:
+        - ""
+        - "&9▶ &7当前值:"
+        - "&8▶ &7投票通过 &a▶ &c%RESULT_PASS%"
+        - "&8▶ &7投票否决 &c▶ &c%RESULT_REJECT%"
+        - ""
+        - "&a▶ &7&o单击以设置值"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 9
+      Y: 1
+    ViewPermission: "VoteUp.create.result"
   VOTE_START:
     ItemStack:
       Display: "&a&l发布投票"
@@ -125,22 +149,25 @@ Items:
       Lore:
         - "&b▶ &7当前投票概览"
         - ""
-        - "&9▶ &7%ID_NAME%: &c%ID%"
-        - "&9▶ &7%TYPE_NAME%: &c%TYPE%"
-        - "&9▶ &7%TITLE_NAME%:"
+        - "&9▶ &7投票ID: &c%ID%"
+        - "&9▶ &7投票类型: &c%TYPE%"
+        - "&9▶ &7投票标题:"
         - "&8▶ &a%TITLE%"
-        - "&9▶ &7%DESCRIPTION_NAME%:"
+        - "&9▶ &7投票简述:"
         - "&8▶ &a%DESCRIPTION%"
-        - "&9▶ &7%CHOICE_NAME%:"
-        - "&8▶ &7%CHOICE_ACCEPT_NAME% &a▶ &c%CHOICE_ACCEPT%"
-        - "&8▶ &7%CHOICE_NEUTRAL_NAME% &e▶ &c%CHOICE_NEUTRAL%"
-        - "&8▶ &7%CHOICE_REFUSE_NAME% &c▶ &c%CHOICE_REFUSE%"
-        - "&9▶ &7%STARTER_NAME%: &c%STARTER%"
-        - "&9▶ &7%DURATION_NAME%: &c%DURATION%"
-        - "&9▶ &7%AUTOCAST_NAME%:"
+        - "&9▶ &7投票选项内容:"
+        - "&8▶ &7同意 &a▶ &c%CHOICE_ACCEPT%"
+        - "&8▶ &7中立 &e▶ &c%CHOICE_NEUTRAL%"
+        - "&8▶ &7反对 &c▶ &c%CHOICE_REFUSE%"
+        - "&9▶ &7发起人: &c%STARTER%"
+        - "&9▶ &7持续时间: &c%DURATION%"
+        - "&9▶ &7自动执行:"
         - "&8▶ &a%AUTOCAST%"
+        - "&9▶ &7投票结果显示:"
+        - "&8▶ &7投票通过 &a▶ &c%RESULT_PASS%"
+        - "&8▶ &7投票否决 &c▶ &c%RESULT_REJECT%"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
-      X: 9
+      X: 1-9
       Y: 2

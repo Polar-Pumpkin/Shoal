@@ -43,7 +43,9 @@ public class SetTitlePrompt extends StringPrompt {
                 user,
                 InventoryUtil.parsePlaceholder(
                         GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                        VoteManager.getInstance().getCreatingVote(voteID))
+                        VoteManager.getInstance().getCreatingVote(voteID),
+                        user
+                )
         );
         return Prompt.END_OF_CONVERSATION;
     }

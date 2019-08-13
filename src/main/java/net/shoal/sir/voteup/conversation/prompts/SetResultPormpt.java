@@ -3,9 +3,8 @@ package net.shoal.sir.voteup.conversation.prompts;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
-import net.shoal.sir.voteup.data.VoteChoice;
-import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.MessageType;
+import net.shoal.sir.voteup.enums.ResultType;
 import net.shoal.sir.voteup.enums.VoteDataType;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
@@ -15,17 +14,15 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-
-public class SetChoicePrompt extends StringPrompt {
+public class SetResultPormpt extends StringPrompt {
 
     private LocaleUtil locale;
 
     private Player user;
     private String voteID;
-    private ChoiceType type;
+    private ResultType type;
 
-    public SetChoicePrompt(Player player, ChoiceType type) {
+    public SetResultPormpt(Player player, ResultType type) {
         this.user = player;
         this.voteID = player.getName();
         this.type = type;
@@ -34,28 +31,22 @@ public class SetChoicePrompt extends StringPrompt {
     @Override
     public String getPromptText(ConversationContext context) {
         locale = VoteUp.getInstance().getLocale();
-        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7请输入投票选项内容, 类型: " + type.getName() + "(&9支持颜色代码&7).");
+        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7请输入投票结果显示内容, 类型: " + type.getName() + "(&9支持颜色代码&7).");
     }
 
     @Override
     public Prompt acceptInput(ConversationContext context, String input) {
         locale = VoteUp.getInstance().getLocale();
-        locale.debug("&7(SetChoicePrompt) 会话输入值已验证通过.");
-        String accept = CommonUtil.color(input);
-        locale.debug("&7新选项内容(输入值): &c" + accept);
-        VoteChoice choiceData = VoteManager.getInstance().getCreatingVote(user.getName()).getChoices();
-        Map<ChoiceType, String> choiceMap = choiceData.getChoices();
-        choiceMap.put(type, accept);
-        choiceData.setChoices(choiceMap);
-        boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.CHOICE, choiceData);
-        locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
+        locale.debug("&7(SetResultPormpt) 会话输入值已验证通过.");
+        String result = CommonUtil.color(input);
+        locale.debug("&7新选项内容(输入值): &c" + result);
+        boolean setResult = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.valueOf(type.toString()), result);
+        locale.debug("&7设置值: &c" + (setResult ? "成功" : "失败"));
 
-        switch(type) {
-            case ACCEPT:
-                return new SetChoicePrompt(user, ChoiceType.NEUTRAL);
-            case NEUTRAL:
-                return new SetChoicePrompt(user, ChoiceType.REFUSE);
-            case REFUSE:
+        switch (type) {
+            case PASS:
+                return new SetResultPormpt(user, ResultType.REJECT);
+            case REJECT:
             default:
                 CommonUtil.openInventory(
                         user,

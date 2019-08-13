@@ -16,13 +16,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class SwitchType implements MenuItemExecutor {
 
-    private LocaleUtil locale;
-    private Player user;
-
     @Override
-    public boolean execute(InventoryClickEvent event) {
-        locale = VoteUp.getInstance().getLocale();
-        user = (Player) event.getWhoClicked();
+    public boolean execute(InventoryClickEvent event, Object value) {
+        LocaleUtil locale = VoteUp.getInstance().getLocale();
+        Player user = (Player) event.getWhoClicked();
         CommonUtil.closeInventory(user);
         SoundManager.getInstance().ding(user.getName());
         boolean result = switchVoteType(user.getName());
@@ -31,7 +28,8 @@ public class SwitchType implements MenuItemExecutor {
                 user,
                 InventoryUtil.parsePlaceholder(
                         GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                        VoteManager.getInstance().getCreatingVote(user.getName())
+                        VoteManager.getInstance().getCreatingVote(user.getName()),
+                        user
                 )
         );
         return true;

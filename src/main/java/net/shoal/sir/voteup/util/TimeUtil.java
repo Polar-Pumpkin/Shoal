@@ -1,11 +1,18 @@
 package net.shoal.sir.voteup.util;
 
+import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.enums.DurationType;
+import net.shoal.sir.voteup.enums.MessageType;
+import org.bukkit.Bukkit;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class TimeUtil {
+
+    private static LocaleUtil locale;
 
     private static final int YEAR = 365 * 24 * 60 * 60;// 年
     private static final int MONTH = 30 * 24 * 60 * 60;// 月
@@ -47,6 +54,51 @@ public class TimeUtil {
                 .replace("d", " 天 ")
                 .replace("H", " 小时 ")
                 .replace("m", " 分钟");
+    }
+
+    public static long getDurationTimeStamp(String duration) {
+        locale = VoteUp.getInstance().getLocale();
+        locale.debug("&7调用 getDurationTimeStamp 方法.");
+        long result = 0;
+
+        String clone = duration.toUpperCase();
+        locale.debug("&7待解析持续时间: &c" + clone);
+        DurationType durationType;
+        while((durationType = getFirstIndexOf(clone)) != null) {
+            locale.debug("&7获取到的时间标识符有效: &c" + durationType.toString());
+            int index = clone.indexOf(durationType.getS());
+            locale.debug("&7时间标识符索引值: &c" + index);
+            try {
+                String target = clone.substring(0, index);
+                locale.debug("&7截取到的时间配置值: &c" + target);
+                int amount = Integer.parseInt(target);
+                result += amount * durationType.getI();
+                locale.debug("&7已算出并添加指定时长至返回值: &c" + result);
+                clone = clone.substring(index + 1);
+                locale.debug("&7准备开始继续解析, 剩余内容: &c" + clone);
+            } catch(Throwable e) {
+                Bukkit.getLogger().info(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7投票持续时间格式化失败: &c" + duration));
+                break;
+            }
+        }
+
+        return result * 1000;
+    }
+
+    public static DurationType getFirstIndexOf(String target) {
+        int index = Integer.MAX_VALUE;
+        DurationType durationType = null;
+        for(DurationType type : DurationType.values()) {
+            int currentIndex = target.indexOf(type.getS());
+            if(currentIndex == -1) {
+                continue;
+            }
+            if(currentIndex < index) {
+                index = currentIndex;
+                durationType = type;
+            }
+        }
+        return durationType;
     }
 
     /**

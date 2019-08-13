@@ -12,11 +12,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class SetTitle implements MenuItemExecutor {
 
-    private Player user;
-
     @Override
-    public boolean execute(InventoryClickEvent event) {
-        user = (Player) event.getWhoClicked();
+    public boolean execute(InventoryClickEvent event, Object value) {
+        Player user = (Player) event.getWhoClicked();
         CommonUtil.closeInventory(user);
         SoundManager.getInstance().ding(user.getName());
         Conversation conversation = new ConversationFactory(VoteUp.getInstance())

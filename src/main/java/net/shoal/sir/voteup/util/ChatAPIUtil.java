@@ -26,7 +26,7 @@ public class ChatAPIUtil {
         return msg;
     }
 
-    public static void sendEditableList(Player user, List<String> content, String title, String add, String addCmd, String del, String delCmd, String back, String backCmd) {
+    public static void sendEditableList(Player user, List<String> content, String title, String add, String addCmd, String set, String setCmd, String del, String delCmd, String back, String backCmd) {
         user.sendMessage(CommonUtil.color(title));
         TextComponent clickableAdd;
         if(!content.isEmpty()) {
@@ -38,12 +38,18 @@ public class ChatAPIUtil {
                         new ClickEvent(ClickEvent.Action.RUN_COMMAND, addCmd + (index + 1)),
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(CommonUtil.color("&a点击在下方插入一行内容")))
                 );
+                TextComponent clickableSet = buildClickText(
+                        set,
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, setCmd + index),
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(CommonUtil.color("&e点击设置此行内容")))
+                );
                 TextComponent clickableDel = buildClickText(
                         del,
                         new ClickEvent(ClickEvent.Action.RUN_COMMAND, delCmd + index),
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(CommonUtil.color("&c点击删除此行内容")))
                 );
                 result.addExtra(clickableAdd);
+                result.addExtra(clickableSet);
                 result.addExtra(clickableDel);
                 result.addExtra(build(CommonUtil.color(desc)));
                 user.spigot().sendMessage(result);

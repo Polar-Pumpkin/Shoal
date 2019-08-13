@@ -7,3 +7,14 @@ Vote:
   Start:
     Subtitle: "&7投票 &c%TITLE% &7已开始"
     Broadcast: "&7投票 &c%TITLE% &7已开始.(点我查看)"
+  End:
+    Subtitle: "&7投票 &c%TITLE% &7已结束"
+    Broadcast: "&7投票 &c%TITLE% &7%RESULT%&7."
+  Report: "&6欢迎回来, 尊敬的投票管理员! &7在您不在线的时间里有 &c%CACHE_LOG_AMOUNT_VOTE_END% &7个投票结束.(鼠标悬浮我查看详细信息)"
+  Vote:
+    ACCEPT: "&7您已成功投出自己的一票: &a&l同意&7."
+    NEUTRAL: "&7您已成功投出自己的一票: &e&l中立&7."
+    REFUSE: "&7您已成功投出自己的一票: &c&l反对&7."
+    Fail:
+      Closed: "&7投票已结束. 您无法继续投票."
+      Logged: "&7您已经投过票了."

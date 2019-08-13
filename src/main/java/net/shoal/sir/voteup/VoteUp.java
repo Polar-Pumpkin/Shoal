@@ -2,11 +2,9 @@ package net.shoal.sir.voteup;
 
 import lombok.Getter;
 import net.shoal.sir.voteup.command.CommandHandler;
-import net.shoal.sir.voteup.config.ExecutorManager;
-import net.shoal.sir.voteup.config.GuiManager;
-import net.shoal.sir.voteup.config.SoundManager;
-import net.shoal.sir.voteup.config.VoteManager;
+import net.shoal.sir.voteup.config.*;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
+import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,6 +26,7 @@ public final class VoteUp extends JavaPlugin {
         }
         init();
 
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClickListener(), this);
         Bukkit.getPluginCommand("voteup").setExecutor(new CommandHandler());
     }
@@ -37,6 +36,7 @@ public final class VoteUp extends JavaPlugin {
         locale = new LocaleUtil(this);
         LOCALE = getConfig().getString("Language");
         SoundManager.getInstance().init();
+        CacheManager.getInstance().load();
         ExecutorManager.getInstance().load();
         GuiManager.getInstance().load();
         VoteManager.getInstance().load();

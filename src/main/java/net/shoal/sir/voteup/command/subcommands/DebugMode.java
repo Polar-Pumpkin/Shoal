@@ -9,11 +9,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class DebugMode implements Subcommand {
 
-    private LocaleUtil locale;
-
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        locale = VoteUp.getInstance().getLocale();
+        LocaleUtil locale = VoteUp.getInstance().getLocale();
         FileConfiguration config = VoteUp.getInstance().getConfig();
         boolean result = !config.getBoolean("Debug");
         config.set("Debug", result);

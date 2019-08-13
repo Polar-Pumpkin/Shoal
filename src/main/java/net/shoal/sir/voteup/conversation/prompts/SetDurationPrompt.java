@@ -32,20 +32,9 @@ public class SetDurationPrompt extends ValidatingPrompt {
     protected boolean isInputValid(ConversationContext context, String input) {
         locale = VoteUp.getInstance().getLocale();
         if(input.contains("d") || input.contains("H") || input.contains("m")) {
-            String[] patternList = {
-                    "^[0-9]d[0-9]H[0-9]m$",
-                    "^[0-9]d[0-9]H$",
-                    "^[0-9]d[0-9]m$",
-                    "^[0-9]H[0-9]m$",
-                    "^[0-9]d$",
-                    "^[0-9]H$",
-                    "^[0-9]m$"
-            };
-            for(String pattern : patternList) {
-                Pattern r = Pattern.compile(pattern);
-                if(r.matcher(input).matches()) {
-                    return true;
-                }
+            Pattern r = Pattern.compile("^[0-9dhmDHM]*$");
+            if(r.matcher(input).matches()) {
+                return true;
             }
         }
         CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7无法识别您输入的时长."), user);
@@ -64,7 +53,9 @@ public class SetDurationPrompt extends ValidatingPrompt {
                 user,
                 InventoryUtil.parsePlaceholder(
                         GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                        VoteManager.getInstance().getCreatingVote(voteID))
+                        VoteManager.getInstance().getCreatingVote(voteID),
+                        user
+                )
         );
         return Prompt.END_OF_CONVERSATION;
     }

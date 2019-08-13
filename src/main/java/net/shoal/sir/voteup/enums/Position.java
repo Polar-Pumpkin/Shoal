@@ -1,12 +1,54 @@
 package net.shoal.sir.voteup.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum Position {
     x1, x2, x3, x4, x5, x6, x7 ,x8 ,x9,
     y1, y2, y3, y4, y5, y6;
 
-    public static int getPositon(int xSlot, int ySlot) {
-        Position x = valueOf("x" + String.valueOf(xSlot));
-        Position y = valueOf("y" + String.valueOf(ySlot));
+    public static List<String> resolutionLocation(String positionString) {
+        List<String> list = new ArrayList<>();
+
+        if(positionString.contains(",")) {
+            for(String interval : positionString.split(",")) {
+                list.addAll(calculateInterval(interval));
+            }
+        } else if(positionString.contains("-")) {
+            list.addAll(calculateInterval(positionString));
+        } else {
+            list.add(positionString);
+        }
+
+        return list;
+    }
+
+    public static List<String> calculateInterval(String interval) {
+        List<String> list = new ArrayList<>();
+        if(interval.contains("-")) {
+            String[] set = interval.split("-");
+            for(int i = Integer.parseInt(set[0]); i <= Integer.parseInt(set[1]); i++) {
+                list.add(String.valueOf(i));
+            }
+        } else {
+            list.add(interval);
+        }
+        return list;
+    }
+
+    public static List<Integer> getPositionList(String x, String y) {
+        List<Integer> list = new ArrayList<>();
+        for(String ySlot : resolutionLocation(y)) {
+            for(String xSlot : resolutionLocation(x)) {
+                list.add(getPosition(Integer.parseInt(xSlot), Integer.parseInt(ySlot)));
+            }
+        }
+        return list;
+    }
+
+    public static int getPosition(int xSlot, int ySlot) {
+        Position x = valueOf("x" + xSlot);
+        Position y = valueOf("y" + ySlot);
         switch(y) {
             case y1:
                 switch(x) {
