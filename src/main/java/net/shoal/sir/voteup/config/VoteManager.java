@@ -219,16 +219,20 @@ public class VoteManager {
                 locale.debug("&7目标投票进行中.");
                 Map<ChoiceType, Map<String, String>> participant = vote.getParticipant();
                 Map<String, String> choiceMap = (participant.get(type) == null ? new HashMap<>() : participant.get(type));
-                if(!choiceMap.containsKey(user.getName())) {
-                    locale.debug("&7未有先前投票纪录.");
-                    choiceMap.put(user.getName(), reason);
-                    participant.put(type, choiceMap);
-                    vote.setParticipant(participant);
-                    save(vote.data());
-                    CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote." + type.toString()), user.getName());
+                if(user.hasPermission(VoteUpPerm.valueOf("VOTE_" + type.toString()).perm())) {
+                    if(!choiceMap.containsKey(user.getName())) {
+                        locale.debug("&7未有先前投票纪录.");
+                        choiceMap.put(user.getName(), reason);
+                        participant.put(type, choiceMap);
+                        vote.setParticipant(participant);
+                        save(vote.data());
+                        CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote." + type.toString()), user.getName());
+                    } else {
+                        locale.debug("已有先前投票纪录. 操作无效.");
+                        CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote.Fail.Logged"), user.getName());
+                    }
                 } else {
-                    locale.debug("已有先前投票纪录. 操作无效.");
-                    CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote.Fail.Logged"), user.getName());
+                    user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做."));
                 }
             } else {
                 locale.debug("&7目标投票已关闭. 操作无效.");
@@ -258,7 +262,7 @@ public class VoteManager {
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     player.sendMessage(PlaceholderUtil.check(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Broadcast"), endVote));
                 });
-                if(PermissionUtil.hasPermission("VoteUp.admin").isEmpty()) {
+                if(PermissionUtil.hasPermission(VoteUpPerm.NOTICE.perm()).isEmpty()) {
                     CacheManager.getInstance().log(CacheLogType.VOTE_END, endVote.getId());
                 }
             }

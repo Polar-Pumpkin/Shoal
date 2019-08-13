@@ -6,6 +6,7 @@ import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.MessageType;
+import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -19,22 +20,26 @@ public class View implements Subcommand {
         LocaleUtil locale = VoteUp.getInstance().getLocale();
         if(sender instanceof Player) {
             Player user = (Player) sender;
-            if(args.length == 2) {
-                Vote data = VoteManager.getInstance().getVote(args[1]);
-                if(data != null) {
-                    CommonUtil.openInventory(
-                            user,
-                            InventoryUtil.parsePlaceholder(
-                                    GuiManager.getInstance().getMenu(GuiManager.VOTE_DETAIL),
-                                    data,
-                                    user
-                            )
-                    );
+            if(user.hasPermission(VoteUpPerm.VIEW.perm())) {
+                if(args.length == 2) {
+                    Vote data = VoteManager.getInstance().getVote(args[1]);
+                    if(data != null) {
+                        CommonUtil.openInventory(
+                                user,
+                                InventoryUtil.parsePlaceholder(
+                                        GuiManager.getInstance().getMenu(GuiManager.VOTE_DETAIL),
+                                        data,
+                                        user
+                                )
+                        );
+                    } else {
+                        user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7目标投票不存在."));
+                    }
                 } else {
-                    user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7目标投票不存在."));
+                    user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                 }
             } else {
-                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做."));
             }
         } else {
             sender.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7控制台无法执行此命令."));

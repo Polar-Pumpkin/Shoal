@@ -23,33 +23,40 @@ permissions:
     description: Quickly configure basic VoteUp permissions.
     default: true
     children:
+      VoteUp.view: true
       VoteUp.vote.*: true
       VoteUp.create.simple: true
+  VoteUp.view:
+    description: Allows you to see the details of a vote.
+    default: op
   VoteUp.vote.*:
     description: Allows you to vote.
-    default: true
+    default: op
     children:
       VoteUp.vote.accept: true
       VoteUp.vote.neutral: true
       VoteUp.vote.refuse: true
   VoteUp.vote.accept:
     description: Allows you to vote as ACCEPT.
-    default: true
+    default: op
   VoteUp.vote.neutral:
     description: Allows you to vote as NEUTRAL.
-    default: true
+    default: op
   VoteUp.vote.refuse:
     description: Allows you to vote as REFUSE.
-    default: true
+    default: op
+  VoteUp.create:
+    description: Allows you to create & start a vote.
+    default: op
   VoteUp.create.simple:
     description: Quickly configure basic voting creation permissions.
-    default: true
+    default: op
     children:
       VoteUp.create.title: true
       VoteUp.create.description: true
       VoteUp.create.duration: true
   VoteUp.create.*:
-    description: Allows you to create & start a vote.
+    description: Allows you to custom all content of a vote during the creating.
     default: op
     children:
       VoteUp.create.title: true
@@ -80,6 +87,9 @@ permissions:
     default: op
   VoteUp.create.autocast:
     description: Allows you to modify the vote's autocast content during the creating.
+    default: op
+  VoteUp.create.autocast.bypass:
+    description: Allows you to use the keyword which is in blacklist.
     default: op
   VoteUp.create.result:
     description: Allows you to modify the vote's result's content during the creating.

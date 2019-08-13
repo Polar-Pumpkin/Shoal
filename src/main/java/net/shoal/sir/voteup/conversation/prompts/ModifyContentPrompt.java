@@ -6,6 +6,7 @@ import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
+import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -52,6 +53,21 @@ public class ModifyContentPrompt extends ValidatingPrompt {
         locale.debug("&7(ModifyContentPrompt) 会话输入值已验证通过.");
         locale.debug("&7目标数据类型: &c" + type.getName());
         locale.debug("&7新内容(输入值): &c" + input);
+
+        if(type == VoteDataType.AUTOCAST) {
+            String[] inputArgs = input.split(" ");
+            List<String> blacklist = VoteUp.getInstance().getConfig().getStringList("AutocastBlacklist");
+            for(String arg : inputArgs) {
+                if(blacklist.contains(arg)) {
+                    if(user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
+                        continue;
+                    }
+                    CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
+                    return Prompt.END_OF_CONVERSATION;
+                }
+            }
+        }
+
         Vote creating = VoteManager.getInstance().getCreatingVote(voteID);
 
         List<String> list;
