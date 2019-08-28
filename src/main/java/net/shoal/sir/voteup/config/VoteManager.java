@@ -32,6 +32,9 @@ public class VoteManager {
         return instance;
     }
 
+    public static final String VOTE_REASON_NOPERM = "&7&o对方无权限发表看法.";
+    public static final String VOTE_REASON_UNUPLOADED = "&7&o暂未发表原因.";
+
     private File dataFolder = new File(VoteUp.getInstance().getDataFolder() + File.separator + "Votes");
 
     private Map<String, Vote> voteMap = new HashMap<>();
@@ -180,6 +183,17 @@ public class VoteManager {
         return null;
     }
 
+    public void backCreating(Player user, String voteID) {
+        CommonUtil.openInventory(
+                user,
+                InventoryUtil.parsePlaceholder(
+                        GuiManager.getInstance().getMenu(GuiConfiguration.CREATE_MENU.getName()),
+                        VoteManager.getInstance().getCreatingVote(voteID),
+                        user
+                )
+        );
+    }
+
     public void finishVoteCreating(String playerName) {
         if(creatingVoteMap.containsKey(playerName)) {
             Map<VoteDataType, Object> data = creatingVoteMap.get(playerName);
@@ -212,6 +226,7 @@ public class VoteManager {
         locale.debug("&7操作人: &c" + user.getName());
         locale.debug("&7投票原因: &c" + reason);
         locale.debug("&7选项类型: &c" + type.toString());
+
         if(voteMap.containsKey(voteID)) {
             locale.debug("&7目标投票已加载.");
             Vote vote = getVote(voteID);
@@ -222,7 +237,7 @@ public class VoteManager {
                 if(user.hasPermission(VoteUpPerm.valueOf("VOTE_" + type.toString()).perm())) {
                     if(!choiceMap.containsKey(user.getName())) {
                         locale.debug("&7未有先前投票纪录.");
-                        choiceMap.put(user.getName(), reason);
+                        choiceMap.put(user.getName(), user.hasPermission(VoteUpPerm.VOTE_REASON.perm()) ? reason : VOTE_REASON_NOPERM);
                         participant.put(type, choiceMap);
                         vote.setParticipant(participant);
                         save(vote.data());
@@ -259,9 +274,7 @@ public class VoteManager {
                                 locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Subtitle"), endVote
                         )
                 );
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendMessage(PlaceholderUtil.check(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Broadcast"), endVote));
-                });
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PlaceholderUtil.check(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Broadcast"), endVote)));
                 if(PermissionUtil.hasPermission(VoteUpPerm.NOTICE.perm()).isEmpty()) {
                     CacheManager.getInstance().log(CacheLogType.VOTE_END, endVote.getId());
                 }
@@ -275,22 +288,51 @@ public class VoteManager {
             if(!vote.isStatus()) {
                 Map<ChoiceType, Map<String, String>> participants = vote.getParticipant();
                 if(participants != null && !participants.isEmpty()) {
+                    Map<String, String> accept = (participants.get(ChoiceType.ACCEPT) == null ? new HashMap<>() : participants.get(ChoiceType.ACCEPT));
+                    Map<String, String> refuse = (participants.get(ChoiceType.REFUSE) == null ? new HashMap<>() : participants.get(ChoiceType.REFUSE));
                     switch(vote.getType()) {
                         case NORMAL:
-                            Map<String, String> accept = (participants.get(ChoiceType.ACCEPT) == null ? new HashMap<>() : participants.get(ChoiceType.ACCEPT));
-                            Map<String, String> refuse = (participants.get(ChoiceType.REFUSE) == null ? new HashMap<>() : participants.get(ChoiceType.REFUSE));
                             if(!accept.isEmpty()) {
                                 return accept.size() > refuse.size();
                             } else {
                                 return false;
                             }
                         case REACHAMOUNT:
-                            return participants.get(ChoiceType.ACCEPT).size() >= vote.getAmount();
+                            return accept.size() >= vote.getAmount();
+                        case LEASTNOT:
+                            return refuse.size() <= vote.getAmount();
                         default:
                             return false;
                     }
                 } else {
                     return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isVoted(String voteID, String playerName) {
+        if(voteMap.containsKey(voteID)) {
+            Vote data = voteMap.get(voteID);
+            for(Map<String, String> participantsMap : data.getParticipant().values()) {
+                if(participantsMap.containsKey(playerName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isUploadReason(String voteID, String playerName) {
+        if(voteMap.containsKey(voteID)) {
+            Vote data = voteMap.get(voteID);
+            for(Map<String, String> participantsMap : data.getParticipant().values()) {
+                if(participantsMap.containsKey(playerName)) {
+                    String reason = participantsMap.get(playerName);
+                    if(!VOTE_REASON_NOPERM.equalsIgnoreCase(reason) && !VOTE_REASON_UNUPLOADED.equalsIgnoreCase(reason)) {
+                        return true;
+                    }
                 }
             }
         }

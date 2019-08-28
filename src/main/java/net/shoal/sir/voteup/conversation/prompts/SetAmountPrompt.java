@@ -1,12 +1,11 @@
 package net.shoal.sir.voteup.conversation.prompts;
 
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
+import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
-import net.shoal.sir.voteup.util.InventoryUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.NumericPrompt;
@@ -28,18 +27,24 @@ public class SetAmountPrompt extends NumericPrompt {
     @Override
     protected Prompt acceptValidatedInput(ConversationContext context, Number input) {
         locale = VoteUp.getInstance().getLocale();
+
+        if(!user.hasPermission(VoteUpPerm.ADMIN.perm()) || !voteID.split("//.")[0].equalsIgnoreCase(user.getName())) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         locale.debug("&7(SetAmountPrompt) 会话输入值已验证通过.");
         locale.debug("&7新人数要求(输入值): &c" + input);
+
+        if(input.equals(-1)) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            VoteManager.getInstance().backCreating(user, voteID);
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.AMOUNT, input);
         locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
-        CommonUtil.openInventory(
-                user,
-                InventoryUtil.parsePlaceholder(
-                        GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                        VoteManager.getInstance().getCreatingVote(voteID),
-                        user
-                )
-        );
+        VoteManager.getInstance().backCreating(user, voteID);
         return null;
     }
 

@@ -5,6 +5,7 @@ import net.shoal.sir.voteup.command.Subcommand;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.enums.GuiConfiguration;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
@@ -24,10 +25,22 @@ public class View implements Subcommand {
                 if(args.length == 2) {
                     Vote data = VoteManager.getInstance().getVote(args[1]);
                     if(data != null) {
+                        GuiConfiguration targetMenu;
+
+                        if(VoteManager.getInstance().isVoted(data.getId(), user.getName())) {
+                            if(VoteManager.getInstance().isUploadReason(data.getId(), user.getName())) {
+                                targetMenu = GuiConfiguration.VOTE_DETAILS_COMPLETE;
+                            } else {
+                                targetMenu = GuiConfiguration.VOTE_DETAILS_REASON;
+                            }
+                        } else {
+                            targetMenu = GuiConfiguration.VOTE_DETAILS_COMMON;
+                        }
+
                         CommonUtil.openInventory(
                                 user,
                                 InventoryUtil.parsePlaceholder(
-                                        GuiManager.getInstance().getMenu(GuiManager.VOTE_DETAIL),
+                                        GuiManager.getInstance().getMenu(targetMenu.getName()),
                                         data,
                                         user
                                 )

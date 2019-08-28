@@ -1,5 +1,5 @@
 Setting:
-  Title: "创建投票"
+  Title: "创建投票: "
   Row: 2
 Items:
   SET_TITLE:
@@ -26,9 +26,11 @@ Items:
       Material: NETHER_STAR
       Lore:
         - "&e▶ &9&lNORMAL"
-        - "&e▶ &7&o在投票结束时同意人数要大于反对人数."
+        - "&e▶ &7&o投票结束时同意人数大于反对人数."
         - "&e▶ &9&lREACHAMOUNT"
-        - "&e▶ &7&o在投票结束前同意人数需达到指定数量."
+        - "&e▶ &7&o投票结束前同意人数需达到指定数量."
+        - "&e▶ &9&lLEASTNOT"
+        - "&e▶ &7&o投票结束前反对人数不超过指定数量."
         - ""
         - "&9▶ &7当前类型:"
         - "&8▶ &a%TYPE%"
@@ -45,9 +47,13 @@ Items:
     ViewPermission: "VoteUp.create.type"
   SET_AMOUNT:
     ItemStack:
-      Display: "同意人数目标"
+      Display: "投票人数目标"
       Material: ZOMBIE_HEAD
       Lore:
+        - "&e▶ &7若投票类型为 &9&lREACHAMOUNT &7则该值为:"
+        - "&e▶ &7&o投票结束前&a同意&7人数&9&l需达到的&7目标数量."
+        - "&e▶ &7若投票类型为 &9&lLEASTNOT &7则该值为:"
+        - "&e▶ &7&o投票结束前&c反对&7人数&9&l不超过的&7目标数量."
         - ""
         - "&9▶ &7当前值:"
         - "&8▶ &a%AMOUNT%"
@@ -153,16 +159,12 @@ Items:
         - "&9▶ &7投票类型: &c%TYPE%"
         - "&9▶ &7投票标题:"
         - "&8▶ &a%TITLE%"
-        - "&9▶ &7投票简述:"
-        - "&8▶ &a%DESCRIPTION%"
         - "&9▶ &7投票选项内容:"
         - "&8▶ &7同意 &a▶ &c%CHOICE_ACCEPT%"
         - "&8▶ &7中立 &e▶ &c%CHOICE_NEUTRAL%"
         - "&8▶ &7反对 &c▶ &c%CHOICE_REFUSE%"
         - "&9▶ &7发起人: &c%STARTER%"
         - "&9▶ &7持续时间: &c%DURATION%"
-        - "&9▶ &7自动执行:"
-        - "&8▶ &a%AUTOCAST%"
         - "&9▶ &7投票结果显示:"
         - "&8▶ &7投票通过 &a▶ &c%RESULT_PASS%"
         - "&8▶ &7投票否决 &c▶ &c%RESULT_REJECT%"

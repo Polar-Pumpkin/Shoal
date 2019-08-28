@@ -27,7 +27,7 @@ public class ChatAPIUtil {
     }
 
     public static void sendEditableList(Player user, List<String> content, String title, String add, String addCmd, String set, String setCmd, String del, String delCmd, String back, String backCmd) {
-        user.sendMessage(CommonUtil.color(title));
+        user.spigot().sendMessage(ChatAPIUtil.build(CommonUtil.color("\n" + title)));
         TextComponent clickableAdd;
         if(!content.isEmpty()) {
             for(String desc : content) {
@@ -73,6 +73,7 @@ public class ChatAPIUtil {
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(CommonUtil.color("&a点击返回")))
                 )
         );
+        user.sendMessage("");
     }
 
 }

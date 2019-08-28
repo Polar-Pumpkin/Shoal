@@ -9,8 +9,12 @@ Sound:
   Vote:
     Start: ENTITY_ARROW_HIT_PLAYER
     End: BLOCK_ANVIL_HIT
-AutocastBlacklist:
-  - "op"
-  - "gamemode"
-  - "give"
-  - "kill"
+Autocast:
+  Enable: true
+  Blacklist:
+    - "op"
+    - "gamemode"
+    - "gm"
+    - "godmode"
+    - "give"
+    - "kill"

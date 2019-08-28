@@ -4,8 +4,8 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.ExecutorType;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
-import net.shoal.sir.voteup.itemexecutor.createmenu.*;
-import net.shoal.sir.voteup.itemexecutor.votedetail.VoteAction;
+import net.shoal.sir.voteup.itemexecutor.create.*;
+import net.shoal.sir.voteup.itemexecutor.detail.VoteAction;
 import net.shoal.sir.voteup.util.LocaleUtil;
 
 import java.util.HashMap;

@@ -16,6 +16,7 @@ public final class VoteUp extends JavaPlugin {
     @Getter private static VoteUp instance;
     @Getter private LocaleUtil locale;
     public static String LOCALE;
+    public static boolean autocastEnable;
 
     @Override
     public void onEnable() {
@@ -35,6 +36,7 @@ public final class VoteUp extends JavaPlugin {
         reloadConfig();
         locale = new LocaleUtil(this);
         LOCALE = getConfig().getString("Language");
+        autocastEnable = getConfig().getBoolean("Autocast.Enable");
         SoundManager.getInstance().init();
         CacheManager.getInstance().load();
         ExecutorManager.getInstance().load();

@@ -41,4 +41,7 @@ public enum Placeholder {
     RESULT_REJECT_NAME,
 
     CACHE_LOG_AMOUNT_VOTE_END,
+
+    PROCESS,
+    PROCESS_DESCRIPTION,
 }

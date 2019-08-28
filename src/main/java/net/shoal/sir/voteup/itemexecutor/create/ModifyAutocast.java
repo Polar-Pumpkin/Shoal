@@ -1,4 +1,4 @@
-package net.shoal.sir.voteup.itemexecutor.createmenu;
+package net.shoal.sir.voteup.itemexecutor.create;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.SoundManager;

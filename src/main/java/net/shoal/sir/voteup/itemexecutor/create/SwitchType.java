@@ -1,14 +1,11 @@
-package net.shoal.sir.voteup.itemexecutor.createmenu;
+package net.shoal.sir.voteup.itemexecutor.create;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.MessageType;
-import net.shoal.sir.voteup.enums.VoteDataType;
-import net.shoal.sir.voteup.enums.VoteType;
-import net.shoal.sir.voteup.enums.VoteUpPerm;
+import net.shoal.sir.voteup.enums.*;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
@@ -30,7 +27,7 @@ public class SwitchType implements MenuItemExecutor {
             CommonUtil.openInventory(
                     user,
                     InventoryUtil.parsePlaceholder(
-                            GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
+                            GuiManager.getInstance().getMenu(GuiConfiguration.CREATE_MENU.getName()),
                             VoteManager.getInstance().getCreatingVote(user.getName()),
                             user
                     )
@@ -44,6 +41,14 @@ public class SwitchType implements MenuItemExecutor {
 
     private boolean switchVoteType(String key) {
         Vote creating = VoteManager.getInstance().getCreatingVote(key);
-        return VoteManager.getInstance().setCreatingVoteData(key, VoteDataType.TYPE, (creating.getType() == VoteType.NORMAL ? VoteType.REACHAMOUNT : VoteType.NORMAL));
+        switch(creating.getType()) {
+            case NORMAL:
+                return VoteManager.getInstance().setCreatingVoteData(key, VoteDataType.TYPE, VoteType.REACHAMOUNT);
+            case REACHAMOUNT:
+                return VoteManager.getInstance().setCreatingVoteData(key, VoteDataType.TYPE, VoteType.LEASTNOT);
+            case LEASTNOT:
+            default:
+                return VoteManager.getInstance().setCreatingVoteData(key, VoteDataType.TYPE, VoteType.NORMAL);
+        }
     }
 }

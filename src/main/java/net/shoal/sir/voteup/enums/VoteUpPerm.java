@@ -1,7 +1,8 @@
 package net.shoal.sir.voteup.enums;
 
 public enum VoteUpPerm {
-    ADMIN("VoteUp.*"),
+    ALL("VoteUp.*"),
+    ADMIN("VoteUp.admin"),
     USER("VoteUp.user"),
     NOTICE("VoteUp.notice"),
     VIEW("VoteUp.view"),
@@ -20,7 +21,8 @@ public enum VoteUpPerm {
     VOTE("VoteUp.vote.*"),
     VOTE_ACCEPT("VoteUp.vote.accept"),
     VOTE_NEUTRAL("VoteUp.vote.neutral"),
-    VOTE_REFUSE("VoteUp.vote.refuse");
+    VOTE_REFUSE("VoteUp.vote.refuse"),
+    VOTE_REASON("VoteUp.vote.reason");
 
     private final String node;
     VoteUpPerm(String type) {

@@ -13,7 +13,15 @@ permissions:
     description: All access for VoteUp plugin.
     default: op
     children:
+      VoteUp.create: true
       VoteUp.vote.*: true
+      VoteUp.create.*: true
+      VoteUp.notice: true
+  VoteUp.admin:
+    description: Admin of vote system.
+    default: op
+    children:
+      VoteUp.user: true
       VoteUp.create.*: true
       VoteUp.notice: true
   VoteUp.notice:
@@ -25,17 +33,19 @@ permissions:
     children:
       VoteUp.view: true
       VoteUp.vote.*: true
+      VoteUp.create: true
       VoteUp.create.simple: true
   VoteUp.view:
     description: Allows you to see the details of a vote.
-    default: op
+    default: true
   VoteUp.vote.*:
     description: Allows you to vote.
-    default: op
+    default: true
     children:
       VoteUp.vote.accept: true
       VoteUp.vote.neutral: true
       VoteUp.vote.refuse: true
+      VoteUp.vote.reason: true
   VoteUp.vote.accept:
     description: Allows you to vote as ACCEPT.
     default: op
@@ -44,6 +54,9 @@ permissions:
     default: op
   VoteUp.vote.refuse:
     description: Allows you to vote as REFUSE.
+    default: op
+  VoteUp.vote.reason:
+    description: Allows you to input the reason why you vote as that vote choice.
     default: op
   VoteUp.create:
     description: Allows you to create & start a vote.

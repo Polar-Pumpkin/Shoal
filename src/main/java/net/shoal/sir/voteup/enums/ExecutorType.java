@@ -14,7 +14,5 @@ public enum ExecutorType {
     VOTE_ACCEPT,
     VOTE_NEUTRAL,
     VOTE_REFUSE,
-
-    GLASS,
-    VOTE_INFO,
+    VOTE_REASON,
 }

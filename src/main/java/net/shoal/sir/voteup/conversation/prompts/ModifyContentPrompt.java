@@ -44,19 +44,38 @@ public class ModifyContentPrompt extends ValidatingPrompt {
 
     @Override
     protected boolean isInputValid(ConversationContext context, String input) {
-        return type == VoteDataType.DESCRIPTION || type == VoteDataType.AUTOCAST;
+        return true;
     }
 
     @Override
     protected Prompt acceptValidatedInput(ConversationContext context, String input) {
+
+        boolean exist = type == VoteDataType.DESCRIPTION || type == VoteDataType.AUTOCAST;
+        if(!exist) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7目标值类型验证失败, 请联系管理员以解决错误: &c" + type.toString()), user.getName());
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         locale = VoteUp.getInstance().getLocale();
+
+        if(!user.hasPermission(VoteUpPerm.ADMIN.perm()) || !voteID.split("//.")[0].equalsIgnoreCase(user.getName())) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         locale.debug("&7(ModifyContentPrompt) 会话输入值已验证通过.");
         locale.debug("&7目标数据类型: &c" + type.getName());
         locale.debug("&7新内容(输入值): &c" + input);
 
+        if("exit".equalsIgnoreCase(input)) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            VoteManager.getInstance().backCreating(user, voteID);
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         if(type == VoteDataType.AUTOCAST) {
             String[] inputArgs = input.split(" ");
-            List<String> blacklist = VoteUp.getInstance().getConfig().getStringList("AutocastBlacklist");
+            List<String> blacklist = VoteUp.getInstance().getConfig().getStringList("Autocast.Blacklist");
             for(String arg : inputArgs) {
                 if(blacklist.contains(arg)) {
                     if(user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
@@ -120,11 +139,11 @@ public class ModifyContentPrompt extends ValidatingPrompt {
                     user,
                     creating.getAutoCast(),
                     PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的自动执行命令列表 &6&l>>>"), creating),
-                    "&a&l[Add] ",
+                    "&a&l[添加] ",
                     "/vote modify autocast add ",
-                    "&e&l[Edit] ",
+                    "&e&l[编辑] ",
                     "/vote modify autocast set",
-                    "&c&l[Del] ",
+                    "&c&l[删除] ",
                     "/vote modify autocast del ",
                     "&a&l>>> &7返回编辑菜单",
                     "/vote create back"

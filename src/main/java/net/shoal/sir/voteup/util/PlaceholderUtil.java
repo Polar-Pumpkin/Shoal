@@ -162,7 +162,35 @@ public class PlaceholderUtil {
     public static List<String> checkAll(List<String> list, Vote data) {
         List<String> result = new ArrayList<>();
         for(String text : list) {
-            result.add(check(text, data));
+            if(text.contains("%DESCRIPTION%") || text.contains("%AUTOCAST%")) {
+                result.add(text);
+
+                boolean isDescription;
+                if(text.contains("%DESCRIPTION%")) {
+                    isDescription = true;
+                } else if(text.contains("%AUTOCAST%")) {
+                    isDescription = false;
+                } else {
+                    result.add(check(text, data));
+                    continue;
+                }
+
+                int targetIndex = result.indexOf(text);
+                String prefix = isDescription ? "&b▶ &7&o" : "";
+                boolean isFirstLine = true;
+                List<String> content  = isDescription ? data.getDescription() : data.getAutoCast();
+
+                for(int index = content.size() - 1; index >= 0; index--) {
+                    if(isFirstLine) {
+                        result.set(targetIndex, CommonUtil.color(prefix + content.get(index)));
+                        isFirstLine = false;
+                    } else {
+                        result.add(targetIndex, CommonUtil.color(prefix + content.get(index)));
+                    }
+                }
+            } else {
+                result.add(check(text, data));
+            }
         }
         return result;
     }

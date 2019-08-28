@@ -1,14 +1,13 @@
 package net.shoal.sir.voteup.conversation.prompts;
 
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.VoteChoice;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
+import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
-import net.shoal.sir.voteup.util.InventoryUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
@@ -40,7 +39,23 @@ public class SetChoicePrompt extends StringPrompt {
     @Override
     public Prompt acceptInput(ConversationContext context, String input) {
         locale = VoteUp.getInstance().getLocale();
+
+        if(!user.hasPermission(VoteUpPerm.ADMIN.perm()) || !voteID.split("//.")[0].equalsIgnoreCase(user.getName())) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         locale.debug("&7(SetChoicePrompt) 会话输入值已验证通过.");
+
+        if("exit".equalsIgnoreCase(input)) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            VoteManager.getInstance().backCreating(user, voteID);
+            return Prompt.END_OF_CONVERSATION;
+        } else if("next".equalsIgnoreCase(input)) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您跳过了输入."), user.getName());
+            return next(type);
+        }
+
         String accept = CommonUtil.color(input);
         locale.debug("&7新选项内容(输入值): &c" + accept);
         VoteChoice choiceData = VoteManager.getInstance().getCreatingVote(user.getName()).getChoices();
@@ -50,6 +65,10 @@ public class SetChoicePrompt extends StringPrompt {
         boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, VoteDataType.CHOICE, choiceData);
         locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
 
+        return next(type);
+    }
+
+    private Prompt next(ChoiceType type) {
         switch(type) {
             case ACCEPT:
                 return new SetChoicePrompt(user, ChoiceType.NEUTRAL);
@@ -57,14 +76,7 @@ public class SetChoicePrompt extends StringPrompt {
                 return new SetChoicePrompt(user, ChoiceType.REFUSE);
             case REFUSE:
             default:
-                CommonUtil.openInventory(
-                        user,
-                        InventoryUtil.parsePlaceholder(
-                                GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
-                                VoteManager.getInstance().getCreatingVote(voteID),
-                                user
-                        )
-                );
+                VoteManager.getInstance().backCreating(user, voteID);
                 return Prompt.END_OF_CONVERSATION;
         }
     }

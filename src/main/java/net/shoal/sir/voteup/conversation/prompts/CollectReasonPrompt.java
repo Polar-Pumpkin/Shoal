@@ -4,6 +4,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.MessageType;
+import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.conversations.ConversationContext;
@@ -34,8 +35,21 @@ public class CollectReasonPrompt extends StringPrompt {
     @Override
     public Prompt acceptInput(ConversationContext context, String input) {
         locale = VoteUp.getInstance().getLocale();
+
+        if(!user.hasPermission(VoteUpPerm.ADMIN.perm()) || !voteID.split("//.")[0].equalsIgnoreCase(user.getName())) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         locale.debug("&7(CollectReasonPrompt) 会话输入值已验证通过.");
         locale.debug("&7投票原因(输入值): &c" + CommonUtil.color(input));
+
+        if("exit".equalsIgnoreCase(input)) {
+            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            VoteManager.getInstance().backCreating(user, voteID);
+            return Prompt.END_OF_CONVERSATION;
+        }
+
         VoteManager.getInstance().vote(voteID, user, input, type);
         return Prompt.END_OF_CONVERSATION;
     }

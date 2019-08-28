@@ -74,7 +74,12 @@ public class InventoryUtil {
                 String y = target.getString("Position.Y");
                 locale.debug("&7物品坐标: (&c" + x + "&7, &c" + y + "&7)");
 //                result.setItem(Position.getPositon(x, y), item);
-                MenuItemExecutor executor = ExecutorManager.getInstance().getExecutor(ExecutorType.valueOf(key.toUpperCase()));
+                MenuItemExecutor executor;
+                try {
+                    executor = ExecutorManager.getInstance().getExecutor(ExecutorType.valueOf(key.toUpperCase()));
+                } catch(Throwable e) {
+                    executor = null;
+                }
                 locale.debug("&7菜单物品动作执行器是否有效: &c" + (executor != null ? "是" : "否"));
                 String perm;
                 perm = target.getString("ViewPermission");
@@ -96,6 +101,12 @@ public class InventoryUtil {
         locale.debug("&7投票数据: &c" + voteData.toString());
         Inventory inventory = constructInventory(data, user, voteData.getId());
         for (MenuItem item : data.getItems()) {
+            String perm = item.getPermission();
+            if(perm != null && !perm.equals("")) {
+                if(!user.hasPermission(perm)) {
+                    continue;
+                }
+            }
             for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
                 inventory.setItem(
                         position,
@@ -107,21 +118,33 @@ public class InventoryUtil {
     }
 
     public static Inventory constructInventory(ChestMenu gui, @NonNull Player user, String additionTitle) {
+        locale = VoteUp.getInstance().getLocale();
+        locale.debug("&7调用 constructInventory 方法.");
+        locale.debug("&7菜单参数是否有效: &c" + (gui != null ? "是" : "否"));
+        locale.debug("&7菜单数据: &c" + gui.toString());
+        locale.debug("&7目标玩家: &c" + user.getName());
+        locale.debug("&7菜单附加标题: &c" + additionTitle);
+
         Inventory result = Bukkit.createInventory(null, gui.getRow() * 9, gui.getTitle() + additionTitle);
         for(MenuItem item : gui.getItems()) {
-            String perm = item.getPermission();
-            if(perm != null && !perm.equalsIgnoreCase("")) {
-                if(user.hasPermission(perm)) {
-                    for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
-                        result.setItem(position, item.getItem().clone());
-                    }
-                }
-            } else {
-                for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
-                    result.setItem(position, item.getItem().clone());
+            locale.debug("&7获取菜单物品: &c" + item.toString());
+
+            if("MODIFY_AUTOCAST".equalsIgnoreCase(item.getId())) {
+                if(!VoteUp.autocastEnable) {
+                    continue;
                 }
             }
-
+            String perm = item.getPermission();
+            locale.debug("&7菜单物品可视权限: &c" + perm);
+            if(perm != null && !perm.equals("")) {
+                locale.debug("&7菜单物品可视权限有效, 玩家是否拥有对应权限: &c" + (user.hasPermission(perm) ? "是" : "否"));
+                if(!user.hasPermission(perm)) {
+                    continue;
+                }
+            }
+            for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
+                result.setItem(position, item.getItem().clone());
+            }
         }
         return result;
     }

@@ -3,6 +3,7 @@ package net.shoal.sir.voteup.config;
 import lombok.Getter;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.data.ChestMenu;
+import net.shoal.sir.voteup.enums.GuiConfiguration;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
@@ -14,9 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GuiManager {
-
-    public static final String CREATE_MENU = "CreateMenu";
-    public static final String VOTE_DETAIL = "VoteDetails";
 
     private static LocaleUtil locale;
     private static GuiManager instance;
@@ -58,13 +56,21 @@ public class GuiManager {
     }
 
     public void checkConfiguration() {
-        if(!new File(dataFolder.getAbsolutePath() + File.separator + CREATE_MENU + ".yml").exists()) {
+        if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.CREATE_MENU.getName() + ".yml").exists()) {
             VoteUp.getInstance().saveResource("Guis/CreateMenu.yml", false);
             locale.debug("&7释放默认配置文件: &cCreateMenu.yml");
         }
-        if(!new File(dataFolder.getAbsolutePath() + File.separator + VOTE_DETAIL + ".yml").exists()) {
-            VoteUp.getInstance().saveResource("Guis/VoteDetails.yml", false);
-            locale.debug("&7释放默认配置文件: &VoteDetails.yml");
+        if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.VOTE_DETAILS_COMMON.getName() + ".yml").exists()) {
+            VoteUp.getInstance().saveResource("Guis/VoteDetails_COMMON.yml", false);
+            locale.debug("&7释放默认配置文件: &VoteDetails_COMMON.yml");
+        }
+        if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.VOTE_DETAILS_REASON.getName() + ".yml").exists()) {
+            VoteUp.getInstance().saveResource("Guis/VoteDetails_REASON.yml", false);
+            locale.debug("&7释放默认配置文件: &VoteDetails_REASON.yml");
+        }
+        if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.VOTE_DETAILS_COMPLETE.getName() + ".yml").exists()) {
+            VoteUp.getInstance().saveResource("Guis/VoteDetails_COMPLETE.yml", false);
+            locale.debug("&7释放默认配置文件: &VoteDetails_COMPLETE.yml");
         }
     }
 

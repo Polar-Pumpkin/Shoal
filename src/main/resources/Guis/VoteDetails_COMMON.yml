@@ -1,5 +1,5 @@
 Setting:
-  Title: "投票信息: "
+  Title: "&a&r投票信息: "
   Row: 4
 Items:
   GLASS:
@@ -10,29 +10,41 @@ Items:
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
-      X: 1-4,6-9
+      X: 1-3,6-9
       Y: 1
   VOTE_INFO:
     ItemStack:
       Display: "&b&l投票信息"
       Material: PLAYER_HEAD
       Lore:
+        - "&9▶ &7投票状态: &c%STATUS%"
+        - ""
         - "&b▶ &7当前投票概览"
         - ""
-        - "&9▶ &7投票ID: &c%ID%"
-        - "&9▶ &7投票状态: &c%STATUS%"
-        - "&9▶ &7投票类型: &c%TYPE%"
         - "&9▶ &7投票标题:"
         - "&8▶ &a%TITLE%"
-        - "&9▶ &7投票简述:"
-        - "&8▶ &a%DESCRIPTION%"
+        - ""
         - "&9▶ &7发起人: &c%STARTER%"
+        - "&9▶ &7投票类型: &c%TYPE%"
         - "&9▶ &7持续时间: &c%DURATION%"
-        - "&9▶ &7发布于 &c%STARTTIME%"
+        - ""
+        - "&7&o发布于 &c%STARTTIME%"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
       X: 5
+      Y: 1
+  VOTE_DESCRIPTION:
+    ItemStack:
+      Display: "&e&l投票简述"
+      Material: WRITABLE_BOOK
+      Lore:
+        - "&9▶ &7投票简述:"
+        - "&7&o%DESCRIPTION%"
+      ItemFlag:
+        - "HIDE_ATTRIBUTES"
+    Position:
+      X: 4
       Y: 1
   VOTE_ACCEPT:
     ItemStack:
@@ -40,6 +52,9 @@ Items:
       Material: LIME_STAINED_GLASS_PANE
       Lore:
         - "&b▶ &a%CHOICE_ACCEPT%"
+        - ""
+        - "&a▶ &d&l左键 &7投票"
+        - "&a▶ &d&l右键 &7投票并发表原因"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
@@ -52,6 +67,9 @@ Items:
       Material: YELLOW_STAINED_GLASS_PANE
       Lore:
         - "&b▶ &e%CHOICE_NEUTRAL%"
+        - ""
+        - "&a▶ &d&l左键 &7投票"
+        - "&a▶ &d&l右键 &7投票并发表原因"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:
@@ -64,6 +82,9 @@ Items:
       Material: RED_STAINED_GLASS_PANE
       Lore:
         - "&b▶ &c%CHOICE_REFUSE%"
+        - ""
+        - "&a▶ &d&l左键 &7投票"
+        - "&a▶ &d&l右键 &7投票并发表原因"
       ItemFlag:
         - "HIDE_ATTRIBUTES"
     Position:

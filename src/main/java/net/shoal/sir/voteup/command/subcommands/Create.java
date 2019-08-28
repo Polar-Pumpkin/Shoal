@@ -5,6 +5,7 @@ import net.shoal.sir.voteup.command.Subcommand;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.enums.GuiConfiguration;
 import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
@@ -55,7 +56,7 @@ public class Create implements Subcommand {
                     CommonUtil.openInventory(
                             user,
                             InventoryUtil.parsePlaceholder(
-                                    GuiManager.getInstance().getMenu(GuiManager.CREATE_MENU),
+                                    GuiManager.getInstance().getMenu(GuiConfiguration.CREATE_MENU.getName()),
                                     data,
                                     user
                             )
