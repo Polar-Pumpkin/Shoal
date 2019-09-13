@@ -73,6 +73,19 @@ public class LocaleUtil {
         return ChatColor.translateAlternateColorCodes('&', "&c&lERROR&7(Encountered language information encountered an error, please contact the administrator to resolve.)");
     }
 
+    public String getRawMessage(String key, String section, String path) {
+        FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get(defaultLocaleKey);
+
+        if(data.getKeys(false).contains(section)) {
+            String message = data.getConfigurationSection(section).getString(path);
+            if(message != null && !message.equalsIgnoreCase("")) {
+                return ChatColor.translateAlternateColorCodes('&', message);
+            }
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', "&c&lERROR&7(Encountered language information encountered an error, please contact the administrator to resolve.)");
+    }
+
     public String buildMessage(String key, MessageType type, String message) {
         FileConfiguration data = locales.containsKey(key) ? locales.get(key) : locales.get(defaultLocaleKey);
         String pluginPrefix = type != MessageType.DEBUG ? data.getString("Plugin.Prefix") : "&9[&d" + plugin.getName() + "&9]&7(&d&lDEBUG&7) ";

@@ -205,7 +205,7 @@ public class VoteManager {
             CommonUtil.broadcastTitle(
                     "",
                     PlaceholderUtil.check(
-                            locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Start.Subtitle"), vote
+                            locale.getRawMessage(VoteUp.LOCALE, "Vote", "Start.Subtitle"), vote
                     )
             );
             String msg = locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Start.Broadcast");
@@ -242,6 +242,27 @@ public class VoteManager {
                         vote.setParticipant(participant);
                         save(vote.data());
                         CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote." + type.toString()), user.getName());
+
+                        Player starter = Bukkit.getPlayerExact(voteID.split("//.")[0]);
+                        if(starter != null && starter.isOnline()) {
+                            String noticeMsg = locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Voted.Starter")
+                                    .replace("%Voter%", user.getName())
+                                    .replace("%Choice%", vote.getChoices().getChoice(VoteManager.getInstance().getChoice(voteID, user.getName())))
+                                    .replace("%Reason%", CommonUtil.color(reason));
+                            CommonUtil.message(PlaceholderUtil.check(noticeMsg,vote), user.getName());
+                        } else {
+                            CacheManager.getInstance().log(CacheLogType.VOTE_VOTED, voteID, user.getName());
+                        }
+
+                        Bukkit.getOnlinePlayers().forEach(player -> {
+                            if(player.hasPermission(VoteUpPerm.NOTICE.perm())) {
+                                String noticeMsg = locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Voted.Noticer")
+                                        .replace("%Voter%", user.getName())
+                                        .replace("%Choice%", vote.getChoices().getChoice(VoteManager.getInstance().getChoice(voteID, user.getName())))
+                                        .replace("%Reason%", CommonUtil.color(reason));
+                                CommonUtil.message(PlaceholderUtil.check(noticeMsg, vote), user.getName());
+                            }
+                        });
                     } else {
                         locale.debug("已有先前投票纪录. 操作无效.");
                         CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote.Fail.Logged"), user.getName());
@@ -271,12 +292,12 @@ public class VoteManager {
                 CommonUtil.broadcastTitle(
                         "",
                         PlaceholderUtil.check(
-                                locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Subtitle"), endVote
+                                locale.getRawMessage(VoteUp.LOCALE, "Vote", "End.Subtitle"), endVote
                         )
                 );
                 Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PlaceholderUtil.check(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "End.Broadcast"), endVote)));
                 if(PermissionUtil.hasPermission(VoteUpPerm.NOTICE.perm()).isEmpty()) {
-                    CacheManager.getInstance().log(CacheLogType.VOTE_END, endVote.getId());
+                    CacheManager.getInstance().log(CacheLogType.VOTE_END, endVote.getId(), "");
                 }
             }
         }
@@ -337,6 +358,31 @@ public class VoteManager {
             }
         }
         return false;
+    }
+
+    public String getReason(String voteID, String playerName) {
+        if(voteMap.containsKey(voteID)) {
+            Vote data = voteMap.get(voteID);
+            for(Map<String, String> participantsMap : data.getParticipant().values()) {
+                if(participantsMap.containsKey(playerName)) {
+                    return CommonUtil.color(participantsMap.get(playerName));
+                }
+            }
+        }
+        return CommonUtil.color("&7&o未获取到目标数据.");
+    }
+
+    public ChoiceType getChoice(String voteID, String playerName) {
+        if(voteMap.containsKey(voteID)) {
+            Vote data = voteMap.get(voteID);
+            Map<ChoiceType, Map<String, String>> participants = data.getParticipant();
+            for(ChoiceType type : participants.keySet()) {
+               if(participants.get(type).containsKey(playerName)) {
+                   return type;
+               }
+            }
+        }
+        return null;
     }
 
     public void save(Map<VoteDataType, Object> data) {

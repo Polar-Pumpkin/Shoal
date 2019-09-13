@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 public class Help implements Subcommand {
 
     private String[] helpList = {
-            "&6&lVote Up &8&o(v1.3-SNAPSHOT)",
+            "&6&lVote Up &8&o(v1.4-SNAPSHOT)",
             "",
             "&7&l作者: &cEntityParrot_",
             "&7&l命令列表:",
