@@ -6,7 +6,7 @@
 
     <groupId>net.shoal.sir</groupId>
     <artifactId>LitmiedRiptide</artifactId>
-    <version>1.4-RELEASE</version>
+    <version>1.5-RELEASE</version>
     <packaging>jar</packaging>
 
     <name>LimitedRiptide</name>

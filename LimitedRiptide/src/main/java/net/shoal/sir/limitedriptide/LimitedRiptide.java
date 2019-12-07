@@ -125,14 +125,20 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
 
     @EventHandler
     public void onInteract(PlayerRiptideEvent event) {
+
+        if(glidingPlayers == null) {
+            locale.debug("&e&lWARN! &7Gliding player log lost, recreated.");
+            glidingPlayers = new HashMap<>();
+        }
+
         locale.debug("&7PlayerRiptideEvent activated: (&aPlayer&7) &c" + event.getPlayer().getName());
         PlayerInventory userInv = event.getPlayer().getInventory();
         ItemStack trident = event.getItem();
         locale.debug("&7Item information: " + trident.toString());
         boolean isMainHand = userInv.getItemInMainHand().getType() == Material.TRIDENT;
         locale.debug("&7Is trident in main hand? " + (isMainHand ? "&a&lYes" : "&c&lNo"));
-        boolean isGliding = glidingPlayers.get(event.getPlayer());
-        locale.debug("&7Is player flying with Elytra? " + (isGliding ? "&a&lYes" : "&c&lNo"));
+        boolean isGliding = glidingPlayers.getOrDefault(event.getPlayer(), false);
+        locale.debug("&7Is player flying with Elytra? " + (isGliding ? "&a&lYes" : "&c&lNo&7(Or missing log&7)"));
         ItemMeta itemMeta = trident.getItemMeta();
         locale.debug("&7Is target trident's ItemMeta null? " + (itemMeta == null ? "&a&lYes" : "&c&lNo"));
         Damageable meta = (Damageable) (itemMeta == null ? Bukkit.getItemFactory().getItemMeta(Material.TRIDENT) : itemMeta);
@@ -157,6 +163,12 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
     @EventHandler
     public void onGliding(EntityToggleGlideEvent event) {
         if(event.getEntity() instanceof Player) {
+
+            if(glidingPlayers == null) {
+                locale.debug("&e&lWARN! &7Gliding player log lost, recreated.");
+                glidingPlayers = new HashMap<>();
+            }
+
             locale.debug("&7EntityToggleGlideEvent activated: (&aPlayer&7) &c" + event.getEntity().getName());
             locale.debug("&7Is player gliding with Elytra? " + (event.isGliding() ? "&a&lYes" : "&c&lNo"));
             glidingPlayers.put((Player) event.getEntity(), event.isGliding());
