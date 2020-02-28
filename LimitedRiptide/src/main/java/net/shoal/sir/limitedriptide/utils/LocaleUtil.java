@@ -16,7 +16,9 @@ import java.util.Map;
 
 public class LocaleUtil {
 
-    @Getter @Setter private String defaultLocaleKey = "Chinese";
+    @Getter
+    @Setter
+    private String defaultLocaleKey = "English";
     private Plugin plugin;
     private File dataFolder;
     @Getter private Map<String, FileConfiguration> locales = new HashMap<>();

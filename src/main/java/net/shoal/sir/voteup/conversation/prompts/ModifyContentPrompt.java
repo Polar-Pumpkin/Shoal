@@ -75,14 +75,21 @@ public class ModifyContentPrompt extends ValidatingPrompt {
 
         if(type == VoteDataType.AUTOCAST) {
             String[] inputArgs = input.split(" ");
-            List<String> blacklist = VoteUp.getInstance().getConfig().getStringList("Autocast.Blacklist");
-            for(String arg : inputArgs) {
-                if(blacklist.contains(arg)) {
-                    if(user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
-                        continue;
+            List<String> commandList = VoteUp.getInstance().getConfig().getStringList("Autocast.List");
+            boolean blackMode = VoteUp.getInstance().getConfig().getBoolean("Autocast.BlackMode");
+            if (blackMode) {
+                if (commandList.contains(inputArgs[0])) {
+                    if (!user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
+                        CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
+                        return Prompt.END_OF_CONVERSATION;
                     }
-                    CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
-                    return Prompt.END_OF_CONVERSATION;
+                }
+            } else {
+                if (!commandList.contains(inputArgs[0])) {
+                    if (!user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
+                        CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
+                        return Prompt.END_OF_CONVERSATION;
+                    }
                 }
             }
         }

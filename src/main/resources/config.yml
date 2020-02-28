@@ -11,7 +11,8 @@ Sound:
     End: BLOCK_ANVIL_HIT
 Autocast:
   Enable: true
-  Blacklist:
+  BlackMode: true
+  List:
     - "op"
     - "gamemode"
     - "gm"

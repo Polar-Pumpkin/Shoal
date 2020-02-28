@@ -126,23 +126,36 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
     @EventHandler
     public void onInteract(PlayerRiptideEvent event) {
 
-        if(glidingPlayers == null) {
+        if (glidingPlayers == null) {
             locale.debug("&e&lWARN! &7Gliding player log lost, recreated.");
             glidingPlayers = new HashMap<>();
         }
 
         locale.debug("&7PlayerRiptideEvent activated: (&aPlayer&7) &c" + event.getPlayer().getName());
         PlayerInventory userInv = event.getPlayer().getInventory();
-        ItemStack trident = event.getItem();
+        ItemStack trident = event.getItem().clone();
         locale.debug("&7Item information: " + trident.toString());
-        boolean isMainHand = userInv.getItemInMainHand().getType() == Material.TRIDENT;
+        boolean isMainHand;
+        if (trident.getType() == Material.TRIDENT) {
+            ItemStack mainHand = userInv.getItemInMainHand();
+            ItemStack offHand = userInv.getItemInOffHand();
+            if (mainHand.getType() == Material.TRIDENT) {
+                isMainHand = true;
+            } else if (offHand.getType() == Material.TRIDENT) {
+                isMainHand = false;
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
         locale.debug("&7Is trident in main hand? " + (isMainHand ? "&a&lYes" : "&c&lNo"));
         boolean isGliding = glidingPlayers.getOrDefault(event.getPlayer(), false);
         locale.debug("&7Is player flying with Elytra? " + (isGliding ? "&a&lYes" : "&c&lNo&7(Or missing log&7)"));
         ItemMeta itemMeta = trident.getItemMeta();
         locale.debug("&7Is target trident's ItemMeta null? " + (itemMeta == null ? "&a&lYes" : "&c&lNo"));
         Damageable meta = (Damageable) (itemMeta == null ? Bukkit.getItemFactory().getItemMeta(Material.TRIDENT) : itemMeta);
-        if(meta != null) {
+        if (meta != null) {
             int resultDurability = meta.getDamage() + (isGliding ? config.getInt("DurabilityCost.Flying") : config.getInt("DurabilityCost.Normal"));
             locale.debug("&7After reducing the durability value is: &c&l" + resultDurability);
 
@@ -155,6 +168,7 @@ public final class LimitedRiptide extends JavaPlugin implements Listener, Comman
                 sendItem(userInv, new ItemStack(Material.AIR), isMainHand);
                 locale.debug("&7Trident has been broken.");
             }
+
         } else {
             locale.debug("&c&lERROR! &7After validating, ItemMeta still was null!");
         }

@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.shoal.sir</groupId>
-    <artifactId>LitmiedRiptide</artifactId>
-    <version>1.5-RELEASE</version>
+    <artifactId>LimitedRiptide</artifactId>
+    <version>1.6-RELEASE</version>
     <packaging>jar</packaging>
 
     <name>LimitedRiptide</name>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.14.4-R0.1-SNAPSHOT</version>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
