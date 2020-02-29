@@ -137,7 +137,7 @@ public class VoteManager {
 
     public Vote startCreateVote(String starter) {
         Map<VoteDataType, Object> newVote = new HashMap<>();
-        String id = starter + "." + (voteMap.size() + 1);
+        String id = starter + "_" + (voteMap.size() + 1);
 
         newVote.put(VoteDataType.ID, id);
         newVote.put(VoteDataType.STATUS, true);
