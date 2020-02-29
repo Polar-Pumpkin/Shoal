@@ -75,18 +75,22 @@ public class CacheManager {
             StringBuilder hover = new StringBuilder();
             List<String> voteIDList = new ArrayList<>(section.getKeys(true));
 
-            if(voteIDList.size() <= 0) {
+            if (voteIDList.isEmpty()) {
                 return;
             }
 
             List<String> targetVoteList = new ArrayList<>();
             for(String voteID : voteIDList) {
-                if(user.getName().equals(voteID.split(".")[0])) {
+                String[] dataSet = voteID.split(".");
+                if (dataSet.length < 2) {
+                    continue;
+                }
+                if (user.getName().equals(dataSet[0])) {
                     targetVoteList.add(voteID);
                 }
             }
 
-            if(targetVoteList.size() <= 0) {
+            if (targetVoteList.isEmpty()) {
                 return;
             }
 
@@ -98,16 +102,16 @@ public class CacheManager {
                         1: 记录时间
                      */
                     if(user.hasPermission(VoteUpPerm.NOTICE.perm())) {
-                        for(int index = 0; index <= voteIDList.size() - 1; index++) {
+                        for (int index = 0; index < voteIDList.size(); index++) {
                             String key = voteIDList.get(index);
                             Vote targetVote = VoteManager.getInstance().getVote(key);
-                            if(targetVote != null) {
+                            if (targetVote != null) {
                                 hover.append(PlaceholderUtil.check(
                                         "&a▶ &7%TITLE%&7(发起人: &a%STARTER%&7) &9-> &c%RESULT%&7(&c%LogTime%&7)"
                                                 .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
                                         targetVote
                                 ));
-                                if(!(index == voteIDList.size() - 1)) {
+                                if (!(index == voteIDList.size() - 1)) {
                                     hover.append("\n");
                                 }
                             }
@@ -116,16 +120,16 @@ public class CacheManager {
                         break;
                     }
 
-                    for(int index = 0; index <= targetVoteList.size() - 1; index++) {
+                    for (int index = 0; index < targetVoteList.size(); index++) {
                         String key = targetVoteList.get(index);
                         Vote targetVote = VoteManager.getInstance().getVote(key);
-                        if(targetVote != null) {
+                        if (targetVote != null) {
                             hover.append(PlaceholderUtil.check(
                                     "&a▶ &7%TITLE% &9-> &c%RESULT%&7(&c%LogTime%&7)"
                                             .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
                                     targetVote
                             ));
-                            if(!(index == voteIDList.size() - 1)) {
+                            if (!(index == voteIDList.size() - 1)) {
                                 hover.append("\n");
                             }
                         }
