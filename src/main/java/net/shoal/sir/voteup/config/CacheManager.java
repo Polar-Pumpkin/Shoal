@@ -153,7 +153,7 @@ public class CacheManager {
 
                             if(targetLogSection != null) {
                                 List<String> logPlayerList = new ArrayList<>(targetLogSection.getKeys(false));
-                                for(int index = 0; index <= logPlayerList.size(); index++) {
+                                for (int index = 0; index < logPlayerList.size(); index++) {
                                     hover.append(PlaceholderUtil.check(
                                             "&b▶ &c%Voter%&7投了&c%Choice%&7一票(&a%LogTime%&7) &9-> &7&o%Reason%"
                                                     .replace("%LogTime%", TimeUtil.getDescriptiveTime(targetLogSection.getLong(voteID)))
@@ -163,7 +163,7 @@ public class CacheManager {
                                             ,
                                             targetVote
                                     ));
-                                    if(!(index == voteIDList.size() - 1)) {
+                                    if (index != voteIDList.size() - 1) {
                                         hover.append("\n");
                                     }
                                 }
