@@ -243,7 +243,7 @@ public class VoteManager {
                         save(vote.data());
                         CommonUtil.message(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Vote." + type.toString()), user.getName());
 
-                        Player starter = Bukkit.getPlayerExact(voteID.split("//.")[0]);
+                        Player starter = Bukkit.getPlayerExact(voteID.split("_")[0]);
                         if(starter != null && starter.isOnline()) {
                             String noticeMsg = locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Voted.Starter")
                                     .replace("%Voter%", user.getName())

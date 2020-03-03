@@ -81,7 +81,7 @@ public class CacheManager {
 
             List<String> targetVoteList = new ArrayList<>();
             for(String voteID : voteIDList) {
-                String[] dataSet = voteID.split(".");
+                String[] dataSet = voteID.split("_");
                 if (dataSet.length < 2) {
                     continue;
                 }
