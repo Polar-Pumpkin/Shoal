@@ -260,7 +260,7 @@ public class VoteManager {
                                         .replace("%Voter%", user.getName())
                                         .replace("%Choice%", vote.getChoices().getChoice(VoteManager.getInstance().getChoice(voteID, user.getName())))
                                         .replace("%Reason%", CommonUtil.color(reason));
-                                CommonUtil.message(PlaceholderUtil.check(noticeMsg, vote), user.getName());
+                                CommonUtil.message(PlaceholderUtil.check(noticeMsg, vote), player.getName());
                             }
                         });
                     } else {
