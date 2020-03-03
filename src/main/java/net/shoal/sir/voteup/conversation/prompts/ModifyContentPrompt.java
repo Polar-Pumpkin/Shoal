@@ -58,7 +58,7 @@ public class ModifyContentPrompt extends ValidatingPrompt {
 
         locale = VoteUp.getInstance().getLocale();
 
-        if (!user.hasPermission(VoteUpPerm.ADMIN.perm()) || !voteID.split("_")[0].equalsIgnoreCase(user.getName())) {
+        if (!user.hasPermission(VoteUpPerm.ADMIN.perm()) && !voteID.split("_")[0].equalsIgnoreCase(user.getName())) {
             CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
             return Prompt.END_OF_CONVERSATION;
         }
