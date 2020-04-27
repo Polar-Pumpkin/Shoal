@@ -1,7 +1,5 @@
 package net.shoal.sir.voteup.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import net.shoal.sir.voteup.enums.ChoiceType;
 import net.shoal.sir.voteup.enums.VoteDataType;
 import net.shoal.sir.voteup.enums.VoteType;
@@ -10,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public @Data @AllArgsConstructor class Vote {
+public class Vote {
 
     private String id;
     private boolean status;

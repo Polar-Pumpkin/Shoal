@@ -58,6 +58,10 @@
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -72,6 +76,11 @@
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Polar-Pumpkin</groupId>
+            <artifactId>ParrotX</artifactId>
+            <version>7a0d60ec8e</version>
         </dependency>
     </dependencies>
 </project>

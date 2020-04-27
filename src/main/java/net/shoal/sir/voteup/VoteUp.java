@@ -1,42 +1,27 @@
 package net.shoal.sir.voteup;
 
 import lombok.Getter;
-import net.shoal.sir.voteup.command.CommandHandler;
 import net.shoal.sir.voteup.config.*;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
-import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.serverct.parrot.parrotx.PPlugin;
 
-import java.io.File;
-
-public final class VoteUp extends JavaPlugin {
-
-    @Getter private static VoteUp instance;
-    @Getter private LocaleUtil locale;
-    public static String LOCALE;
-    public static boolean autocastEnable;
-
+public final class VoteUp extends PPlugin {
     @Override
-    public void onEnable() {
-        // Plugin startup logic
-        instance = this;
-        if(!new File(getDataFolder() + File.separator + "config.yml").exists()) {
-            saveDefaultConfig();
-        }
-        init();
-
+    protected void registerListener() {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClickListener(), this);
-        Bukkit.getPluginCommand("voteup").setExecutor(new CommandHandler());
     }
 
-    public void init() {
-        reloadConfig();
-        locale = new LocaleUtil(this);
-        LOCALE = getConfig().getString("Language");
-        autocastEnable = getConfig().getBoolean("Autocast.Enable");
+    @Override
+    protected void preload() {
+        this.pConfig = new ConfigManager();
+        this.pConfig.init();
+    }
+
+    @Override
+    public void load() {
         SoundManager.getInstance().init();
         CacheManager.getInstance().load();
         ExecutorManager.getInstance().load();
@@ -44,8 +29,35 @@ public final class VoteUp extends JavaPlugin {
         VoteManager.getInstance().load();
     }
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
+    public enum Perm {
+        ALL("VoteUp.*"),
+        ADMIN("VoteUp.admin"),
+        USER("VoteUp.user"),
+        NOTICE("VoteUp.notice"),
+        VIEW("VoteUp.view"),
+        CREATE("VoteUp.create"),
+        CREATE_CUSTOM_ALL("VoteUp.create.*"),
+        CREATE_CUSTOM_TITLE("VoteUp.create.title"),
+        CREATE_CUSTOM_TYPE("VoteUp.create.type"),
+        CREATE_CUSTOM_AMOUNT("VoteUp.create.amount"),
+        CREATE_CUSTOM_DESCRIPTION("VoteUp.create.description"),
+        CREATE_CUSTOM_DURATION("VoteUp.create.duration"),
+        CREATE_CUSTOM_CHOICE("VoteUp.create.choice"),
+        CREATE_CUSTOM_AUTOCAST("VoteUp.create.autocast"),
+        CREATE_CUSTOM_AUTOCAST_BYPASS("VoteUp.create.autocast.bypass"),
+        CREATE_CUSTOM_RESULT("VoteUp.create.result"),
+        CREATE_SIMPLE("VoteUp.create.simple"),
+        VOTE("VoteUp.vote.*"),
+        VOTE_ACCEPT("VoteUp.vote.accept"),
+        VOTE_NEUTRAL("VoteUp.vote.neutral"),
+        VOTE_REFUSE("VoteUp.vote.refuse"),
+        VOTE_REASON("VoteUp.vote.reason");
+
+        @Getter
+        private final String node;
+
+        Perm(String type) {
+            this.node = type;
+        }
     }
 }

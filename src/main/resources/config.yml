@@ -11,11 +11,13 @@ Sound:
     End: BLOCK_ANVIL_HIT
 Autocast:
   Enable: true
-  BlackMode: true
+  BlackList: true
   List:
-    - "op"
-    - "gamemode"
-    - "gm"
-    - "godmode"
-    - "give"
-    - "kill"
+    - 'op'
+    - 'gamemode'
+    - 'gm'
+    - 'godmode'
+    - 'give'
+    - 'kill'
+    - 'sudo'
+Admin: []
