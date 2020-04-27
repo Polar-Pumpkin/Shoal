@@ -1,20 +1,16 @@
 package net.shoal.sir.voteup.api;
 
-import lombok.Getter;
-
 public class VoteUpAPI {
 
+    public static final SoundUtil SOUND;
     private static VoteUpAPI api;
+
+    static {
+        SOUND = new SoundUtil();
+    }
 
     public static VoteUpAPI get() {
         if (api == null) api = new VoteUpAPI();
         return api;
-    }
-
-    @Getter
-    private final SoundUtil soundTool;
-
-    public VoteUpAPI() {
-        this.soundTool = new SoundUtil();
     }
 }

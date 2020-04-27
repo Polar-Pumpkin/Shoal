@@ -11,7 +11,7 @@ import java.util.Map;
 
 public @Data @AllArgsConstructor class VoteChoice {
 
-    private Map<ChoiceType, String> choices;
+    private Map<Vote.Choice, String> choices;
 
     public VoteChoice(ConfigurationSection section) {
         choices = new HashMap<>();

@@ -6,6 +6,7 @@ import net.shoal.sir.voteup.VoteUp;
 import org.bukkit.Sound;
 import org.serverct.parrot.parrotx.config.PConfig;
 import org.serverct.parrot.parrotx.data.annotations.PConfigBoolean;
+import org.serverct.parrot.parrotx.data.annotations.PConfigInt;
 import org.serverct.parrot.parrotx.utils.EnumUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 
@@ -31,6 +32,11 @@ public class ConfigManager extends PConfig {
     public static List<String> AUTOCAST_LIST;
 
     public static List<UUID> ADMIN;
+
+    @PConfigInt(path = "Settings.PassLeast.Agree", def = 3)
+    public static int SETTINGS_PASSLEAST_AGREE;
+    @PConfigInt(path = "Settings.PassLeast.Refuse", def = 1)
+    public static int SETTINGS_PASSLEAST_REFUSE;
 
     public ConfigManager() {
         super(VoteUp.getInstance(), "config", "主配置文件");
@@ -76,6 +82,9 @@ public class ConfigManager extends PConfig {
         ADMIN.forEach(s -> admins.add(s.toString()));
         this.config.set(Path.ADMIN.path, admins);
 
+        this.config.set(Path.SETTINGS_PASSLEAST_AGREE.path, SETTINGS_PASSLEAST_AGREE);
+        this.config.set(Path.SETTINGS_PASSLEAST_REFUSE.path, SETTINGS_PASSLEAST_REFUSE);
+
         super.save();
     }
 
@@ -90,6 +99,8 @@ public class ConfigManager extends PConfig {
         AUTOCAST_BLACKLIST("Autocast.Blacklist"),
         AUTOCAST_LIST("Autocast.List"),
         ADMIN("Admin"),
+        SETTINGS_PASSLEAST_AGREE("Settings.PassLeast.Agree"),
+        SETTINGS_PASSLEAST_REFUSE("Settings.PassLeast.Refuse"),
         ;
 
         @Getter

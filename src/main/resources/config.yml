@@ -9,6 +9,10 @@ Sound:
   Vote:
     Start: ENTITY_ARROW_HIT_PLAYER
     End: BLOCK_ANVIL_HIT
+Settings:
+  PassLeast:
+    Agree: 3
+    Refuse: 1
 Autocast:
   Enable: true
   BlackList: true
