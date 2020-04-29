@@ -3,7 +3,6 @@ package net.shoal.sir.voteup.conversation.prompts;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.enums.ChoiceType;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -16,9 +15,9 @@ public class CollectReasonPrompt extends StringPrompt {
 
     private LocaleUtil locale;
 
-    private Player user;
-    private String voteID;
-    private ChoiceType type;
+    private final Player user;
+    private final String voteID;
+    private final ChoiceType type;
 
     public CollectReasonPrompt(String voteID, Player player, ChoiceType type) {
         this.user = player;
@@ -29,7 +28,7 @@ public class CollectReasonPrompt extends StringPrompt {
     @Override
     public String getPromptText(ConversationContext context) {
         locale = VoteUp.getInstance().getLocale();
-        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您为什么选择这个选项呢? 发表一下您的看法吧.");
+        return plugin.lang.buildMessage(plugin.localeKey, I18n.Type.INFO, "&7您为什么选择这个选项呢? 发表一下您的看法吧.");
     }
 
     @Override
@@ -37,15 +36,15 @@ public class CollectReasonPrompt extends StringPrompt {
         locale = VoteUp.getInstance().getLocale();
 
         if (!user.hasPermission(VoteUpPerm.ADMIN.perm()) && !voteID.split("_")[0].equalsIgnoreCase(user.getName())) {
-            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
             return Prompt.END_OF_CONVERSATION;
         }
 
-        locale.debug("&7(CollectReasonPrompt) 会话输入值已验证通过.");
-        locale.debug("&7投票原因(输入值): &c" + CommonUtil.color(input));
+        plugin.lang.debug("&7(CollectReasonPrompt) 会话输入值已验证通过.");
+        plugin.lang.debug("&7投票原因(输入值): &c" + CommonUtil.color(input));
 
         if("exit".equalsIgnoreCase(input)) {
-            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.INFO, "&7您已取消输入."), user.getName());
             VoteManager.getInstance().backCreating(user, voteID);
             return Prompt.END_OF_CONVERSATION;
         }

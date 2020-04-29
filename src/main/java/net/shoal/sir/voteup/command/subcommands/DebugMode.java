@@ -2,7 +2,6 @@ package net.shoal.sir.voteup.command.subcommands;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.command.Subcommand;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.util.LocaleUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,7 +15,7 @@ public class DebugMode implements Subcommand {
         boolean result = !config.getBoolean("Debug");
         config.set("Debug", result);
         VoteUp.getInstance().saveConfig();
-        sender.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7Debug模式已 " + (result ? "&a&l开启" : "&c&l关闭") + "&7."));
+        sender.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.INFO, "&7Debug模式已 " + (result ? "&a&l开启" : "&c&l关闭") + "&7."));
         return true;
     }
 }

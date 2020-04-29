@@ -5,7 +5,8 @@ import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.*;
+import net.shoal.sir.voteup.enums.GuiConfiguration;
+import net.shoal.sir.voteup.enums.VoteDataType;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
@@ -23,7 +24,7 @@ public class SwitchType implements MenuItemExecutor {
             CommonUtil.closeInventory(user);
             SoundManager.getInstance().ding(user.getName());
             boolean result = switchVoteType(user.getName());
-            locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
+            plugin.lang.debug("&7设置值: &c" + (result ? "成功" : "失败"));
             CommonUtil.openInventory(
                     user,
                     InventoryUtil.parsePlaceholder(
@@ -34,7 +35,7 @@ public class SwitchType implements MenuItemExecutor {
             );
         } else {
             SoundManager.getInstance().fail(user.getName());
-            user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做. 使用 &d/vote create back &7可以返回投票草稿."));
+            user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您没有权限这么做. 使用 &d/vote create back &7可以返回投票草稿."));
         }
         return true;
     }

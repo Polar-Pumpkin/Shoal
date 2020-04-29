@@ -4,7 +4,6 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
@@ -22,11 +21,11 @@ public class ModifyContentPrompt extends ValidatingPrompt {
 
     private LocaleUtil locale;
 
-    private Player user;
-    private String voteID;
-    private VoteDataType type;
-    private int index;
-    private String actionType;
+    private final Player user;
+    private final String voteID;
+    private final VoteDataType type;
+    private final int index;
+    private final String actionType;
 
     public ModifyContentPrompt(Player player, VoteDataType type, int index, String actionType) {
         this.user = player;
@@ -39,7 +38,7 @@ public class ModifyContentPrompt extends ValidatingPrompt {
     @Override
     public String getPromptText(ConversationContext context) {
         locale = VoteUp.getInstance().getLocale();
-        return locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7请输入您想要修改/添加的内容, 当前修改内容类型: &c" + type.getName());
+        return plugin.lang.buildMessage(plugin.localeKey, I18n.Type.INFO, "&7请输入您想要修改/添加的内容, 当前修改内容类型: &c" + type.getName());
     }
 
     @Override
@@ -52,23 +51,23 @@ public class ModifyContentPrompt extends ValidatingPrompt {
 
         boolean exist = type == VoteDataType.DESCRIPTION || type == VoteDataType.AUTOCAST;
         if(!exist) {
-            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7目标值类型验证失败, 请联系管理员以解决错误: &c" + type.toString()), user.getName());
+            CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.ERROR, "&7目标值类型验证失败, 请联系管理员以解决错误: &c" + type.toString()), user.getName());
             return Prompt.END_OF_CONVERSATION;
         }
 
         locale = VoteUp.getInstance().getLocale();
 
         if (!user.hasPermission(VoteUpPerm.ADMIN.perm()) && !voteID.split("_")[0].equalsIgnoreCase(user.getName())) {
-            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
+            CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7权限验证失败, 您不具有修改目标投票内容的权限."), user.getName());
             return Prompt.END_OF_CONVERSATION;
         }
 
-        locale.debug("&7(ModifyContentPrompt) 会话输入值已验证通过.");
-        locale.debug("&7目标数据类型: &c" + type.getName());
-        locale.debug("&7新内容(输入值): &c" + input);
+        plugin.lang.debug("&7(ModifyContentPrompt) 会话输入值已验证通过.");
+        plugin.lang.debug("&7目标数据类型: &c" + type.getName());
+        plugin.lang.debug("&7新内容(输入值): &c" + input);
 
         if("exit".equalsIgnoreCase(input)) {
-            CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.INFO, "&7您已取消输入."), user.getName());
+            CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.INFO, "&7您已取消输入."), user.getName());
             VoteManager.getInstance().backCreating(user, voteID);
             return Prompt.END_OF_CONVERSATION;
         }
@@ -80,14 +79,14 @@ public class ModifyContentPrompt extends ValidatingPrompt {
             if (blackMode) {
                 if (commandList.contains(inputArgs[0])) {
                     if (!user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
-                        CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
+                        CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
                         return Prompt.END_OF_CONVERSATION;
                     }
                 }
             } else {
                 if (!commandList.contains(inputArgs[0])) {
                     if (!user.hasPermission(VoteUpPerm.CREATE_CUSTOM_AUTOCAST_BYPASS.perm())) {
-                        CommonUtil.message(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
+                        CommonUtil.message(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您输入的命令中含有屏蔽关键词."), user.getName());
                         return Prompt.END_OF_CONVERSATION;
                     }
                 }
@@ -124,7 +123,7 @@ public class ModifyContentPrompt extends ValidatingPrompt {
         }
 
         boolean result = VoteManager.getInstance().setCreatingVoteData(voteID, type, list);
-        locale.debug("&7设置值: &c" + (result ? "成功" : "失败"));
+        plugin.lang.debug("&7设置值: &c" + (result ? "成功" : "失败"));
 
         SoundManager.getInstance().ding(user.getName());
         if(type == VoteDataType.DESCRIPTION) {

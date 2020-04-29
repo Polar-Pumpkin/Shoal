@@ -6,7 +6,6 @@ import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.GuiConfiguration;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.InventoryUtil;
@@ -34,7 +33,7 @@ public class Create implements Subcommand {
                                 data = VoteManager.getInstance().getCreatingVote(user.getName());
                                 break;
                             default:
-                                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                                user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                                 break;
                         }
                         break;
@@ -44,11 +43,11 @@ public class Create implements Subcommand {
                                 data = VoteManager.getInstance().startCreateVote(args[2]);
                                 break;
                             default:
-                                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                                user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                                 break;
                         }
                     default:
-                        user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                        user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                         break;
                 }
 
@@ -63,7 +62,7 @@ public class Create implements Subcommand {
                     );
                 }
             } else {
-                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做."));
+                user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您没有权限这么做."));
             }
         }
         return true;

@@ -5,7 +5,6 @@ import net.shoal.sir.voteup.command.Subcommand;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.conversation.prompts.ModifyContentPrompt;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteDataType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -41,11 +40,11 @@ public class Modify implements Subcommand {
                             modify(user, creating, args, false);
                             break;
                         default:
-                            user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                            user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                             break;
                     }
                 } else {
-                    user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                    user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
                 }
             }
         }
@@ -79,10 +78,10 @@ public class Modify implements Subcommand {
                 list.remove((args.length == 4 ? Integer.parseInt(args[3]) : list.size() - 1));
                 VoteManager.getInstance().setCreatingVoteData(user.getName(), (isDesc ? VoteDataType.DESCRIPTION : VoteDataType.AUTOCAST), list);
             } else {
-                user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
+                user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7未知命令, 使用 &d/vote help &7查看帮助."));
             }
         } else {
-            user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做."));
+            user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您没有权限这么做."));
         }
     }
 }

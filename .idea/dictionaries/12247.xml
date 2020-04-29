@@ -3,12 +3,15 @@
     <words>
       <w>autocast</w>
       <w>elytra</w>
+      <w>fadein</w>
       <w>guis</w>
       <w>leastnot</w>
       <w>passleast</w>
       <w>reachamount</w>
       <w>starttime</w>
       <w>subcommand</w>
+      <w>voteend</w>
+      <w>votestart</w>
     </words>
   </dictionary>
 </component>

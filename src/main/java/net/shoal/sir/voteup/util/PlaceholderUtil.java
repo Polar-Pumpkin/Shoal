@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class PlaceholderUtil {
 
-    private static LocaleUtil locale = VoteUp.getInstance().getLocale();
+    private static final LocaleUtil locale = VoteUp.getInstance().getLocale();
 
     public static String parse(Placeholder type, Vote data) {
         String result = "";
@@ -139,23 +139,23 @@ public class PlaceholderUtil {
                 result = "读取数据遇到错误.(未知变量)";
         }
 
-//        locale.debug("&7目标变量值: &c" + result);
+//        plugin.lang.debug("&7目标变量值: &c" + result);
         return ChatColor.translateAlternateColorCodes('&', result);
     }
 
     public static String check(String text, Vote data) {
         String result = text;
-//        locale.debug("&7调用 (PlaceholderUtil) check 方法, 目标文本: &c" + result);
+//        plugin.lang.debug("&7调用 (PlaceholderUtil) check 方法, 目标文本: &c" + result);
         for(Placeholder placeholder : Placeholder.values()) {
             String placeholderName = "%" + placeholder.toString() + "%";
             if(result.contains(placeholderName)) {
-//                locale.debug("&7目标文本包含变量: &7" + placeholderName);
+//                plugin.lang.debug("&7目标文本包含变量: &7" + placeholderName);
                 String placeholderResult = parse(placeholder, data);
 
                 result = result.replace(placeholderName, placeholderResult);
             }
         }
-//        locale.debug("&7最终返回文本: &c" + result);
+//        plugin.lang.debug("&7最终返回文本: &c" + result);
         return result;
     }
 

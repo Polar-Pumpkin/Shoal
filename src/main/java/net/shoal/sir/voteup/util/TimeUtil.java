@@ -2,7 +2,6 @@ package net.shoal.sir.voteup.util;
 
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.enums.DurationType;
-import net.shoal.sir.voteup.enums.MessageType;
 import org.bukkit.Bukkit;
 
 import java.text.ParseException;
@@ -19,7 +18,7 @@ public class TimeUtil {
     private static final int DAY = 24 * 60 * 60;// 天
     private static final int HOUR = 60 * 60;// 小时
     private static final int MINUTE = 60;// 分钟
-    private static Calendar calendar = Calendar.getInstance();
+    private static final Calendar calendar = Calendar.getInstance();
 
 
     /**
@@ -58,26 +57,26 @@ public class TimeUtil {
 
     public static long getDurationTimeStamp(String duration) {
         locale = VoteUp.getInstance().getLocale();
-        locale.debug("&7调用 getDurationTimeStamp 方法.");
+        plugin.lang.debug("&7调用 getDurationTimeStamp 方法.");
         long result = 0;
 
         String clone = duration.toUpperCase();
-        locale.debug("&7待解析持续时间: &c" + clone);
+        plugin.lang.debug("&7待解析持续时间: &c" + clone);
         DurationType durationType;
         while((durationType = getFirstIndexOf(clone)) != null) {
-            locale.debug("&7获取到的时间标识符有效: &c" + durationType.toString());
+            plugin.lang.debug("&7获取到的时间标识符有效: &c" + durationType.toString());
             int index = clone.indexOf(durationType.getS());
-            locale.debug("&7时间标识符索引值: &c" + index);
+            plugin.lang.debug("&7时间标识符索引值: &c" + index);
             try {
                 String target = clone.substring(0, index);
-                locale.debug("&7截取到的时间配置值: &c" + target);
+                plugin.lang.debug("&7截取到的时间配置值: &c" + target);
                 int amount = Integer.parseInt(target);
                 result += amount * durationType.getI();
-                locale.debug("&7已算出并添加指定时长至返回值: &c" + result);
+                plugin.lang.debug("&7已算出并添加指定时长至返回值: &c" + result);
                 clone = clone.substring(index + 1);
-                locale.debug("&7准备开始继续解析, 剩余内容: &c" + clone);
+                plugin.lang.debug("&7准备开始继续解析, 剩余内容: &c" + clone);
             } catch(Throwable e) {
-                Bukkit.getLogger().info(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "&7投票持续时间格式化失败: &c" + duration));
+                Bukkit.getLogger().info(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.ERROR, "&7投票持续时间格式化失败: &c" + duration));
                 break;
             }
         }

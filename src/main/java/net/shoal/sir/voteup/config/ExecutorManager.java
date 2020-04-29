@@ -23,11 +23,11 @@ public class ExecutorManager {
         return instance;
     }
 
-    private Map<ExecutorType, MenuItemExecutor> executorMap = new HashMap<>();
+    private final Map<ExecutorType, MenuItemExecutor> executorMap = new HashMap<>();
 
     private void registerExecutor(ExecutorType type, MenuItemExecutor executor) {
         executorMap.put(type, executor);
-        locale.debug("&7注册执行器: &c" + type.toString());
+        plugin.lang.debug("&7注册执行器: &c" + type.toString());
     }
 
     public void load() {
@@ -47,12 +47,12 @@ public class ExecutorManager {
     }
 
     public MenuItemExecutor getExecutor(ExecutorType type) {
-        locale.debug("&7调用 getExecutor 方法.");
+        plugin.lang.debug("&7调用 getExecutor 方法.");
         if(executorMap.containsKey(type)) {
-            locale.debug("&7目标执行器已注册: &c" + type.toString());
+            plugin.lang.debug("&7目标执行器已注册: &c" + type.toString());
             return executorMap.get(type);
         }
-        locale.debug("&7目标执行器未注册, 返回 &4null&7: &c" + type.toString());
+        plugin.lang.debug("&7目标执行器未注册, 返回 &4null&7: &c" + type.toString());
         return null;
     }
 }

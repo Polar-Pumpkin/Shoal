@@ -13,6 +13,13 @@ Settings:
   PassLeast:
     Agree: 3
     Refuse: 1
+  Broadcast:
+    Title:
+      VoteStart: true
+      VoteEnd: false
+      FadeIn: 5
+      Stay: 10
+      FadeOut: 7
 Autocast:
   Enable: true
   BlackList: true

@@ -1,16 +1,14 @@
 package net.shoal.sir.voteup.api;
 
+import net.shoal.sir.voteup.config.VoteManager;
+
 public class VoteUpAPI {
 
     public static final SoundUtil SOUND;
-    private static VoteUpAPI api;
+    public static final VoteManager VOTE_MANAGER;
 
     static {
         SOUND = new SoundUtil();
-    }
-
-    public static VoteUpAPI get() {
-        if (api == null) api = new VoteUpAPI();
-        return api;
+        VOTE_MANAGER = new VoteManager();
     }
 }

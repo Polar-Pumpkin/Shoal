@@ -1,7 +1,10 @@
 package net.shoal.sir.voteup.data;
 
-import lombok.Getter;
 import lombok.NonNull;
+import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpAPI;
+import net.shoal.sir.voteup.enums.BuiltinMsg;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,6 +23,7 @@ import java.util.*;
 
 public class Vote implements PData, Owned, Timestamp {
 
+    private final PPlugin plugin;
     public String voteID;
     public boolean status;
     public Type type;
@@ -27,24 +31,95 @@ public class Vote implements PData, Owned, Timestamp {
     public UUID owner;
     public long startTime;
     public String duration;
-
     public String title;
     public List<String> description;
     public Map<Choice, String> choices;
     public List<String> autocast;
     public Map<Result, String> results;
-
     public Map<Choice, Map<UUID, String>> participant;
-
-    private final PPlugin plugin;
     private PID id;
     private File file;
 
-    public Vote(@NonNull PID id, @NonNull File file) {
-        this.plugin = id.getPlugin();
-        this.id = id;
+    public Vote(@NonNull File file) {
+        this.plugin = VoteUp.getInstance();
         this.file = file;
         load(file);
+
+        this.id = new PID(plugin, "VOTE_" + voteID);
+    }
+
+    public Vote(String voteID, Type type, int goal, UUID owner, String duration) {
+        this.plugin = VoteUp.getInstance();
+        this.id = new PID(plugin, "VOTE_" + voteID);
+        this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
+
+        this.voteID = voteID;
+        this.status = true;
+        this.type = type;
+        this.goal = goal;
+        this.owner = owner;
+        this.startTime = System.currentTimeMillis();
+        this.duration = duration;
+        init();
+    }
+
+    public Vote(int goal, UUID owner, String duration) {
+        this.voteID = UUID.randomUUID().toString();
+        this.plugin = VoteUp.getInstance();
+        this.id = new PID(plugin, "VOTE_" + voteID);
+        this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
+
+        this.status = true;
+        this.type = Type.NORMAL;
+        this.goal = goal;
+        this.owner = owner;
+        this.startTime = System.currentTimeMillis();
+        this.duration = duration;
+        init();
+    }
+
+    public void set(Data dataType, Object value) {
+        switch (dataType) {
+            case ID:
+                this.voteID = (String) value;
+                break;
+            case STATUS:
+                this.status = (boolean) value;
+                break;
+            case TYPE:
+                this.type = (Type) value;
+                break;
+            case GOAL:
+                this.goal = (int) value;
+                break;
+            case OWNER:
+                this.owner = (UUID) value;
+                break;
+            case STARTTIME:
+                this.startTime = (long) value;
+                break;
+            case DURATION:
+                this.duration = (String) value;
+                break;
+            case TITLE:
+                this.title = (String) value;
+                break;
+            case DESCRIPTION:
+                this.description = (List<String>) value;
+                break;
+            case CHOICE:
+                this.choices = (Map<Choice, String>) value;
+                break;
+            case AUTOCAST:
+                this.autocast = (List<String>) value;
+                break;
+            case RESULT:
+                this.results = (Map<Result, String>) value;
+                break;
+            case PARTICIPANT:
+                this.participant = (Map<Choice, Map<UUID, String>>) value;
+                break;
+        }
     }
 
     @Override
@@ -59,12 +134,32 @@ public class Vote implements PData, Owned, Timestamp {
 
     @Override
     public void init() {
-        plugin.lang.logAction(I18n.EXECUTE, "init() 方法 -> " + getTypeName());
+        this.title = getOwnerName() + " 的投票";
+        this.description = new ArrayList<>(Collections.singletonList(BuiltinMsg.NO_DESCRIPTION.msg));
+        this.choices = new HashMap<Choice, String>() {
+            {
+                put(Choice.ACCEPT, ChatColor.GREEN + Choice.ACCEPT.name);
+                put(Choice.NEUTRAL, ChatColor.YELLOW + Choice.NEUTRAL.name);
+                put(Choice.REFUSE, ChatColor.RED + Choice.REFUSE.name);
+            }
+        };
+        this.autocast = new ArrayList<>();
+        this.results = new HashMap<Result, String>() {
+            {
+                put(Result.PASS, ChatColor.GREEN + Result.PASS.name);
+                put(Result.DRAW, ChatColor.YELLOW + Result.DRAW.name);
+                put(Result.REJECT, ChatColor.RED + Result.REJECT.name);
+                put(Result.CANCEL, ChatColor.RED + Result.CANCEL.name);
+            }
+        };
+
+        this.participant = new HashMap<>();
     }
 
     @Override
     public void saveDefault() {
-        plugin.lang.logAction(I18n.EXECUTE, "saveDefault() 方法 -> " + getTypeName());
+        init();
+        save();
     }
 
     @Override
@@ -206,10 +301,8 @@ public class Vote implements PData, Owned, Timestamp {
         REACHAMOUNT(1, "同意人数需达到指定数量"),
         LEASTNOT(2, "反对人数不超过指定数量");
 
-        @Getter
-        private final String desc;
-        @Getter
-        private final int mode;
+        public final String desc;
+        public final int mode;
 
         Type(int mode, String type) {
             this.desc = type;
@@ -234,8 +327,7 @@ public class Vote implements PData, Owned, Timestamp {
         NEUTRAL("中立"),
         REFUSE("反对");
 
-        @Getter
-        private final String name;
+        public final String name;
 
         Choice(String name) {
             this.name = name;
@@ -248,8 +340,7 @@ public class Vote implements PData, Owned, Timestamp {
         DRAW("平票"),
         CANCEL("被取消");
 
-        @Getter
-        private final String name;
+        public final String name;
 
         Result(String name) {
             this.name = name;
@@ -261,14 +352,34 @@ public class Vote implements PData, Owned, Timestamp {
         HOUR("H", 3600),
         MINUTE("M", 60);
 
-        @Getter
-        private final String name;
-        @Getter
-        private final int time;
+        public final String name;
+        public final int time;
 
         Duration(String name, int time) {
             this.name = name;
             this.time = time;
+        }
+    }
+
+    public enum Data {
+        ID("ID"),
+        STATUS("状态"),
+        TYPE("类型"),
+        GOAL("目标人数"),
+        OWNER("发起者"),
+        STARTTIME("发起时间"),
+        DURATION("持续时间"),
+        TITLE("标题"),
+        DESCRIPTION("简述"),
+        CHOICE("选项"),
+        AUTOCAST("自动执行"),
+        RESULT("投票结果"),
+        PARTICIPANT("参加者");
+
+        public final String name;
+
+        Data(String type) {
+            this.name = type;
         }
     }
 }

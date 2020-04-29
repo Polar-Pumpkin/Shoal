@@ -4,7 +4,6 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
@@ -39,7 +38,7 @@ public class ModifyDescription implements MenuItemExecutor {
             );
         } else {
             SoundManager.getInstance().fail(user.getName());
-            user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.WARN, "&7您没有权限这么做. 使用 &d/vote create back &7可以返回投票草稿."));
+            user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.WARN, "&7您没有权限这么做. 使用 &d/vote create back &7可以返回投票草稿."));
         }
         return true;
     }

@@ -5,9 +5,10 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.CacheLogType;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
-import net.shoal.sir.voteup.util.*;
+import net.shoal.sir.voteup.util.ChatAPIUtil;
+import net.shoal.sir.voteup.util.PlaceholderUtil;
+import net.shoal.sir.voteup.util.TimeUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,7 +31,7 @@ public class CacheManager {
         return instance;
     }
 
-    private File dataFile = new File(VoteUp.getInstance().getDataFolder() + File.separator + "cache.yml");
+    private final File dataFile = new File(VoteUp.getInstance().getDataFolder() + File.separator + "cache.yml");
     private FileConfiguration data;
 
     public void load() {
@@ -71,7 +72,7 @@ public class CacheManager {
     public void report(CacheLogType type, Player user) {
         ConfigurationSection section = data.getConfigurationSection(type.toString());
         if(section != null) {
-            TextComponent text = ChatAPIUtil.build(PlaceholderUtil.check(locale.getMessage(VoteUp.LOCALE, MessageType.INFO, "Vote", "Report." + type.toString()), null));
+            TextComponent text = ChatAPIUtil.build(PlaceholderUtil.check(plugin.lang.getMessage(plugin.localeKey, I18n.Type.INFO, "Vote", "Report." + type.toString()), null));
             StringBuilder hover = new StringBuilder();
             List<String> voteIDList = new ArrayList<>(section.getKeys(true));
 

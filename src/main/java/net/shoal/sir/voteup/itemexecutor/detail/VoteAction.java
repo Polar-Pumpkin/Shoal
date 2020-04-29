@@ -5,7 +5,6 @@ import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.conversation.prompts.CollectReasonPrompt;
 import net.shoal.sir.voteup.enums.ChoiceType;
-import net.shoal.sir.voteup.enums.MessageType;
 import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
@@ -17,7 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class VoteAction implements MenuItemExecutor {
 
-    private ChoiceType type;
+    private final ChoiceType type;
 
     public VoteAction(ChoiceType type) {
         this.type = type;
@@ -40,7 +39,7 @@ public class VoteAction implements MenuItemExecutor {
                 conversation.begin();
             }
         } else {
-            user.sendMessage(locale.buildMessage(VoteUp.LOCALE, MessageType.ERROR, "处理数据时遇到错误, 请联系管理员寻求帮助."));
+            user.sendMessage(plugin.lang.buildMessage(plugin.localeKey, I18n.Type.ERROR, "处理数据时遇到错误, 请联系管理员寻求帮助."));
         }
         return true;
     }
