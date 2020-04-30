@@ -56,7 +56,7 @@ public class GuiManager {
 
     public void checkConfiguration() {
         if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.CREATE_MENU.getName() + ".yml").exists()) {
-            VoteUp.getInstance().saveResource("Guis/CreateMenu.yml", false);
+            VoteUp.getInstance().saveResource("Guis/VoteCreate.yml", false);
             plugin.lang.debug("&7释放默认配置文件: &cCreateMenu.yml");
         }
         if(!new File(dataFolder.getAbsolutePath() + File.separator + GuiConfiguration.VOTE_DETAILS_COMMON.getName() + ".yml").exists()) {

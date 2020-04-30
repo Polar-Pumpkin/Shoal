@@ -1,6 +1,7 @@
 package net.shoal.sir.voteup.conversation.prompts;
 
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
@@ -9,7 +10,6 @@ import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
-import net.shoal.sir.voteup.util.PlaceholderUtil;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.ValidatingPrompt;
@@ -130,7 +130,7 @@ public class ModifyContentPrompt extends ValidatingPrompt {
             ChatAPIUtil.sendEditableList(
                     user,
                     creating.getDescription(),
-                    PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的简述信息 &6&l>>>"), creating),
+                    VoteUpPlaceholder.check(CommonUtil.color("&7投票 &c%TITLE% &7的简述信息 &6&l>>>"), creating),
                     "&a&l[Add] ",
                     "/vote modify desc add ",
                     "&e&l[Edit] ",
@@ -144,7 +144,7 @@ public class ModifyContentPrompt extends ValidatingPrompt {
             ChatAPIUtil.sendEditableList(
                     user,
                     creating.getAutoCast(),
-                    PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的自动执行命令列表 &6&l>>>"), creating),
+                    VoteUpPlaceholder.check(CommonUtil.color("&7投票 &c%TITLE% &7的自动执行命令列表 &6&l>>>"), creating),
                     "&a&l[添加] ",
                     "/vote modify autocast add ",
                     "&e&l[编辑] ",

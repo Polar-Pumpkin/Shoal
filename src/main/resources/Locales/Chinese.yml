@@ -3,7 +3,11 @@ Plugin:
   INFO: "&a&l&o>> "
   WARN: "&e&l&o>> "
   ERROR: "&c&l&o>> "
+  NoPerm: "&7您没有权限这么做."
 Vote:
+  Status:
+    Processing: "&a进行中"
+    End: "&e已结束"
   Start:
     Subtitle: "&7投票 &c%TITLE% &7已开始"
     Broadcast: "&7投票 &c%TITLE% &7已开始.(点我查看)"

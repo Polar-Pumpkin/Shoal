@@ -36,7 +36,7 @@ public class Vote implements PData, Owned, Timestamp {
     public Map<Choice, String> choices;
     public List<String> autocast;
     public Map<Result, String> results;
-    public Map<Choice, Map<UUID, String>> participant;
+    public Map<Choice, Map<UUID, String>> participants;
     private PID id;
     private File file;
 
@@ -117,9 +117,49 @@ public class Vote implements PData, Owned, Timestamp {
                 this.results = (Map<Result, String>) value;
                 break;
             case PARTICIPANT:
-                this.participant = (Map<Choice, Map<UUID, String>>) value;
+                this.participants = (Map<Choice, Map<UUID, String>>) value;
                 break;
         }
+    }
+
+    public boolean isPassed() {
+        Map<UUID, String> accept = participants.getOrDefault(Choice.ACCEPT, new HashMap<>());
+        Map<UUID, String> refuse = participants.getOrDefault(Choice.REFUSE, new HashMap<>());
+        switch (type) {
+            case NORMAL:
+                return accept.size() > refuse.size();
+            case REACHAMOUNT:
+                return accept.size() >= goal;
+            case LEASTNOT:
+                return refuse.size() <= goal;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isVoted(UUID uuid) {
+        for (Map<UUID, String> choiceMap : participants.values()) if (choiceMap.containsKey(uuid)) return true;
+        return false;
+    }
+
+    public boolean hasReason(UUID uuid) {
+        for (Map<UUID, String> choiceMap : participants.values()) {
+            String reason = choiceMap.getOrDefault(uuid, BuiltinMsg.REASON_NOT_YET.msg);
+            if (!reason.equalsIgnoreCase(BuiltinMsg.REASON_NOT_YET.msg) && !reason.equalsIgnoreCase(BuiltinMsg.REASON_NO_PERM.msg))
+                return true;
+        }
+        return false;
+    }
+
+    public String getReason(UUID uuid) {
+        for (Map<UUID, String> choiceMap : participants.values())
+            if (choiceMap.containsKey(uuid)) return I18n.color(choiceMap.get(uuid));
+        return I18n.color(BuiltinMsg.REASON_NOT_YET.msg);
+    }
+
+    public Choice getChoice(UUID uuid) {
+        for (Choice type : participants.keySet()) if (participants.get(type).containsKey(uuid)) return type;
+        return null;
     }
 
     @Override
@@ -153,7 +193,7 @@ public class Vote implements PData, Owned, Timestamp {
             }
         };
 
-        this.participant = new HashMap<>();
+        this.participants = new HashMap<>();
     }
 
     @Override
@@ -208,10 +248,10 @@ public class Vote implements PData, Owned, Timestamp {
             }
 
             ConfigurationSection participantSection = data.getConfigurationSection("Participants");
-            this.participant = new HashMap<>();
+            this.participants = new HashMap<>();
             for (String choiceKey : participantSection.getKeys(false)) {
                 Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
-                Map<UUID, String> reasons = this.participant.getOrDefault(choice, new HashMap<>());
+                Map<UUID, String> reasons = this.participants.getOrDefault(choice, new HashMap<>());
                 ConfigurationSection section = participantSection.getConfigurationSection(choiceKey);
                 for (String uuid : section.getKeys(false)) {
                     reasons.put(UUID.fromString(uuid), I18n.color(section.getString(uuid)));
@@ -253,7 +293,7 @@ public class Vote implements PData, Owned, Timestamp {
                 (result, s) -> setting.set("Results." + result.name(), I18n.deColor(s, '&'))
         );
 
-        this.participant.forEach(
+        this.participants.forEach(
                 (choice, reasons) -> reasons.forEach(
                         (uuid, s) -> data.set("Participants." + choice.name() + "." + uuid.toString(), I18n.deColor(s, '&'))
                 )
@@ -297,15 +337,17 @@ public class Vote implements PData, Owned, Timestamp {
     }
 
     public enum Type {
-        NORMAL(0, "同意人数大于反对人数"),
-        REACHAMOUNT(1, "同意人数需达到指定数量"),
-        LEASTNOT(2, "反对人数不超过指定数量");
+        NORMAL(0, "普通投票", "同意人数大于反对人数"),
+        REACHAMOUNT(1, "多数同意投票", "同意人数需达到指定数量"),
+        LEASTNOT(2, "否决投票", "反对人数不超过指定数量");
 
         public final String desc;
+        public final String name;
         public final int mode;
 
-        Type(int mode, String type) {
+        Type(int mode, String name, String type) {
             this.desc = type;
+            this.name = name;
             this.mode = mode;
         }
 
@@ -348,31 +390,35 @@ public class Vote implements PData, Owned, Timestamp {
     }
 
     public enum Duration {
-        DAY("D", 86400),
-        HOUR("H", 3600),
-        MINUTE("M", 60);
+        // yyyy-MM-dd HH:mm:ss
+        DAY('d', "天", 86400),
+        HOUR('H', "时", 3600),
+        MINUTE('M', "分", 60),
+        SECOND('s', "秒", 1);
 
+        public final char code;
         public final String name;
         public final int time;
 
-        Duration(String name, int time) {
+        Duration(char code, String name, int time) {
+            this.code = code;
             this.name = name;
             this.time = time;
         }
     }
 
     public enum Data {
-        ID("ID"),
-        STATUS("状态"),
-        TYPE("类型"),
+        ID("投票ID"),
+        STATUS("进行状态"),
+        TYPE("投票类型"),
         GOAL("目标人数"),
         OWNER("发起者"),
         STARTTIME("发起时间"),
         DURATION("持续时间"),
-        TITLE("标题"),
-        DESCRIPTION("简述"),
-        CHOICE("选项"),
-        AUTOCAST("自动执行"),
+        TITLE("投票标题"),
+        DESCRIPTION("投票简述"),
+        CHOICE("投票选项"),
+        AUTOCAST("自动执行内容"),
         RESULT("投票结果"),
         PARTICIPANT("参加者");
 

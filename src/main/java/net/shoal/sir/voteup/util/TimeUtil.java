@@ -52,7 +52,7 @@ public class TimeUtil {
         return duration
                 .replace("d", " 天 ")
                 .replace("H", " 小时 ")
-                .replace("m", " 分钟");
+                .replace("m", " 分钟 ");
     }
 
     public static long getDurationTimeStamp(String duration) {

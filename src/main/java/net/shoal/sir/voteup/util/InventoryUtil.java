@@ -2,6 +2,7 @@ package net.shoal.sir.voteup.util;
 
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.ExecutorManager;
 import net.shoal.sir.voteup.data.ChestMenu;
 import net.shoal.sir.voteup.data.MenuItem;
@@ -110,7 +111,7 @@ public class InventoryUtil {
             for(int position : Position.getPositionList(item.getXPosition(), item.getYPosition())) {
                 inventory.setItem(
                         position,
-                        PlaceholderUtil.applyPlaceholder(item.getItem().clone(), voteData)
+                        VoteUpPlaceholder.applyPlaceholder(item.getItem().clone(), voteData)
                 );
             }
         }

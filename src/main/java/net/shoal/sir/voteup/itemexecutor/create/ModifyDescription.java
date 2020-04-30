@@ -1,6 +1,7 @@
 package net.shoal.sir.voteup.itemexecutor.create;
 
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.SoundManager;
 import net.shoal.sir.voteup.config.VoteManager;
 import net.shoal.sir.voteup.data.Vote;
@@ -9,7 +10,6 @@ import net.shoal.sir.voteup.itemexecutor.MenuItemExecutor;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
 import net.shoal.sir.voteup.util.CommonUtil;
 import net.shoal.sir.voteup.util.LocaleUtil;
-import net.shoal.sir.voteup.util.PlaceholderUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -26,7 +26,7 @@ public class ModifyDescription implements MenuItemExecutor {
             ChatAPIUtil.sendEditableList(
                     user,
                     creating.getDescription(),
-                    PlaceholderUtil.check(CommonUtil.color("&7投票 &c%TITLE% &7的简述信息 &6&l>>>"), creating),
+                    VoteUpPlaceholder.check(CommonUtil.color("&7投票 &c%TITLE% &7的简述信息 &6&l>>>"), creating),
                     "&a&l[Add] ",
                     "/vote modify desc add ",
                     "&e&l[Edit] ",

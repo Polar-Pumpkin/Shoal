@@ -1,10 +1,31 @@
 Setting:
-  Title: "创建投票: "
-  Row: 2
+  Title: "创建投票"
+  Row: 5
 Items:
+  GRAY_GLASS:
+    ItemStack:
+      Material: GRAY_STAINED_GLASS_PANE
+    Position:
+      X: 1-9
+      Y: 1
+  RESET:
+    ItemStack:
+      Display: "&c恢复默认设置"
+      Material: BARRIAR
+      Lore:
+        - ''
+        - '  &7重置当前投票的所有设置'
+        - '  &7为默认值, 请注意!'
+        - '  &c该操作不可还原!'
+        - ''
+        - '  &c▶ &f重置投票设置'
+        - ''
+    Position:
+      X: 5
+      Y: 1
   SET_TITLE:
     ItemStack:
-      Display: "投票标题"
+      Display: "&b投票标题"
       Material: PLAYER_HEAD
       Lore:
         - "&9▶ &7投票ID: &c%ID%"
@@ -45,7 +66,7 @@ Items:
       X: 3
       Y: 1
     ViewPermission: "VoteUp.create.type"
-  SET_AMOUNT:
+  SET_GOAL:
     ItemStack:
       Display: "投票人数目标"
       Material: ZOMBIE_HEAD

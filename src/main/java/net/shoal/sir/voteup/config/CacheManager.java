@@ -3,11 +3,11 @@ package net.shoal.sir.voteup.config;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.CacheLogType;
 import net.shoal.sir.voteup.enums.VoteUpPerm;
 import net.shoal.sir.voteup.util.ChatAPIUtil;
-import net.shoal.sir.voteup.util.PlaceholderUtil;
 import net.shoal.sir.voteup.util.TimeUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -72,7 +72,7 @@ public class CacheManager {
     public void report(CacheLogType type, Player user) {
         ConfigurationSection section = data.getConfigurationSection(type.toString());
         if(section != null) {
-            TextComponent text = ChatAPIUtil.build(PlaceholderUtil.check(plugin.lang.getMessage(plugin.localeKey, I18n.Type.INFO, "Vote", "Report." + type.toString()), null));
+            TextComponent text = ChatAPIUtil.build(VoteUpPlaceholder.check(plugin.lang.getMessage(plugin.localeKey, I18n.Type.INFO, "Vote", "Report." + type.toString()), null));
             StringBuilder hover = new StringBuilder();
             List<String> voteIDList = new ArrayList<>(section.getKeys(true));
 
@@ -107,7 +107,7 @@ public class CacheManager {
                             String key = voteIDList.get(index);
                             Vote targetVote = VoteManager.getInstance().getVote(key);
                             if (targetVote != null) {
-                                hover.append(PlaceholderUtil.check(
+                                hover.append(VoteUpPlaceholder.check(
                                         "&a▶ &7%TITLE%&7(发起人: &a%STARTER%&7) &9-> &c%RESULT%&7(&c%LogTime%&7)"
                                                 .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
                                         targetVote
@@ -125,7 +125,7 @@ public class CacheManager {
                         String key = targetVoteList.get(index);
                         Vote targetVote = VoteManager.getInstance().getVote(key);
                         if (targetVote != null) {
-                            hover.append(PlaceholderUtil.check(
+                            hover.append(VoteUpPlaceholder.check(
                                     "&a▶ &7%TITLE% &9-> &c%RESULT%&7(&c%LogTime%&7)"
                                             .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
                                     targetVote
@@ -155,7 +155,7 @@ public class CacheManager {
                             if(targetLogSection != null) {
                                 List<String> logPlayerList = new ArrayList<>(targetLogSection.getKeys(false));
                                 for (int index = 0; index < logPlayerList.size(); index++) {
-                                    hover.append(PlaceholderUtil.check(
+                                    hover.append(VoteUpPlaceholder.check(
                                             "&b▶ &c%Voter%&7投了&c%Choice%&7一票(&a%LogTime%&7) &9-> &7&o%Reason%"
                                                     .replace("%LogTime%", TimeUtil.getDescriptiveTime(targetLogSection.getLong(voteID)))
                                                     .replace("%Voter%", logPlayerList.get(index))
