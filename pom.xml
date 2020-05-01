@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.github.Polar-Pumpkin</groupId>
             <artifactId>ParrotX</artifactId>
-            <version>f5689b1afb</version>
+            <version>e038d249ce</version>
         </dependency>
     </dependencies>
 </project>

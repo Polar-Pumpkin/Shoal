@@ -1,22 +1,22 @@
-Setting:
+Settings:
   Title: "创建投票"
-  Row: 5
+  Row: 6
 Items:
   GRAY_GLASS:
     ItemStack:
       Material: GRAY_STAINED_GLASS_PANE
     Position:
       X: 1-9
-      Y: 1
+      Y: 1,5
   RESET:
     ItemStack:
       Display: "&c恢复默认设置"
       Material: BARRIAR
       Lore:
         - ''
-        - '  &7重置当前投票的所有设置'
-        - '  &7为默认值, 请注意!'
-        - '  &c该操作不可还原!'
+        - '  &7&o重置当前投票的所有设置'
+        - '  &7&o为默认值, 请注意!'
+        - '  &c&o该操作不可还原!'
         - ''
         - '  &c▶ &f重置投票设置'
         - ''
@@ -25,172 +25,195 @@ Items:
       Y: 1
   SET_TITLE:
     ItemStack:
-      Display: "&b投票标题"
+      Display: "&b%TITLE_display%"
       Material: PLAYER_HEAD
       Lore:
-        - "&9▶ &7投票ID: &c%ID%"
-        - "&9▶ &7发起人: &c%STARTER%"
-        - ""
-        - "&9▶ &7当前标题:"
-        - "&8▶ &a%TITLE%"
-        - ""
-        - "&a▶ &7&o单击以设置值"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o投票ID是投票的唯一识别码,'
+        - '  &7&o不可重复.'
+        - '  &7&o投票标题能让其他玩家快速理解'
+        - '  &7&o该投票的目的.'
+        - ''
+        - '  &7投票ID: &f&o%ID%'
+        - '  &7由 &a%STARTER% &7发起'
+        - ''
+        - '  &7投票标题 &b▶'
+        - '  &f%TITLE%'
+        - ''
+        - '  &b▶ &f左键更改投票标题'
+        - '  &b▶ &f右键更改投票ID'
+        - ''
     Position:
-      X: 1
-      Y: 1
-    ViewPermission: "VoteUp.create.title"
+      X: 2
+      Y: 3
   SWITCH_TYPE:
     ItemStack:
-      Display: "投票类型"
+      Display: "&b%TYPE_display%"
       Material: NETHER_STAR
       Lore:
-        - "&e▶ &9&lNORMAL"
-        - "&e▶ &7&o投票结束时同意人数大于反对人数."
-        - "&e▶ &9&lREACHAMOUNT"
-        - "&e▶ &7&o投票结束前同意人数需达到指定数量."
-        - "&e▶ &9&lLEASTNOT"
-        - "&e▶ &7&o投票结束前反对人数不超过指定数量."
-        - ""
-        - "&9▶ &7当前类型:"
-        - "&8▶ &a%TYPE%"
-        - ""
-        - "&a▶ &7&o单击以切换类型"
-      Enchants:
-        DAMAGE_ALL: 10
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
-        - "HIDE_ENCHANTS"
-    Position:
-      X: 3
-      Y: 1
-    ViewPermission: "VoteUp.create.type"
-  SET_GOAL:
-    ItemStack:
-      Display: "投票人数目标"
-      Material: ZOMBIE_HEAD
-      Lore:
-        - "&e▶ &7若投票类型为 &9&lREACHAMOUNT &7则该值为:"
-        - "&e▶ &7&o投票结束前&a同意&7人数&9&l需达到的&7目标数量."
-        - "&e▶ &7若投票类型为 &9&lLEASTNOT &7则该值为:"
-        - "&e▶ &7&o投票结束前&c反对&7人数&9&l不超过的&7目标数量."
-        - ""
-        - "&9▶ &7当前值:"
-        - "&8▶ &a%AMOUNT%"
-        - ""
-        - "&a▶ &7&o单击以设置值"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o不同的投票类型在最后'
+        - '  &7&o判断是否通过的规则不一样.'
+        - ''
+        - '  &7当前类型 &b▶'
+        - '  &f%TYPE%'
+        - '  &7&o%TYPE_desc%'
+        - ''
+        - '  &b▶ &f左键切换至下一个类型'
+        - '  &b▶ &f右键切换至上一个类型'
+        - ''
     Position:
       X: 4
-      Y: 1
-    ViewPermission: "VoteUp.create.amount"
-  MODIFY_DESCRIPTION:
+      Y: 3
+  SET_GOAL:
     ItemStack:
-      Display: "投票简述"
-      Material: WRITABLE_BOOK
+      Display: "&b%GOAL_display%"
+      Material: ZOMBIE_HEAD
       Lore:
-        - ""
-        - "&9▶ &7当前内容:"
-        - "&8▶ &a%DESCRIPTION%"
-        - ""
-        - "&a▶ &7&o单击以编辑描述"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
-    Position:
-      X: 5
-      Y: 1
-    ViewPermission: "VoteUp.create.description"
-  SET_DURATION:
-    ItemStack:
-      Display: "投票持续时间"
-      Material: OAK_SIGN
-      Lore:
-        - ""
-        - "&9▶ &7当前值:"
-        - "&8▶ &a%DURATION%"
-        - ""
-        - "&a▶ &7&o单击以设置值"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o投票通过所需的目标人数,'
+        - '  &7&o不同类型的投票所需要的'
+        - '  &7&o目标选项的人数不一样'
+        - ''
+        - '  &7当前目标 &b▶'
+        - '  &f%AMOUNT%'
+        - ''
+        - '  &b▶ &f左/右键 (+/-1)'
+        - '  &b▶ &f潜行+左/右键 (+/-5)'
+        - ''
     Position:
       X: 6
-      Y: 1
-    ViewPermission: "VoteUp.create.duration"
-  SET_CHOICE:
+      Y: 3
+  MODIFY_DESCRIPTION:
     ItemStack:
-      Display: "投票选项内容"
-      Material: WHITE_WOOL
+      Display: "&b%DESCRIPTION_display%"
+      Material: WRITABLE_BOOK
       Lore:
-        - ""
-        - "&9▶ &7当前值:"
-        - "&8▶ &7同意 &a▶ &c%CHOICE_ACCEPT%"
-        - "&8▶ &7中立 &e▶ &c%CHOICE_NEUTRAL%"
-        - "&8▶ &7反对 &c▶ &c%CHOICE_REFUSE%"
-        - ""
-        - "&a▶ &7&o单击以设置值"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
-    Position:
-      X: 7
-      Y: 1
-    ViewPermission: "VoteUp.create.choice"
-  MODIFY_AUTOCAST:
-    ItemStack:
-      Display: "自动执行"
-      Material: COMMAND_BLOCK
-      Lore:
-        - ""
-        - "&9▶ &7当前内容:"
-        - "&8▶ &a%AUTOCAST%"
-        - ""
-        - "&a▶ &7&o单击以编辑自动执行命令"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o投票简述帮助其他玩家'
+        - '  &7&o更细致地了解该投票,'
+        - '  &7&o从而做出正确的选择.'
+        - ''
+        - '  &7当前内容 &b▶'
+        - '  &f%DESCRIPTION%'
+        - ''
+        - '  &b▶ &f点击在聊天栏中编辑简述'
+        - ''
     Position:
       X: 8
-      Y: 1
-    ViewPermission: "VoteUp.create.autocast"
-  SET_RESULT:
+      Y: 3
+  SET_DURATION:
     ItemStack:
-      Display: "投票结果显示"
+      Display: "&b%DURATION_display%"
       Material: OAK_SIGN
       Lore:
-        - ""
-        - "&9▶ &7当前值:"
-        - "&8▶ &7投票通过 &a▶ &c%RESULT_PASS%"
-        - "&8▶ &7投票否决 &c▶ &c%RESULT_REJECT%"
-        - ""
-        - "&a▶ &7&o单击以设置值"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o投票将在多久后自动关闭,'
+        - '  &7&o结算并公布投票结果.'
+        - '  &7&o如果设定了自动执行,'
+        - '  &7&o将会在投票通过后依次执行命令'
+        - ''
+        - '  &7当前值 &b▶'
+        - '  &f%DURATION%'
+        - ''
+        - '  &a▶ &f点击输入新的时长'
+        - ''
     Position:
-      X: 9
-      Y: 1
-    ViewPermission: "VoteUp.create.result"
+      X: 2
+      Y: 4
+  SET_CHOICE:
+    ItemStack:
+      Display: "&b%CHOICE_display%"
+      Material: WHITE_WOOL
+      Lore:
+        - ''
+        - '  &7&o向参与者展示并提供选择的投票选项,'
+        - '  &7&o有三种类型: 同意, 中立, 反对.'
+        - '  &7&o可以在这里设定三种选项的具体内容.'
+        - ''
+        - '  &7当前值 &b▶'
+        - ''
+        - '    &7同意 &a▶'
+        - '    &f%CHOICE_accept%'
+        - ''
+        - '    &7中立 &e▶'
+        - '    &f%CHOICE_neutral%'
+        - ''
+        - '    &7反对 &c▶'
+        - '    &f%CHOICE_refuse%'
+        - ''
+        - '  &b▶ &f点击在聊天栏中输入新的选项内容'
+        - ''
+    Position:
+      X: 4
+      Y: 4
+  MODIFY_AUTOCAST:
+    ItemStack:
+      Display: "&b%AUTOCAST_display%"
+      Material: COMMAND_BLOCK
+      Lore:
+        - ''
+        - '  &7&o自动执行是一个在投票通过后'
+        - '  &7&o立即按顺序执行的命令列表.'
+        - '  &7&o可根据需要在插件配置中设置'
+        - '  &7&o自动执行中禁止执行的命令.'
+        - ''
+        - '  &7当前内容 &b▶'
+        - '  &f%AUTOCAST%'
+        - ''
+        - '  &b▶ &f点击在聊天栏中编辑自动执行内容'
+        - ''
+    Position:
+      X: 6
+      Y: 4
+  SET_RESULT:
+    ItemStack:
+      Display: "&b%RESULT_display%"
+      Material: OAK_SIGN
+      Lore:
+        - ''
+        - '  &7&o对外显示的投票结果内容,'
+        - '  &7&o有四种类型: 通过, 驳回, 平票, 被取消.'
+        - '  &7当前值 &b▶'
+        - ''
+        - '    &7通过 &a▶'
+        - '    &f%RESULT_pass%'
+        - ''
+        - '    &7驳回 &c▶'
+        - '    &f%RESULT_reject%'
+        - ''
+        - '    &7平票 &e▶'
+        - '    &f%RESULT_draw%'
+        - ''
+        - '    &7被取消 &c▶'
+        - '    &f%RESULT_cancel%'
+        - ''
+        - '  &b▶ &f点击在聊天栏中输入新的投票结果内容'
+        - ''
+    Position:
+      X: 8
+      Y: 4
   VOTE_START:
     ItemStack:
-      Display: "&a&l发布投票"
+      Display: "&b&l发布投票"
       Material: LIME_STAINED_GLASS_PANE
       Lore:
-        - "&b▶ &7当前投票概览"
-        - ""
-        - "&9▶ &7投票ID: &c%ID%"
-        - "&9▶ &7投票类型: &c%TYPE%"
-        - "&9▶ &7投票标题:"
-        - "&8▶ &a%TITLE%"
-        - "&9▶ &7投票选项内容:"
-        - "&8▶ &7同意 &a▶ &c%CHOICE_ACCEPT%"
-        - "&8▶ &7中立 &e▶ &c%CHOICE_NEUTRAL%"
-        - "&8▶ &7反对 &c▶ &c%CHOICE_REFUSE%"
-        - "&9▶ &7发起人: &c%STARTER%"
-        - "&9▶ &7持续时间: &c%DURATION%"
-        - "&9▶ &7投票结果显示:"
-        - "&8▶ &7投票通过 &a▶ &c%RESULT_PASS%"
-        - "&8▶ &7投票否决 &c▶ &c%RESULT_REJECT%"
-      ItemFlag:
-        - "HIDE_ATTRIBUTES"
+        - ''
+        - '  &7&o发布该投票草稿,'
+        - '  &7&o所有玩家可参与投票.'
+        - ''
     Position:
-      X: 1-9
-      Y: 2
+      X: 4
+      Y: 6
+  DRAFT_DELETE:
+    ItemStack:
+      Display: "&c&l删除草稿"
+      Material: RED_STAINED_GLASS_PANE
+      Lore:
+        - ''
+        - '  &7&o删除该投票草稿,'
+        - '  &7&o所有改动皆不会保存.'
+        - ''
+    Position:
+      X: 6
+      Y: 6

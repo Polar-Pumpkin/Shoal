@@ -13,18 +13,17 @@ import org.serverct.parrot.parrotx.utils.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VoteUpPlaceholder {
 
-    public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("[%]([^%]+)[%]");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("[%]([^%]+)[%]");
 
-    public static String parse(Vote vote, String text, Pattern pattern) {
+    public static String parse(Vote vote, String text) {
         if (text == null) return null;
 
-        Matcher m = pattern.matcher(text);
+        Matcher m = PLACEHOLDER_PATTERN.matcher(text);
 
         while (m.find()) {
             String format = m.group(1);
@@ -81,7 +80,7 @@ public class VoteUpPlaceholder {
                 return String.format(BuiltinMsg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size());
             case RESULT:
                 Vote.Result result = EnumUtil.valueOf(Vote.Result.class, params.toUpperCase());
-                if (result == null) return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
+                if (result == null) return vote.result().name;
                 return vote.results.getOrDefault(result, ChatColor.BLUE + result.name);
             case PARTICIPANT:
                 return String.format(BuiltinMsg.VOTE_VALUE_PARTICIPANT.msg, vote.autocast.size());
@@ -90,55 +89,29 @@ public class VoteUpPlaceholder {
         }
     }
 
-    public static List<String> parse(List<String> list, Vote data) {
+    public static List<String> parse(Vote vote, List<String> lore) {
         List<String> result = new ArrayList<>();
-        for (String text : list) {
+        for (String text : lore) {
+            result.add(parse(vote, text));
             if (text.contains("%DESCRIPTION%") || text.contains("%AUTOCAST%")) {
-                result.add(text);
-
-                boolean isDescription;
-                if (text.contains("%DESCRIPTION%")) {
-                    isDescription = true;
-                } else if (text.contains("%AUTOCAST%")) {
-                    isDescription = false;
-                } else {
-                    result.add(check(text, data));
-                    continue;
-                }
-
-                int targetIndex = result.indexOf(text);
-                String prefix = isDescription ? "&b▶ &7&o" : "";
-                boolean isFirstLine = true;
-                List<String> content = isDescription ? data.getDescription() : data.getAutoCast();
-
-                for (int index = content.size() - 1; index >= 0; index--) {
-                    if (isFirstLine) {
-                        result.set(targetIndex, CommonUtil.color(prefix + content.get(index)));
-                        isFirstLine = false;
-                    } else {
-                        result.add(targetIndex, CommonUtil.color(prefix + content.get(index)));
-                    }
-                }
-            } else {
-                result.add(check(text, data));
+                boolean isDescription = text.contains("%DESCRIPTION%");
+                List<String> content = new ArrayList<>();
+                (isDescription ? vote.description : vote.autocast).forEach(
+                        line -> content.add(I18n.color(text.substring(0, text.indexOf("%")) + (isDescription ? "" : "/") + line))
+                );
+                result.addAll(content);
             }
         }
         return result;
     }
 
-    public static ItemStack applyPlaceholder(ItemStack item, Vote data) {
+    public static ItemStack applyPlaceholder(ItemStack item, Vote vote) {
         ItemStack result = item.clone();
-        if (result.hasItemMeta()) {
-            ItemMeta meta = result.getItemMeta();
-
-            if (meta != null) {
-                meta.setDisplayName(check(meta.getDisplayName(), data));
-                if (meta.hasLore()) {
-                    meta.setLore(parse(Objects.requireNonNull(meta.getLore()), data));
-                }
-                result.setItemMeta(meta);
-            }
-        }
+        ItemMeta meta = result.getItemMeta();
+        if (meta == null) return result;
+        meta.setDisplayName(parse(vote, meta.getDisplayName()));
+        if (meta.getLore() != null) meta.setLore(parse(vote, meta.getLore()));
+        result.setItemMeta(meta);
         return result;
     }
 }

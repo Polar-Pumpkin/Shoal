@@ -26,6 +26,7 @@ public class Vote implements PData, Owned, Timestamp {
     private final PPlugin plugin;
     public String voteID;
     public boolean status;
+    public boolean cancelled;
     public Type type;
     public int goal;
     public UUID owner;
@@ -55,6 +56,7 @@ public class Vote implements PData, Owned, Timestamp {
 
         this.voteID = voteID;
         this.status = true;
+        this.cancelled = false;
         this.type = type;
         this.goal = goal;
         this.owner = owner;
@@ -70,12 +72,47 @@ public class Vote implements PData, Owned, Timestamp {
         this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
 
         this.status = true;
+        this.cancelled = false;
         this.type = Type.NORMAL;
         this.goal = goal;
         this.owner = owner;
         this.startTime = System.currentTimeMillis();
         this.duration = duration;
         init();
+    }
+
+    public static long getDurationTimestamp(String duration) {
+        long result = 0;
+
+        String clone = duration.toUpperCase();
+        Vote.Duration durationType;
+        while ((durationType = getFirstIndexOf(clone)) != null) {
+            int index = clone.indexOf(durationType.code);
+            try {
+                String target = clone.substring(0, index);
+                int amount = Integer.parseInt(target);
+                result += amount * durationType.time;
+                clone = clone.substring(index + 1);
+            } catch (Throwable e) {
+                break;
+            }
+        }
+
+        return result * 1000;
+    }
+
+    public static Vote.Duration getFirstIndexOf(String target) {
+        int index = Integer.MAX_VALUE;
+        Vote.Duration durationType = null;
+        for (Vote.Duration type : Vote.Duration.values()) {
+            int currentIndex = target.indexOf(type.code);
+            if (currentIndex == -1) continue;
+            if (currentIndex < index) {
+                index = currentIndex;
+                durationType = type;
+            }
+        }
+        return durationType;
     }
 
     public void set(Data dataType, Object value) {
@@ -135,6 +172,17 @@ public class Vote implements PData, Owned, Timestamp {
             default:
                 return false;
         }
+    }
+
+    public Result result() {
+        if (cancelled) return Result.CANCEL;
+
+        if (type == Type.NORMAL)
+            if (participants.getOrDefault(Choice.ACCEPT, new HashMap<>()).size() == participants.getOrDefault(Choice.REFUSE, new HashMap<>()).size())
+                return Result.DRAW;
+
+        if (isPassed()) return Result.PASS;
+        else return Result.REJECT;
     }
 
     public boolean isVoted(UUID uuid) {
@@ -220,6 +268,7 @@ public class Vote implements PData, Owned, Timestamp {
 
             ConfigurationSection information = data.getConfigurationSection("Information");
             this.status = information.getBoolean("Status", false);
+            this.cancelled = information.getBoolean("Cancelled", false);
             this.type = Type.valueOf(information.getString("Type", "NORMAL").toUpperCase());
             this.goal = information.getInt("Goal", Integer.MAX_VALUE);
             this.owner = UUID.fromString(information.getString("Owner"));
@@ -274,6 +323,7 @@ public class Vote implements PData, Owned, Timestamp {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection information = data.createSection("Information");
         information.set("Status", status);
+        information.set("Cancelled", cancelled);
         information.set("Type", type.name());
         information.set("Goal", goal);
         information.set("Owner", owner.toString());
@@ -351,7 +401,9 @@ public class Vote implements PData, Owned, Timestamp {
             this.mode = mode;
         }
 
-        public Type mode(int mode) {
+        public static Type mode(int mode) {
+            if (mode > 2) mode = 0;
+            if (mode < 0) mode = 2;
             switch (mode) {
                 case 0:
                 default:

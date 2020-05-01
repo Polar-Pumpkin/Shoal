@@ -9,12 +9,10 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
 import net.shoal.sir.voteup.enums.CacheLogType;
-import net.shoal.sir.voteup.enums.GuiConfiguration;
 import net.shoal.sir.voteup.task.VoteEndTask;
-import net.shoal.sir.voteup.util.ChatAPIUtil;
-import net.shoal.sir.voteup.util.InventoryUtil;
 import net.shoal.sir.voteup.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -23,6 +21,7 @@ import org.serverct.parrot.parrotx.config.PFolder;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.EnumUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
+import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
 import java.io.File;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ import java.util.UUID;
 public class VoteManager extends PFolder {
 
     private final Map<String, Vote> voteMap = new HashMap<>();
-    private final Map<UUID, Vote> creatingVoteMap = new HashMap<>();
+    private final Map<UUID, Vote> draftMap = new HashMap<>();
     private final Map<String, Integer> endTaskMap = new HashMap<>();
 
     public VoteManager() {
@@ -55,7 +54,7 @@ public class VoteManager extends PFolder {
         if (data == null) return;
         if (!data.status) return;
         if (endTaskMap.containsKey(voteID)) return;
-        long timeRemain = data.startTime + TimeUtil.getDurationTimeStamp(data.duration) - System.currentTimeMillis();
+        long timeRemain = data.startTime + TimeUtil.getDurationTimestamp(data.duration) - System.currentTimeMillis();
         if (timeRemain <= 0) {
             endVote(voteID);
             return;
@@ -71,59 +70,49 @@ public class VoteManager extends PFolder {
 
     public Vote create(UUID uuid) {
         Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PASSLEAST_AGREE.path, 3), uuid, "1d");
-        creatingVoteMap.put(uuid, vote);
+        draftMap.put(uuid, vote);
         return vote;
     }
 
-    public boolean setVoteData(@NonNull Player user, Vote.Data dataType, Object value) {
-        Vote vote = creatingVoteMap.getOrDefault(user.getUniqueId(), null);
+    public boolean setVoteData(String voteID, @NonNull Player editor, Vote.Data dataType, Object value) {
+        Vote vote = getVote(voteID);
         if (vote == null) {
-            BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.ERROR, String.format(I18n.color(BuiltinMsg.VOTE_VALUE_CHANGE_FAIL.msg), dataType.name)));
-            VoteUpAPI.SOUND.fail(user);
+            BasicUtil.send(plugin, editor, plugin.lang.build(plugin.localeKey, I18n.Type.ERROR, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_FAIL.msg), dataType.name)));
+            VoteUpAPI.SOUND.fail(editor);
             return false;
         }
         vote.set(dataType, value);
-        BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_VALUE_CHANGE_SUCCESS.msg), dataType.name)));
-        VoteUpAPI.SOUND.success(user);
+        BasicUtil.send(plugin, editor, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_SUCCESS.msg), dataType.name)));
+        VoteUpAPI.SOUND.success(editor);
         return true;
     }
 
-    public Vote getCreatingVote(UUID uuid) {
-        return creatingVoteMap.getOrDefault(uuid, null);
+    public Vote draftVote(UUID uuid) {
+        return draftMap.getOrDefault(uuid, create(uuid));
     }
 
     public void back(@NonNull Player user) {
-        BasicUtil.openInventory(
-                plugin,
-                user,
-                InventoryUtil.parsePlaceholder(
-                        GuiManager.getInstance().getMenu(GuiConfiguration.CREATE_MENU.getName()),
-                        getCreatingVote(user.getUniqueId()),
-                        user
-                )
-        );
+        BasicUtil.openInventory(plugin, user, new CreateInventoryHolder<>(draftVote(user.getUniqueId())).getInventory());
     }
 
     public void start(@NonNull Player user) {
-        Vote vote = getCreatingVote(user.getUniqueId());
+        Vote vote = draftVote(user.getUniqueId());
         if (vote == null) return;
         startCountdown(vote.voteID);
         vote.startTime = System.currentTimeMillis();
-        creatingVoteMap.remove(user.getUniqueId());
+        draftMap.remove(user.getUniqueId());
         voteMap.put(vote.voteID, vote);
 
         VoteUpAPI.SOUND.voteEvent(true);
         BasicUtil.broadcastTitle(
                 "",
-                VoteUpPlaceholder.check(
-                        plugin.lang.getRaw(plugin.localeKey, "Vote", "Start.Subtitle"), vote
-                ),
+                VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Start.Subtitle")),
                 plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
                 plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
                 plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
         );
-        Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(ChatAPIUtil.buildClickText(
-                VoteUpPlaceholder.check(plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Start.Broadcast"), vote),
+        Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(JsonChatUtil.buildClickText(
+                VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Start.Broadcast")),
                 new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + vote.voteID),
                 new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(BuiltinMsg.VOTE_CLICK.msg)))
         )));
@@ -158,7 +147,7 @@ public class VoteManager extends PFolder {
                     .replace("%Voter%", user.getName())
                     .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
                     .replace("%Reason%", I18n.color(reason));
-            I18n.send(user, VoteUpPlaceholder.check(noticeMsg, vote));
+            I18n.send(user, VoteUpPlaceholder.parse(vote, noticeMsg));
         } else CacheManager.getInstance().log(CacheLogType.VOTE_VOTED, voteID, user.getName());
 
         // TODO 管理员不在线时的提醒挂起规则
@@ -170,7 +159,7 @@ public class VoteManager extends PFolder {
                                 .replace("%Voter%", user.getName())
                                 .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
                                 .replace("%Reason%", I18n.color(reason));
-                        I18n.send(admin, VoteUpPlaceholder.check(noticeMsg, vote));
+                        I18n.send(admin, VoteUpPlaceholder.parse(vote, noticeMsg));
                     }
                 }
         );
@@ -187,14 +176,20 @@ public class VoteManager extends PFolder {
             VoteUpAPI.SOUND.voteEvent(false);
             BasicUtil.broadcastTitle(
                     "",
-                    VoteUpPlaceholder.check(plugin.lang.getRaw(plugin.localeKey, "Vote", "End.Subtitle"), vote),
+                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "End.Subtitle")),
                     plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
                     plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
                     plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
             );
-            BasicUtil.broadcast(VoteUpPlaceholder.check(plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "End.Broadcast"), vote));
+            BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "End.Broadcast")));
             // TODO 管理员不在线时的提醒挂起规则
             CacheManager.getInstance().log(CacheLogType.VOTE_END, voteID, "");
         }
+    }
+
+    @Override
+    public void delete(String id) {
+        voteMap.remove(id);
+        draftMap.remove(UUID.fromString(id));
     }
 }
