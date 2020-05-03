@@ -84,10 +84,7 @@ public class ModifyContentPrompt extends StringPrompt {
                 return Prompt.END_OF_CONVERSATION;
         }
 
-        if (targetDesc) vote.description = list;
-        else vote.autocast = list;
-
-        VoteUpAPI.SOUND.ding(user);
+        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, list);
         JsonChatUtil.sendEditableList(
                 user,
                 list,

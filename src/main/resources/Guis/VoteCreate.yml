@@ -7,11 +7,11 @@ Items:
       Material: GRAY_STAINED_GLASS_PANE
     Position:
       X: 1-9
-      Y: 1,5
+      Y: 1,6
   RESET:
     ItemStack:
       Display: "&c恢复默认设置"
-      Material: BARRIAR
+      Material: BARRIER
       Lore:
         - ''
         - '  &7&o重置当前投票的所有设置'
@@ -35,7 +35,7 @@ Items:
         - '  &7&o该投票的目的.'
         - ''
         - '  &7投票ID: &f&o%ID%'
-        - '  &7由 &a%STARTER% &7发起'
+        - '  &7由 &f%OWNER% &7发起'
         - ''
         - '  &7投票标题 &b▶'
         - '  &f%TITLE%'
@@ -76,7 +76,7 @@ Items:
         - '  &7&o目标选项的人数不一样'
         - ''
         - '  &7当前目标 &b▶'
-        - '  &f%AMOUNT%'
+        - '  &f%GOAL%'
         - ''
         - '  &b▶ &f左/右键 (+/-1)'
         - '  &b▶ &f潜行+左/右键 (+/-5)'
@@ -116,7 +116,7 @@ Items:
         - '  &7当前值 &b▶'
         - '  &f%DURATION%'
         - ''
-        - '  &a▶ &f点击输入新的时长'
+        - '  &b▶ &f点击输入新的时长'
         - ''
     Position:
       X: 2

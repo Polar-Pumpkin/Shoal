@@ -1,6 +1,5 @@
 package net.shoal.sir.voteup.data.prompts;
 
-import com.sun.istack.internal.NotNull;
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
@@ -21,7 +20,7 @@ public class SetTitlePrompt extends StringPrompt {
     private final Player user;
     private final Vote vote;
 
-    public SetTitlePrompt(@NotNull Player player, @NonNull Vote vote) {
+    public SetTitlePrompt(@NonNull Player player, @NonNull Vote vote) {
         this.plugin = VoteUp.getInstance();
         this.user = player;
         this.vote = vote;
@@ -45,7 +44,7 @@ public class SetTitlePrompt extends StringPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        vote.title = I18n.color(input);
+        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, I18n.color(input));
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;
     }

@@ -4,27 +4,32 @@ Plugin:
   WARN: "&e&l&o>> "
   ERROR: "&c&l&o>> "
   NoPerm: "&7您没有权限这么做."
+  UnknownCmd: "&7未知命令, 使用 &d/vote help &7查看帮助."
 Vote:
   Status:
     Processing: "&a进行中"
     End: "&e已结束"
-  Start:
-    Subtitle: "&7投票 &c%TITLE% &7已开始"
-    Broadcast: "&7投票 &c%TITLE% &7已开始.(点我查看)"
-  End:
-    Subtitle: "&7投票 &c%TITLE% &7已结束"
-    Broadcast: "&7投票 &c%TITLE% &7%RESULT%&7."
-    Starter: "&7您的投票 &c%TITLE% &7已结束, 投票结果: %RESULT%&7."
-  Voted:
-    Starter: "&c%Voter%&7在您的投票 &c%TITLE% &7中投了&c%Choice%&7一票. &9-> &7&o%Reason%"
-    Noticer: "&c%Voter%&7在投票 &c%TITLE%&7(发起人: &c%STARTER%&7) 中投了&c%Choice%&7一票. &9-> &7&o%Reason%"
-  Report:
-    VOTE_END: "&6&l欢迎回来! &7在您不在线的时间里有 &c%CACHE_LOG_AMOUNT_VOTE_END% &7个投票结束.(鼠标悬浮我查看详细信息)"
-    VOTE_VOTED: "&b&l欢迎回来! &7在您不在线的时间里有 &c%CACHE_LOG_AMOUNT_VOTE_VOTED% &7个玩家在您的一个(或多个)投票中投出自己的一票.(鼠标悬浮我查看详细信息)"
+  Event:
+    Start:
+      Subtitle: "&7投票 &c%TITLE% &7已开始"
+      Broadcast: "&7投票 &c%TITLE% &7已开始. (点击查看)"
+    End:
+      Subtitle: "&7投票 &c%TITLE% &7已结束"
+      Broadcast: "&7投票 &c%TITLE% &7%RESULT%&7."
+      Starter: "&7您的投票 &c%TITLE% &7已结束, 投票结果: %RESULT%&7."
+  Notice:
+    VOTE:
+      Head: "&b&l欢迎回来! &7在您不在的这段时间中有 &c%amount% &7个玩家参与了投票. (查看详细信息)"
+      Starter: "&b▶ &a%user% &7在投票 &c%TITLE% &7中投了 &c%choice% &7票. &9-> &7&o%reason%"
+      Noticer: "&b▶ &a%user% &7在投票 &c%TITLE%&7(由 &a%STARTER% &7发起) 中投了 &c%choice% &7票. &9-> &7&o%reason%"
+    VOTE_END:
+      Head: "&b&l欢迎回来! &7在您不在的这段时间中有 &c%amount% &7个投票结束. (查看详细信息)"
+      Starter: "&b▶ &c%TITLE%&7 &9-> &c%RESULT% &7(&c%time%&7)"
+      Noticer: "&b▶ &c%TITLE%&7(由 &a%STARTER% &7发起) &9-> &c%RESULT% &7(&c%time%&7)"
   Vote:
-    ACCEPT: "&7您已成功投出自己的一票: &a&l同意&7."
-    NEUTRAL: "&7您已成功投出自己的一票: &e&l中立&7."
-    REFUSE: "&7您已成功投出自己的一票: &c&l反对&7."
+    ACCEPT: "&7成功投出一张 &a&l同意 &7票."
+    NEUTRAL: "&7成功投出一张 &e&l中立 &7票."
+    REFUSE: "&7成功投出一张 &c&l反对 &7票."
     Fail:
-      Closed: "&7投票已结束. 您无法继续投票."
+      Closed: "&7该投票已结束."
       Logged: "&7您已经投过票了."

@@ -1,7 +1,7 @@
 package net.shoal.sir.voteup.listener;
 
-import net.shoal.sir.voteup.config.CacheManager;
-import net.shoal.sir.voteup.enums.CacheLogType;
+import net.shoal.sir.voteup.api.VoteUpAPI;
+import net.shoal.sir.voteup.data.Notice;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,8 +12,8 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player user = event.getPlayer();
-        CacheManager.getInstance().report(CacheLogType.VOTE_END, user);
-        CacheManager.getInstance().report(CacheLogType.VOTE_VOTED, user);
+        VoteUpAPI.CACHE_MANAGER.report(Notice.Type.VOTE_END, user);
+        VoteUpAPI.CACHE_MANAGER.report(Notice.Type.VOTE, user);
     }
 
 }

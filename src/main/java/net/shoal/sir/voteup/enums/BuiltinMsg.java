@@ -15,13 +15,14 @@ public enum BuiltinMsg {
     VOTE_CLICK("&a点击立即查看投票详细信息"),
     VOTE_REASON("&7您为什么选择这个选项呢? 发表一下您的看法吧."),
     ERROR_GET_CHOICE("&c获取选项内容失败"),
+    ERROR_GET_VOTE("&7目标投票不存在."),
     ERROR_PLACEHOLDER_REQUEST("&c获取变量内容失败"),
     ERROR_GUI_TITLE("初始化菜单遇到错误"),
     ERROR_EDIT_NO_PERM("&7您没有权限修改该投票或该项内容."),
     ERROR_EDIT_DURATION("&7无法识别您输入的时长."),
     ERROR_EDIT_AUTOCAST_DISABLE("&7自动执行功能被禁用."),
     ERROR_EDIT_AUTOCAST_IGNORE("&7您输入的命令中含有屏蔽关键词."),
-    ;
+    ERROR_COMMAND_NOT_PLAYER("&7控制台无法执行此命令.");
 
     public final String msg;
 

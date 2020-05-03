@@ -1,12 +1,17 @@
-package net.shoal.sir.voteup.command.subcommands;
+package net.shoal.sir.voteup.command;
 
-import net.shoal.sir.voteup.command.Subcommand;
-import net.shoal.sir.voteup.util.CommonUtil;
-import org.bukkit.command.CommandSender;
+import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.api.VoteUpPerm;
+import net.shoal.sir.voteup.command.subcommands.CreateCmd;
+import net.shoal.sir.voteup.command.subcommands.ModifyCmd;
+import net.shoal.sir.voteup.command.subcommands.ViewCmd;
+import org.serverct.parrot.parrotx.command.CommandHandler;
+import org.serverct.parrot.parrotx.command.subcommands.HelpCommand;
+import org.serverct.parrot.parrotx.command.subcommands.ReloadCommand;
 
-public class Help implements Subcommand {
+public class VoteUpCmd extends CommandHandler {
 
-    private String[] helpList = {
+    /*private String[] helpList = {
             "&6&lVote Up &8&o(v1.4-SNAPSHOT)",
             "",
             "&7&l作者: &cEntityParrot_",
@@ -26,13 +31,14 @@ public class Help implements Subcommand {
             "",
             "  &d/vote reload &9- &7重载插件配置文件.",
             "  &d/vote debug &9- &7切换 Debug 模式."
-    };
+    };*/
 
-    @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        for(String text : helpList) {
-            sender.sendMessage(CommonUtil.color(text));
-        }
-        return true;
+    public VoteUpCmd() {
+        super(VoteUp.getInstance(), "voteup");
+        registerSubCommand("help", new HelpCommand(plugin, null));
+        registerSubCommand("create", new CreateCmd());
+        registerSubCommand("reload", new ReloadCommand(plugin, VoteUpPerm.ADMIN.node));
+        registerSubCommand("modify", new ModifyCmd());
+        registerSubCommand("view", new ViewCmd());
     }
 }

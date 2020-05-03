@@ -8,12 +8,11 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
+import net.shoal.sir.voteup.data.Notice;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
-import net.shoal.sir.voteup.enums.CacheLogType;
 import net.shoal.sir.voteup.task.VoteEndTask;
-import net.shoal.sir.voteup.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -54,7 +53,7 @@ public class VoteManager extends PFolder {
         if (data == null) return;
         if (!data.status) return;
         if (endTaskMap.containsKey(voteID)) return;
-        long timeRemain = data.startTime + TimeUtil.getDurationTimestamp(data.duration) - System.currentTimeMillis();
+        long timeRemain = data.startTime + Vote.getDurationTimestamp(data.duration) - System.currentTimeMillis();
         if (timeRemain <= 0) {
             endVote(voteID);
             return;
@@ -148,7 +147,13 @@ public class VoteManager extends PFolder {
                     .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
                     .replace("%Reason%", I18n.color(reason));
             I18n.send(user, VoteUpPlaceholder.parse(vote, noticeMsg));
-        } else CacheManager.getInstance().log(CacheLogType.VOTE_VOTED, voteID, user.getName());
+        } else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
+            {
+                put("Voter", user.getName());
+                put("Choice", choice.name());
+                put("Reason", reason);
+            }
+        });
 
         // TODO 管理员不在线时的提醒挂起规则
         plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path).forEach(
@@ -183,7 +188,7 @@ public class VoteManager extends PFolder {
             );
             BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "End.Broadcast")));
             // TODO 管理员不在线时的提醒挂起规则
-            CacheManager.getInstance().log(CacheLogType.VOTE_END, voteID, "");
+            VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
         }
     }
 

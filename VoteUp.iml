@@ -28,8 +28,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.13-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.23" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.8" level="project" />
-    <orderEntry type="library" name="Maven: com.github.Polar-Pumpkin:ParrotX:e038d249ce" level="project" />
-    <orderEntry type="library" name="Maven: com.scireum:parsii:1.5" level="project" />
-    <orderEntry type="library" name="Maven: com.github.WesJD.AnvilGUI:anvilgui:99a504a3bb" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:e038d249ce" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.scireum:parsii:1.5" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.WesJD.AnvilGUI:anvilgui:99a504a3bb" level="project" />
   </component>
 </module>

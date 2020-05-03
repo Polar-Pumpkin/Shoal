@@ -1,6 +1,6 @@
 package net.shoal.sir.voteup.config;
 
-import com.sun.istack.internal.NotNull;
+import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,7 +20,7 @@ public class GuiManager extends PFolder {
     }
 
     @Override
-    public void load(@NotNull File file) {
+    public void load(@NonNull File file) {
         guiMap.put(BasicUtil.getNoExFileName(file.getName()), YamlConfiguration.loadConfiguration(file));
     }
 

@@ -1,6 +1,5 @@
 package net.shoal.sir.voteup.data.prompts;
 
-import com.sun.istack.internal.NotNull;
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
@@ -23,7 +22,7 @@ public class SetDurationPrompt extends ValidatingPrompt {
     private final Player user;
     private final Vote vote;
 
-    public SetDurationPrompt(@NotNull Player player, @NonNull Vote vote) {
+    public SetDurationPrompt(@NonNull Player player, @NonNull Vote vote) {
         this.plugin = VoteUp.getInstance();
         this.user = player;
         this.vote = vote;
@@ -58,7 +57,7 @@ public class SetDurationPrompt extends ValidatingPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        vote.duration = input;
+        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, input);
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;
     }

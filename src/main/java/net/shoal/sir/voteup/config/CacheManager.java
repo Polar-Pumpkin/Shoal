@@ -1,199 +1,94 @@
 package net.shoal.sir.voteup.config;
 
+import lombok.NonNull;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.CacheLogType;
-import net.shoal.sir.voteup.enums.VoteUpPerm;
-import net.shoal.sir.voteup.util.ChatAPIUtil;
-import net.shoal.sir.voteup.util.TimeUtil;
+import net.shoal.sir.voteup.data.Notice;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.serverct.parrot.parrotx.config.PConfig;
+import org.serverct.parrot.parrotx.utils.I18n;
+import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class CacheManager {
+public class CacheManager extends PConfig {
 
-    private static LocaleUtil locale;
-    private static CacheManager instance;
-    public static CacheManager getInstance() {
-        if(instance == null) {
-            instance = new CacheManager();
-        }
-        locale = VoteUp.getInstance().getLocale();
-        return instance;
+    private final Map<String, Map<Integer, Notice>> notices = new HashMap<>();
+
+    public CacheManager() {
+        super(VoteUp.getInstance(), "cache", "缓存日志文件");
     }
 
-    private final File dataFile = new File(VoteUp.getInstance().getDataFolder() + File.separator + "cache.yml");
-    private FileConfiguration data;
-
-    public void load() {
-        if(!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        data = YamlConfiguration.loadConfiguration(dataFile);
-    }
-
-    public void log(CacheLogType type, String voteID, String playerName) {
-        ConfigurationSection section = data.getConfigurationSection(type.toString());
-        if(section == null) {
-            section = data.createSection(type.toString());
-        }
-
-        switch (type) {
-            case VOTE_END:
-                section.set(voteID, System.currentTimeMillis());
-                break;
-            case VOTE_VOTED:
-                section.set(voteID + "." + playerName, System.currentTimeMillis());
-                break;
-            default:
-                break;
-        }
-
-        try {
-            data.save(dataFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void report(CacheLogType type, Player user) {
-        ConfigurationSection section = data.getConfigurationSection(type.toString());
-        if(section != null) {
-            TextComponent text = ChatAPIUtil.build(VoteUpPlaceholder.check(plugin.lang.getMessage(plugin.localeKey, I18n.Type.INFO, "Vote", "Report." + type.toString()), null));
-            StringBuilder hover = new StringBuilder();
-            List<String> voteIDList = new ArrayList<>(section.getKeys(true));
-
-            if (voteIDList.isEmpty()) {
-                return;
-            }
-
-            List<String> targetVoteList = new ArrayList<>();
-            for(String voteID : voteIDList) {
-                String[] dataSet = voteID.split("_");
-                if (dataSet.length < 2) {
-                    continue;
-                }
-                if (user.getName().equals(dataSet[0])) {
-                    targetVoteList.add(voteID);
-                }
-            }
-
-            if (targetVoteList.isEmpty()) {
-                return;
-            }
-
-            switch (type) {
-                case VOTE_END:
-                    /*
-                    VOTE_END:
-                      EntityParrot_:
-                        1: 记录时间
-                     */
-                    if(user.hasPermission(VoteUpPerm.NOTICE.perm())) {
-                        for (int index = 0; index < voteIDList.size(); index++) {
-                            String key = voteIDList.get(index);
-                            Vote targetVote = VoteManager.getInstance().getVote(key);
-                            if (targetVote != null) {
-                                hover.append(VoteUpPlaceholder.check(
-                                        "&a▶ &7%TITLE%&7(发起人: &a%STARTER%&7) &9-> &c%RESULT%&7(&c%LogTime%&7)"
-                                                .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
-                                        targetVote
-                                ));
-                                if (!(index == voteIDList.size() - 1)) {
-                                    hover.append("\n");
-                                }
-                            }
-                        }
-                        data.set(type.toString(), null);
-                        break;
-                    }
-
-                    for (int index = 0; index < targetVoteList.size(); index++) {
-                        String key = targetVoteList.get(index);
-                        Vote targetVote = VoteManager.getInstance().getVote(key);
-                        if (targetVote != null) {
-                            hover.append(VoteUpPlaceholder.check(
-                                    "&a▶ &7%TITLE% &9-> &c%RESULT%&7(&c%LogTime%&7)"
-                                            .replace("%LogTime%", TimeUtil.getDescriptiveTime(section.getLong(key))),
-                                    targetVote
-                            ));
-                            if (!(index == voteIDList.size() - 1)) {
-                                hover.append("\n");
-                            }
-                        }
-                        section.set(key, null);
-                    }
-                    break;
-
-                case VOTE_VOTED:
-                    /*
-                    VOTE_VOTED:
-                      EntityParrot_:
-                        1:
-                          cat: 记录时间
-                     */
-                    for(String voteID : targetVoteList) {
-                        Vote targetVote = VoteManager.getInstance().getVote(voteID);
-                        ConfigurationSection targetLogSection = section.getConfigurationSection(voteID);
-
-                        if(targetVote != null) {
-                            hover.append(CommonUtil.color("&7投票: &c" + targetVote.getTitle() + "\n"));
-
-                            if(targetLogSection != null) {
-                                List<String> logPlayerList = new ArrayList<>(targetLogSection.getKeys(false));
-                                for (int index = 0; index < logPlayerList.size(); index++) {
-                                    hover.append(VoteUpPlaceholder.check(
-                                            "&b▶ &c%Voter%&7投了&c%Choice%&7一票(&a%LogTime%&7) &9-> &7&o%Reason%"
-                                                    .replace("%LogTime%", TimeUtil.getDescriptiveTime(targetLogSection.getLong(voteID)))
-                                                    .replace("%Voter%", logPlayerList.get(index))
-                                                    .replace("%Choice%", targetVote.getChoices().getChoice(VoteManager.getInstance().getChoice(voteID, user.getName())))
-                                                    .replace("%Reason%", VoteManager.getInstance().getReason(voteID, user.getName()))
-                                            ,
-                                            targetVote
-                                    ));
-                                    if (index != voteIDList.size() - 1) {
-                                        hover.append("\n");
+    @Override
+    public void load(@NonNull File file) {
+        ConfigurationSection log = config.getConfigurationSection("Logs");
+        if (log == null) return;
+        log.getKeys(false).forEach(
+                voteID -> {
+                    ConfigurationSection section = log.getConfigurationSection(voteID);
+                    if (section != null) {
+                        section.getKeys(false).forEach(
+                                number -> {
+                                    ConfigurationSection numberSection = section.getConfigurationSection(number);
+                                    if (numberSection != null) {
+                                        Map<Integer, Notice> map = notices.getOrDefault(voteID, new HashMap<>());
+                                        Notice notice = new Notice(voteID, numberSection);
+                                        map.put(notice.number, notice);
+                                        notices.put(voteID, map);
                                     }
                                 }
-                            }
-                        }
-                        section.set(voteID, null);
+                        );
                     }
-                    break;
-                default:
-                    break;
-            }
-
-            text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(CommonUtil.color(hover.toString()))));
-            user.spigot().sendMessage(text);
-        }
-
-        try {
-            data.save(dataFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                }
+        );
     }
 
-    public int getLogAmount(CacheLogType type) {
-        ConfigurationSection section = data.getConfigurationSection(type.toString());
-        if(section != null) {
-            return section.getKeys(true).size();
-        }
-        return -1;
+    @Override
+    public void save() {
+        ConfigurationSection log = config.createSection("Logs");
+        this.notices.forEach(
+                (voteID, map) -> {
+                    ConfigurationSection voteIDSection = log.createSection(voteID);
+                    map.forEach((number, notice) -> notice.save(voteIDSection.createSection(String.valueOf(number))));
+                }
+        );
+        super.save();
     }
 
+    public void log(Notice.Type type, String voteID, Map<String, Object> params) {
+        Map<Integer, Notice> noticeMap = notices.getOrDefault(voteID, new HashMap<>());
+        int number = noticeMap.size() + 1;
+        while (noticeMap.containsKey(number)) number++;
+        noticeMap.put(number, new Notice(type, voteID, number, params));
+        notices.put(voteID, noticeMap);
+    }
+
+    public void report(Notice.Type type, @NonNull Player user) {
+        List<String> content = new ArrayList<>();
+        StringBuilder hover = new StringBuilder();
+        this.notices.forEach(
+                (voteID, map) -> map.forEach(
+                        (number, notice) -> {
+                            String append = notice.announce(user.getUniqueId());
+                            if (append != null) content.add(append);
+                        }
+                )
+        );
+
+        TextComponent text = JsonChatUtil.getFromLegacy(
+                plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Notice." + type.name() + ".Head")
+                        .replace("%amount%", String.valueOf(content.size()))
+        );
+        Iterator<String> iterator = content.iterator();
+        while (iterator.hasNext()) {
+            hover.append(iterator.next());
+            if (iterator.hasNext()) hover.append("\n");
+        }
+
+        text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(hover.toString()))));
+        user.spigot().sendMessage(text);
+    }
 }

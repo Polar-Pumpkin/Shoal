@@ -1,6 +1,7 @@
 package net.shoal.sir.voteup;
 
-import net.shoal.sir.voteup.config.CacheManager;
+import net.shoal.sir.voteup.api.VoteUpAPI;
+import net.shoal.sir.voteup.command.VoteUpCmd;
 import net.shoal.sir.voteup.config.ConfigManager;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
@@ -22,6 +23,10 @@ public final class VoteUp extends PPlugin {
 
     @Override
     public void load() {
-        CacheManager.getInstance().load();
+        VoteUpAPI.VOTE_MANAGER.init();
+        VoteUpAPI.GUI_MANAGER.init();
+        VoteUpAPI.CACHE_MANAGER.init();
+
+        super.registerCommand(new VoteUpCmd());
     }
 }

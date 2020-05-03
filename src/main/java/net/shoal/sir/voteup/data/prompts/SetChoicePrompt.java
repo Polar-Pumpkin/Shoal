@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.utils.I18n;
 
+import java.util.Map;
+
 public class SetChoicePrompt extends StringPrompt {
 
     public static final Vote.Data TARGET = Vote.Data.CHOICE;
@@ -49,7 +51,9 @@ public class SetChoicePrompt extends StringPrompt {
             return next(type);
         }
 
-        vote.choices.put(type, I18n.color(input));
+        Map<Vote.Choice, String> choices = vote.choices;
+        choices.put(type, I18n.color(input));
+        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, choices);
         return next(type);
     }
 

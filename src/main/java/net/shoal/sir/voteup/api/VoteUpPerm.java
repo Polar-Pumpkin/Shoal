@@ -9,8 +9,11 @@ import org.serverct.parrot.parrotx.utils.I18n;
 
 public enum VoteUpPerm {
     VOTE("VoteUp.vote."),
+    CREATE("VoteUp.create"),
+    VIEW("VoteUp.view"),
     EDIT("VoteUp.edit."),
     REASON("VoteUp.vote.reason"),
+    NOTICE("VoteUp.notice"),
     ADMIN("VoteUp.admin"),
     ALL("VoteUp.*"),
     ;
@@ -40,13 +43,13 @@ public enum VoteUpPerm {
                 result = user.hasPermission(node + ((Vote.Data) params[0]).name().toLowerCase()) || adminPerm(user);
                 break;
             default:
-                result = user.hasPermission(node);
+                result = user.hasPermission(node) || adminPerm(user);
         }
         if (!result) user.sendMessage(plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "NoPerm"));
         return result;
     }
 
     private boolean adminPerm(@NonNull Player user) {
-        return user.hasPermission(node + "*") || user.hasPermission(ADMIN.node) || user.hasPermission(ALL.node);
+        return (node.endsWith(".") && user.hasPermission(node + "*")) || user.hasPermission(ADMIN.node) || user.hasPermission(ALL.node);
     }
 }
