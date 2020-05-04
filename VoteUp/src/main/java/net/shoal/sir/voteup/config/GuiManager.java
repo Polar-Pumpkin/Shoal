@@ -36,17 +36,19 @@ public class GuiManager extends PFolder {
     }
 
     public enum GuiKey {
-        MAIN_MENU("MainMenu"),
-        VOTE_CREATE("VoteCreate"),
-        VOTE_LIST("VoteList"),
-        VOTE_DETAILS("VoteDetails"),
-        VOTE_PARTICIPANTS("VoteParticipants"),
+        MAIN_MENU("MainMenu", "VoteUp 主界面"),
+        VOTE_CREATE("VoteCreate", "投票创建菜单"),
+        VOTE_LIST("VoteList", "投票列表"),
+        VOTE_DETAILS("VoteDetails", "投票详细信息界面"),
+        VOTE_PARTICIPANTS("VoteParticipants", "投票参与者列表"),
         ;
 
         public final String filename;
+        public final String guiname;
 
-        GuiKey(String filename) {
+        GuiKey(String filename, String guiname) {
             this.filename = filename;
+            this.guiname = guiname;
         }
     }
 }

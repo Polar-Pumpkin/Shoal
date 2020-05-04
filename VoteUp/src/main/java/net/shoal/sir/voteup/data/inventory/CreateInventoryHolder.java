@@ -13,12 +13,14 @@ import net.shoal.sir.voteup.data.prompts.SetResultPrompt;
 import net.shoal.sir.voteup.data.prompts.SetTitlePrompt;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.data.InventoryExecutor;
 import org.serverct.parrot.parrotx.enums.Position;
@@ -34,10 +36,12 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
     private final Map<Integer, KeyWord> slotItemMap = new HashMap<>();
     protected T data;
     protected Inventory inventory;
+    protected Player viewer;
 
-    public CreateInventoryHolder(T data) {
+    public CreateInventoryHolder(T data, @NonNull Player player) {
         this.plugin = VoteUp.getInstance();
         this.data = data;
+        this.viewer = player;
         this.inventory = construct();
     }
 
@@ -58,6 +62,19 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
 
             if (targetItemSection == null) continue;
             ItemStack item = VoteUpPlaceholder.applyPlaceholder(ItemUtil.build(plugin, targetItemSection), vote);
+            if (item.getType() == Material.PLAYER_HEAD) {
+                SkullMeta skull = (SkullMeta) item.getItemMeta();
+                if (skull != null) {
+                    skull.setOwningPlayer(Bukkit.getOfflinePlayer(vote.owner));
+                    item.setItemMeta(skull);
+                }
+            }
+
+            if (keyWord != null && keyWord.target != null && !VoteUpPerm.EDIT.hasPermission(viewer, keyWord.target)) {
+                ConfigurationSection noPerm = file.getConfigurationSection("Settings.NoPerm");
+                if (noPerm != null) item = ItemUtil.build(plugin, noPerm);
+                else item = new ItemStack(Material.BARRIER);
+            }
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
             if (targetSlotSection == null) continue;
@@ -66,18 +83,17 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
             String y = targetSlotSection.getString("Y");
 
             if (x == null || x.length() == 0 || y == null || y.length() == 0) continue;
-            Position.getPositionList(x, y).forEach(
-                    slot -> {
-                        inv.setItem(slot, item);
-                        slotItemMap.put(slot, keyWord);
-                    }
-            );
+            for (Integer slot : Position.getPositionList(x, y)) {
+                inv.setItem(slot, item);
+                slotItemMap.put(slot, keyWord);
+            }
         }
         return inv;
     }
 
     @Override
     public void execute(InventoryClickEvent event) {
+        event.setCancelled(true);
         KeyWord keyWord = slotItemMap.getOrDefault(event.getSlot(), null);
         if (keyWord == null) return;
 
@@ -183,16 +199,22 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
     }
 
     public enum KeyWord {
-        RESET,
-        SET_TITLE,
-        SWITCH_TYPE,
-        SET_GOAL,
-        MODIFY_DESCRIPTION,
-        SET_DURATION,
-        SET_CHOICE,
-        MODIFY_AUTOCAST,
-        SET_RESULT,
-        VOTE_START,
-        DRAFT_DELETE
+        RESET(null),
+        SET_TITLE(Vote.Data.TITLE),
+        SWITCH_TYPE(Vote.Data.TYPE),
+        SET_GOAL(Vote.Data.GOAL),
+        MODIFY_DESCRIPTION(Vote.Data.DESCRIPTION),
+        SET_DURATION(Vote.Data.DURATION),
+        SET_CHOICE(Vote.Data.CHOICE),
+        MODIFY_AUTOCAST(Vote.Data.AUTOCAST),
+        SET_RESULT(Vote.Data.RESULT),
+        VOTE_START(null),
+        DRAFT_DELETE(null);
+
+        public Vote.Data target;
+
+        KeyWord(Vote.Data target) {
+            this.target = target;
+        }
     }
 }

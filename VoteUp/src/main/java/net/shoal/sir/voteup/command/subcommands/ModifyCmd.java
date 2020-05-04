@@ -26,6 +26,11 @@ public class ModifyCmd implements PCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "修改投票的复合内容, 例如投票简述或自动执行";
+    }
+
+    @Override
     public boolean execute(PPlugin plugin, CommandSender sender, String[] args) {
         // /vote modify desc/autocast add/set/del line
         if (sender instanceof Player) {

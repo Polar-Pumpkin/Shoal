@@ -19,6 +19,11 @@ public class ViewCmd implements PCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "查看投票的详细信息";
+    }
+
+    @Override
     public boolean execute(PPlugin plugin, CommandSender sender, String[] args) {
         // /vote view voteID
         if (sender instanceof Player) {
@@ -27,7 +32,7 @@ public class ViewCmd implements PCommand {
                 if (args.length == 2) {
                     Vote vote = VoteUpAPI.VOTE_MANAGER.getVote(args[1]);
                     if (vote != null)
-                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote).getInventory());
+                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user).getInventory());
                     else
                         I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_GET_VOTE.msg));
                 } else I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));

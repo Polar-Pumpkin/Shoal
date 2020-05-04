@@ -22,6 +22,11 @@ public class CreateCmd implements PCommand {
     }
 
     @Override
+    public String getDescription() {
+        return "创建新投票或返回投票草稿";
+    }
+
+    @Override
     public boolean execute(PPlugin plugin, CommandSender sender, String[] args) {
         if (sender instanceof Player) {
             Player user = (Player) sender;
@@ -55,7 +60,8 @@ public class CreateCmd implements PCommand {
                     break;
             }
 
-            if (data != null) BasicUtil.openInventory(plugin, user, new CreateInventoryHolder<>(data).getInventory());
+            if (data != null)
+                BasicUtil.openInventory(plugin, user, new CreateInventoryHolder<>(data, user).getInventory());
         }
         return true;
     }
