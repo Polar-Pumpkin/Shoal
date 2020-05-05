@@ -18,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.serverct.parrot.parrotx.config.PFolder;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
-import org.serverct.parrot.parrotx.utils.EnumUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
@@ -30,7 +29,6 @@ import java.util.UUID;
 public class VoteManager extends PFolder {
 
     private final Map<String, Vote> voteMap = new HashMap<>();
-    private final Map<UUID, Vote> draftMap = new HashMap<>();
     private final Map<String, Integer> endTaskMap = new HashMap<>();
 
     public VoteManager() {
@@ -49,9 +47,10 @@ public class VoteManager extends PFolder {
     }
 
     private void startCountdown(String voteID) {
+        // TODO 这里有一个 Bug, 重载配置文件会立刻结束所有投票, 目测是时长解析出了问题
         Vote data = voteMap.getOrDefault(voteID, null);
         if (data == null) return;
-        if (!data.status) return;
+        if (!data.open) return;
         if (endTaskMap.containsKey(voteID)) return;
         long timeRemain = data.startTime + Vote.getDurationTimestamp(data.duration) - System.currentTimeMillis();
         if (timeRemain <= 0) {
@@ -69,7 +68,7 @@ public class VoteManager extends PFolder {
 
     public Vote create(UUID uuid) {
         Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PASSLEAST_AGREE.path, 3), uuid, "1d");
-        draftMap.put(uuid, vote);
+        voteMap.put(vote.voteID, vote);
         return vote;
     }
 
@@ -87,7 +86,11 @@ public class VoteManager extends PFolder {
     }
 
     public Vote draftVote(UUID uuid) {
-        return draftMap.getOrDefault(uuid, create(uuid));
+        for (Map.Entry<String, Vote> entry : voteMap.entrySet()) {
+            Vote vote = entry.getValue();
+            if (vote.isOwner(uuid) && vote.isDraft) return vote;
+        }
+        return create(uuid);
     }
 
     public void back(@NonNull Player user) {
@@ -99,8 +102,8 @@ public class VoteManager extends PFolder {
         if (vote == null) return;
         startCountdown(vote.voteID);
         vote.startTime = System.currentTimeMillis();
-        draftMap.remove(user.getUniqueId());
-        voteMap.put(vote.voteID, vote);
+        vote.open = true;
+        vote.isDraft = false;
 
         VoteUpAPI.SOUND.voteEvent(true);
         BasicUtil.broadcastTitle(
@@ -121,11 +124,11 @@ public class VoteManager extends PFolder {
         UUID uuid = user.getUniqueId();
         Vote vote = getVote(voteID);
         if (vote == null) return;
-        if (!vote.status) {
+        if (!vote.open) {
             I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Closed"));
             return;
         }
-        if (!EnumUtil.valueOf(VoteUpPerm.class, "VOTE_" + choice.name()).hasPermission(user)) return;
+        if (!VoteUpPerm.VOTE.hasPermission(user, choice)) return;
 
         Map<Vote.Choice, Map<UUID, String>> participant = vote.participants;
         Map<UUID, String> choiceMap = participant.getOrDefault(choice, new HashMap<>());
@@ -146,7 +149,8 @@ public class VoteManager extends PFolder {
                     .replace("%Voter%", user.getName())
                     .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
                     .replace("%Reason%", I18n.color(reason));
-            I18n.send(user, VoteUpPlaceholder.parse(vote, noticeMsg));
+            // TODO 修复这个提示信息无法发出的问题
+            I18n.send(starter, VoteUpPlaceholder.parse(vote, noticeMsg));
         } else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
             {
                 put("Voter", user.getName());
@@ -173,8 +177,8 @@ public class VoteManager extends PFolder {
     public void endVote(String voteID) {
         Vote vote = getVote(voteID);
         if (vote == null) return;
-        if (vote.status) {
-            vote.status = false;
+        if (vote.open) {
+            vote.open = false;
             vote.save();
 
             if (vote.isPassed()) vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
@@ -193,8 +197,12 @@ public class VoteManager extends PFolder {
     }
 
     @Override
+    public void saveAll() {
+        voteMap.forEach((voteID, vote) -> vote.save());
+    }
+
+    @Override
     public void delete(String id) {
         voteMap.remove(id);
-        draftMap.remove(UUID.fromString(id));
     }
 }

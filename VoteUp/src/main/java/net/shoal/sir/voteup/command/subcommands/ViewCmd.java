@@ -32,7 +32,7 @@ public class ViewCmd implements PCommand {
                 if (args.length == 2) {
                     Vote vote = VoteUpAPI.VOTE_MANAGER.getVote(args[1]);
                     if (vote != null)
-                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user).getInventory());
+                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, null).getInventory());
                     else
                         I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_GET_VOTE.msg));
                 } else I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));

@@ -12,6 +12,7 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player user = event.getPlayer();
+        // TODO 不要 0 提醒还发通知
         VoteUpAPI.CACHE_MANAGER.report(Notice.Type.VOTE_END, user);
         VoteUpAPI.CACHE_MANAGER.report(Notice.Type.VOTE, user);
     }

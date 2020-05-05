@@ -25,8 +25,10 @@ public class Vote implements PData, Owned, Timestamp {
 
     private final PPlugin plugin;
     public String voteID;
-    public boolean status;
+    public boolean open;
     public boolean cancelled;
+    public boolean isDraft;
+    public boolean anonymous; // TODO 匿名投票设置
     public Type type;
     public int goal;
     public UUID owner;
@@ -55,8 +57,9 @@ public class Vote implements PData, Owned, Timestamp {
         this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
 
         this.voteID = voteID;
-        this.status = true;
+        this.open = false;
         this.cancelled = false;
+        this.isDraft = true;
         this.type = type;
         this.goal = goal;
         this.owner = owner;
@@ -71,8 +74,9 @@ public class Vote implements PData, Owned, Timestamp {
         this.id = new PID(plugin, "VOTE_" + voteID);
         this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
 
-        this.status = true;
+        this.open = false;
         this.cancelled = false;
+        this.isDraft = true;
         this.type = Type.NORMAL;
         this.goal = goal;
         this.owner = owner;
@@ -120,8 +124,14 @@ public class Vote implements PData, Owned, Timestamp {
             case ID:
                 this.voteID = (String) value;
                 break;
-            case STATUS:
-                this.status = (boolean) value;
+            case OPEN:
+                this.open = (boolean) value;
+                break;
+            case CANCELLED:
+                this.cancelled = (boolean) value;
+                break;
+            case DRAFT:
+                this.isDraft = (boolean) value;
                 break;
             case TYPE:
                 this.type = (Type) value;
@@ -210,6 +220,38 @@ public class Vote implements PData, Owned, Timestamp {
         return null;
     }
 
+    public int getProcess() {
+        // TODO 考虑最低同意人数对结果的影响
+        int accept = participants.getOrDefault(Choice.ACCEPT, new HashMap<>()).size();
+        int neutral = participants.getOrDefault(Choice.NEUTRAL, new HashMap<>()).size();
+        int refuse = participants.getOrDefault(Choice.REFUSE, new HashMap<>()).size();
+        int rate;
+        switch (type) {
+            case NORMAL:
+                rate = (int) ((accept / (double) (accept + neutral + refuse)) * 100);
+                break;
+            case REACHAMOUNT:
+                rate = (int) ((accept / (double) goal) * 100);
+                break;
+            case LEASTNOT:
+                rate = (int) ((Math.max(goal - refuse, 0) / (double) goal) * 100);
+                break;
+            default:
+                rate = 0;
+                break;
+        }
+        return rate;
+    }
+
+    public UserStatus getUserStatus(UUID uuid) {
+        if (!open) return UserStatus.DONE;
+        boolean isVoted = isVoted(uuid);
+        boolean hasReason = hasReason(uuid);
+        if (isVoted && hasReason) return UserStatus.DONE;
+        else if (isVoted) return UserStatus.NO_REASON;
+        else return UserStatus.FIRST;
+    }
+
     @Override
     public String getTypeName() {
         return "投票数据文件/" + getFileName();
@@ -267,8 +309,10 @@ public class Vote implements PData, Owned, Timestamp {
             this.voteID = getFileName();
 
             ConfigurationSection information = data.getConfigurationSection("Information");
-            this.status = information.getBoolean("Status", false);
+            if (information == null) return;
+            this.open = information.getBoolean("Open", true);
             this.cancelled = information.getBoolean("Cancelled", false);
+            this.isDraft = information.getBoolean("Draft", false);
             this.type = Type.valueOf(information.getString("Type", "NORMAL").toUpperCase());
             this.goal = information.getInt("Goal", Integer.MAX_VALUE);
             this.owner = UUID.fromString(information.getString("Owner"));
@@ -276,34 +320,42 @@ public class Vote implements PData, Owned, Timestamp {
             this.duration = information.getString("Duration");
 
             ConfigurationSection setting = data.getConfigurationSection("Settings");
-            this.title = I18n.color(setting.getString("Title", "&7" + getOwnerName() + " 的投票"));
-            this.description = setting.getStringList("Description");
-            this.description.replaceAll(I18n::color);
+            if (setting != null) {
+                this.title = I18n.color(setting.getString("Title", "&7" + getOwnerName() + " 的投票"));
+                this.description = setting.getStringList("Description");
+                this.description.replaceAll(I18n::color);
+            }
 
             ConfigurationSection choiceSection = setting.getConfigurationSection("Choices");
             this.choices = new HashMap<>();
-            for (String choiceKey : choiceSection.getKeys(false)) {
-                Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
-                this.choices.put(choice, I18n.color(choiceSection.getString(choiceKey)));
+            if (choiceSection != null) {
+                for (String choiceKey : choiceSection.getKeys(false)) {
+                    Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
+                    this.choices.put(choice, I18n.color(choiceSection.getString(choiceKey)));
+                }
             }
+
 
             this.autocast = setting.getStringList("Autocast");
 
             ConfigurationSection resultSection = setting.getConfigurationSection("Results");
             this.results = new HashMap<>();
-            for (String resultKey : resultSection.getKeys(false)) {
-                Result result = EnumUtil.valueOf(Result.class, resultKey.toUpperCase());
-                this.results.put(result, I18n.color(choiceSection.getString(resultKey)));
+            if (resultSection != null) {
+                for (String resultKey : resultSection.getKeys(false)) {
+                    Result result = EnumUtil.valueOf(Result.class, resultKey.toUpperCase());
+                    this.results.put(result, I18n.color(choiceSection.getString(resultKey)));
+                }
             }
 
             ConfigurationSection participantSection = data.getConfigurationSection("Participants");
             this.participants = new HashMap<>();
-            for (String choiceKey : participantSection.getKeys(false)) {
-                Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
-                Map<UUID, String> reasons = this.participants.getOrDefault(choice, new HashMap<>());
-                ConfigurationSection section = participantSection.getConfigurationSection(choiceKey);
-                for (String uuid : section.getKeys(false)) {
-                    reasons.put(UUID.fromString(uuid), I18n.color(section.getString(uuid)));
+            if (participantSection != null) {
+                for (String choiceKey : participantSection.getKeys(false)) {
+                    Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
+                    Map<UUID, String> reasons = this.participants.getOrDefault(choice, new HashMap<>());
+                    ConfigurationSection section = participantSection.getConfigurationSection(choiceKey);
+                    if (section != null) for (String uuid : section.getKeys(false))
+                        reasons.put(UUID.fromString(uuid), I18n.color(section.getString(uuid)));
                 }
             }
 
@@ -322,8 +374,9 @@ public class Vote implements PData, Owned, Timestamp {
     public void save() {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection information = data.createSection("Information");
-        information.set("Status", status);
+        information.set("Open", open);
         information.set("Cancelled", cancelled);
+        information.set("Draft", isDraft);
         information.set("Type", type.name());
         information.set("Goal", goal);
         information.set("Owner", owner.toString());
@@ -459,9 +512,17 @@ public class Vote implements PData, Owned, Timestamp {
         }
     }
 
+    public enum UserStatus {
+        FIRST,
+        NO_REASON,
+        DONE
+    }
+
     public enum Data {
         ID("投票ID"),
-        STATUS("进行状态"),
+        OPEN("进行状态"),
+        CANCELLED("投票被取消"),
+        DRAFT("草稿"),
         TYPE("投票类型"),
         GOAL("目标人数"),
         OWNER("发起者"),
@@ -472,7 +533,8 @@ public class Vote implements PData, Owned, Timestamp {
         CHOICE("投票选项"),
         AUTOCAST("自动执行内容"),
         RESULT("投票结果"),
-        PARTICIPANT("参加者");
+        PARTICIPANT("参加者"),
+        PROCESS("投票进度");
 
         public final String name;
 

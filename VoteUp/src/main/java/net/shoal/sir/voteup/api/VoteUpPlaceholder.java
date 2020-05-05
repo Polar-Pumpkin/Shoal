@@ -11,8 +11,7 @@ import org.serverct.parrot.parrotx.utils.EnumUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.TimeUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,8 +48,8 @@ public class VoteUpPlaceholder {
         switch (identifier) {
             case ID:
                 return vote.voteID;
-            case STATUS:
-                return plugin.lang.getRaw(plugin.localeKey, "Vote", "Status." + (vote.status ? "Processing" : "End"));
+            case OPEN:
+                return plugin.lang.getRaw(plugin.localeKey, "Vote", "Status." + (vote.open ? "Processing" : "End"));
             case TYPE:
                 if ("desc".equalsIgnoreCase(params)) return vote.type.desc;
                 return vote.type.name;
@@ -83,7 +82,18 @@ public class VoteUpPlaceholder {
                 if (result == null) return vote.result().name;
                 return vote.results.getOrDefault(result, ChatColor.BLUE + result.name);
             case PARTICIPANT:
-                return String.format(BuiltinMsg.VOTE_VALUE_PARTICIPANT.msg, vote.autocast.size());
+                int amount;
+                Vote.Choice choiceType = EnumUtil.valueOf(Vote.Choice.class, params.toUpperCase());
+                if (choiceType != null)
+                    return String.valueOf(vote.participants.getOrDefault(choiceType, new HashMap<>()).size());
+                else {
+                    amount = 0;
+                    for (Map.Entry<Vote.Choice, Map<UUID, String>> entry : vote.participants.entrySet())
+                        amount += entry.getValue().size();
+                }
+                return String.format(BuiltinMsg.VOTE_VALUE_PARTICIPANT.msg, amount);
+            case PROCESS:
+                return vote.getProcess() + "%";
             default:
                 return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
         }

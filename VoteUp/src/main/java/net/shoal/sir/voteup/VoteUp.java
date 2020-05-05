@@ -29,4 +29,10 @@ public final class VoteUp extends PPlugin {
 
         super.registerCommand(new VoteUpCmd());
     }
+
+    @Override
+    public void onDisable() {
+        VoteUpAPI.VOTE_MANAGER.saveAll();
+        super.onDisable();
+    }
 }

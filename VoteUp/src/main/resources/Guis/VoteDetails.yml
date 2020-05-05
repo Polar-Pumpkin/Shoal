@@ -1,5 +1,5 @@
-Setting:
-  Title: "投票 %TITLE% (%STATUS%)"
+Settings:
+  Title: "投票 %TITLE% (%OPEN%)"
   Row: 5
 Items:
   GLASS:
@@ -8,110 +8,110 @@ Items:
     Position:
       X: 1-9
       Y: 1,5
-    BACK:
-      ItemStack:
-        Display: "&b返回"
-        Material: MAP
-        Lore:
-          - ''
-          - '  &7导航 &b▶'
-          - '  %BACK%'
-          - ''
-          - '  &b▶ &f返回上一个界面'
-          - ''
-      Position:
-        X: 2
-        Y: 5
-    EDIT:
-      ItemStack:
-        Display: "&b编辑投票"
-        Material: WRITABLE_BOOK
-        Lore:
-          - ''
-          - '  &7&o编辑投票内容,'
-          - '  &7&o编辑后将会作为一个新的投票发布,'
-          - '  &7&o先前其他玩家已投的投票记录将会消失.'
-          - '  &c&o该操作不可还原!'
-          - ''
-          - '  &c▶ &f编辑投票设置'
-          - ''
-      Position:
-        X: 4
-        Y: 5
-    PARTICIPANT:
-      ItemStack:
-        Display: "&b投票参与者"
-        Material: PLAYER_HEAD
-        Lore:
-          - ''
-          - '  &7&o查看投票的参与者,'
-          - '  &7&o查看每一位参与者投的票类型,'
-          - '  &7&o以及他们发表的看法.'
-          - ''
-          - '  &b▶ &f查看投票参与者'
-          - ''
-      Position:
-        X: 6
-        Y: 5
-    CANCEL:
-      ItemStack:
-        Display: "&c取消投票"
-        Material: BARRIER
-        Lore:
-          - ''
-          - '  &7&o立即结束投票,'
-          - '  &7&o投票会被标记为已取消,'
-          - '  &7&o且不会执行自动执行命令.'
-          - '  &c&o该操作不可还原!'
-          - ''
-          - '  &c▶ &f取消投票'
-          - ''
-      Position:
-        X: 8
-        Y: 5
-    OWNER:
-      ItemStack:
-        Display: "&b投票信息"
-        Material: PLAYER_HEAD
-        Lore:
-          - ''
-          - '  &7投票类型 &b▶'
-          - '  &f%TYPE%'
-          - '  &7&o%TYPE_desc%'
-          - ''
-          - '  &7目标人数 &b▶'
-          - '  &f%GOAL% 人'
-          - ''
-          - '  &7由 &f%OWNER% &7于 &f%STARTTIME% &7发起'
-          - '  &7持续 &f%DURATION%'
-          - ''
-      Position:
-        X: 1
-        Y: 1
-    DESCRIPTION:
-      ItemStack:
-        Display: '&b投票简述'
-        Material: OAK_SIGN
-        Lore:
-          - ''
-          - '  &7投票简述 &b▶ '
-          - '  &f&o%DESCRIPTION%'
-          - ''
-      Position:
-        X: 4
-        Y: 1
-    AUTOCAST:
-      ItemStack:
-        Display: '&b自动执行'
-        Material: COMMAND_BLOCK
-        Lore:
-          - ''
-          - '  &7自动执行命令 &b▶ '
-          - '  &f&o%AUTOCAST%'
-          - ''
-      Position:
-        X: 9
-        Y: 1
+  BACK:
+    ItemStack:
+      Display: "&b返回"
+      Material: MAP
+      Lore:
+        - ''
+        - '  &7导航 &b▶'
+        - '  %BACK%'
+        - ''
+        - '  &b▶ &f返回上一个界面'
+        - ''
+    Position:
+      X: 2
+      Y: 5
+  EDIT:
+    ItemStack:
+      Display: "&b编辑投票"
+      Material: WRITABLE_BOOK
+      Lore:
+        - ''
+        - '  &7&o编辑投票内容,'
+        - '  &7&o编辑后将会作为一个新的投票发布,'
+        - '  &7&o先前其他玩家已投的投票记录将会消失.'
+        - '  &c&o该操作不可还原!'
+        - ''
+        - '  &c▶ &f编辑投票设置'
+        - ''
+    Position:
+      X: 4
+      Y: 5
+  PARTICIPANT:
+    ItemStack:
+      Display: "&b投票参与者"
+      Material: PLAYER_HEAD
+      Lore:
+        - ''
+        - '  &7&o查看投票的参与者,'
+        - '  &7&o查看每一位参与者投的票类型,'
+        - '  &7&o以及他们发表的看法.'
+        - ''
+        - '  &b▶ &f查看投票参与者'
+        - ''
+    Position:
+      X: 8
+      Y: 5
+  CANCEL:
+    ItemStack:
+      Display: "&c取消投票"
+      Material: BARRIER
+      Lore:
+        - ''
+        - '  &7&o立即结束投票,'
+        - '  &7&o投票会被标记为已取消,'
+        - '  &7&o且不会执行自动执行命令.'
+        - '  &c&o该操作不可还原!'
+        - ''
+        - '  &c▶ &f取消投票'
+        - ''
+    Position:
+      X: 6
+      Y: 5
+  OWNER:
+    ItemStack:
+      Display: "&b投票信息"
+      Material: PLAYER_HEAD
+      Lore:
+        - ''
+        - '  &7投票类型 &b▶'
+        - '  &f%TYPE%'
+        - '  &7&o%TYPE_desc%'
+        - ''
+        - '  &7目标人数 &b▶'
+        - '  &f%GOAL% 人'
+        - ''
+        - '  &7由 &f%OWNER% &7于 &f%STARTTIME% &7发起'
+        - '  &7持续 &f%DURATION%'
+        - ''
+    Position:
+      X: 1
+      Y: 1
+  DESCRIPTION:
+    ItemStack:
+      Display: '&b投票简述'
+      Material: OAK_SIGN
+      Lore:
+        - ''
+        - '  &7投票简述 &b▶ '
+        - '  &f&o%DESCRIPTION%'
+        - ''
+    Position:
+      X: 3
+      Y: 1
+  AUTOCAST:
+    ItemStack:
+      Display: '&b自动执行'
+      Material: COMMAND_BLOCK
+      Lore:
+        - ''
+        - '  &7自动执行命令 &b▶ '
+        - '  &f&o%AUTOCAST%'
+        - ''
+    Position:
+      X: 9
+      Y: 1
 Status:
   FIRST:
     VOTE_ACCEPT:
@@ -159,3 +159,35 @@ Status:
       Position:
         X: 7-9
         Y: 2-4
+  NO_REASON:
+    VOTE_REASON:
+      ItemStack:
+        Display: "&b发表看法"
+        Material: WRITABLE_BOOK
+        Lore:
+          - ''
+          - '  &7&o您已投票,'
+          - '  &7&o但未发表看法,'
+          - '  &7&o跟大家讲讲你为什么选择这个选项吧!'
+          - ''
+          - '  &b▶ &f点击在聊天栏中输入看法'
+          - ''
+      Position:
+        X: 5
+        Y: 3
+  DONE:
+    PROCESS_DONE:
+      ItemStack:
+        Display: "&b投票进度"
+        Material: LIME_STAINED_GLASS_PANE
+        Lore:
+          - ''
+          - '  &7投票参与情况 &b▶'
+          - '  %PARTICIPANT%'
+          - ''
+          - '  &7其中&a同意&7/&e中立&7/&c反对&7人数 &b▶'
+          - '  &a%PARTICIPANT_accept%&7/&e%PARTICIPANT_neutral%&7/&c%PARTICIPANT_refuse%'
+          - ''
+    PROCESS_NOT:
+      ItemStack:
+        Material: GRAY_STAINED_GLASS_PANE

@@ -12,6 +12,7 @@ import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class CacheManager extends PConfig {
@@ -44,6 +45,16 @@ public class CacheManager extends PConfig {
                     }
                 }
         );
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Override
+    public void saveDefault() {
+        try {
+            this.file.createNewFile();
+        } catch (IOException e) {
+            plugin.lang.logError(I18n.LOAD, getTypeName(), e, null);
+        }
     }
 
     @Override

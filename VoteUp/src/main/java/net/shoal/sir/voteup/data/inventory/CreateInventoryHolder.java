@@ -27,7 +27,6 @@ import org.serverct.parrot.parrotx.enums.Position;
 import org.serverct.parrot.parrotx.utils.*;
 
 import java.util.HashMap;
-import java.util.ListIterator;
 import java.util.Map;
 
 public class CreateInventoryHolder<T> implements InventoryExecutor {
@@ -185,12 +184,6 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
             return true;
         }
         return false;
-    }
-
-    private void refresh(@NonNull Inventory inventory) {
-        Inventory inv = construct();
-        ListIterator<ItemStack> iterator = inv.iterator();
-        while (iterator.hasNext()) inventory.setItem(iterator.nextIndex(), iterator.next());
     }
 
     @Override
