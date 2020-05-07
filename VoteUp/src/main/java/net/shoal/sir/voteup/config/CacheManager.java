@@ -69,12 +69,14 @@ public class CacheManager extends PConfig {
         super.save();
     }
 
-    public void log(Notice.Type type, String voteID, Map<String, Object> params) {
+    public Notice log(Notice.Type type, String voteID, Map<String, Object> params) {
         Map<Integer, Notice> noticeMap = notices.getOrDefault(voteID, new HashMap<>());
         int number = noticeMap.size() + 1;
         while (noticeMap.containsKey(number)) number++;
-        noticeMap.put(number, new Notice(type, voteID, number, params));
+        Notice notice = new Notice(type, voteID, number, params);
+        noticeMap.put(number, notice);
         notices.put(voteID, noticeMap);
+        return notice;
     }
 
     public void report(Notice.Type type, @NonNull Player user) {
@@ -85,14 +87,17 @@ public class CacheManager extends PConfig {
                         (number, notice) -> {
                             String append = notice.announce(user.getUniqueId());
                             if (append != null) content.add(append);
+                            if (notice.isOver()) map.remove(number);
                         }
                 )
         );
+        if (content.isEmpty()) return;
 
         TextComponent text = JsonChatUtil.getFromLegacy(
                 plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Notice." + type.name() + ".Head")
                         .replace("%amount%", String.valueOf(content.size()))
         );
+
         Iterator<String> iterator = content.iterator();
         while (iterator.hasNext()) {
             hover.append(iterator.next());

@@ -26,7 +26,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.13-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.23" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.8" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:462e78c3d2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:f0f4340df0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.scireum:parsii:1.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.WesJD.AnvilGUI:anvilgui:99a504a3bb" level="project" />
   </component>

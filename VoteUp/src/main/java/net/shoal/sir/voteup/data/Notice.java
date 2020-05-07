@@ -4,6 +4,7 @@ import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
+import net.shoal.sir.voteup.config.ConfigManager;
 import org.bukkit.configuration.ConfigurationSection;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.data.flags.Timestamp;
@@ -80,6 +81,13 @@ public class Notice implements Timestamp {
         for (Map.Entry<String, Object> entry : this.params.entrySet())
             result = result.replace("%" + entry.getKey().toLowerCase() + "%", (String) entry.getValue());
         return result;
+    }
+
+    public boolean isOver() {
+        List<String> admins = plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path);
+        List<String> announced = new ArrayList<>();
+        this.announced.forEach(uuid -> announced.add(uuid.toString()));
+        return announced.equals(admins);
     }
 
     @Override

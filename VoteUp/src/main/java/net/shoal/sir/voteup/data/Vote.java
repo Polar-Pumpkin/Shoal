@@ -3,6 +3,7 @@ package net.shoal.sir.voteup.data;
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
+import net.shoal.sir.voteup.config.ConfigManager;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -89,7 +90,7 @@ public class Vote implements PData, Owned, Timestamp {
         long result = 0;
 
         String clone = duration.toUpperCase();
-        Vote.Duration durationType;
+        Duration durationType;
         while ((durationType = getFirstIndexOf(clone)) != null) {
             int index = clone.indexOf(durationType.code);
             try {
@@ -105,10 +106,10 @@ public class Vote implements PData, Owned, Timestamp {
         return result * 1000;
     }
 
-    public static Vote.Duration getFirstIndexOf(String target) {
+    public static Duration getFirstIndexOf(String target) {
         int index = Integer.MAX_VALUE;
-        Vote.Duration durationType = null;
-        for (Vote.Duration type : Vote.Duration.values()) {
+        Duration durationType = null;
+        for (Duration type : Duration.values()) {
             int currentIndex = target.indexOf(type.code);
             if (currentIndex == -1) continue;
             if (currentIndex < index) {
@@ -221,25 +222,30 @@ public class Vote implements PData, Owned, Timestamp {
     }
 
     public int getProcess() {
-        // TODO 考虑最低同意人数对结果的影响
         int accept = participants.getOrDefault(Choice.ACCEPT, new HashMap<>()).size();
         int neutral = participants.getOrDefault(Choice.NEUTRAL, new HashMap<>()).size();
         int refuse = participants.getOrDefault(Choice.REFUSE, new HashMap<>()).size();
+        int all = accept + neutral + refuse;
+        int least = plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 3);
+
         int rate;
-        switch (type) {
-            case NORMAL:
-                rate = (int) ((accept / (double) (accept + neutral + refuse)) * 100);
-                break;
-            case REACHAMOUNT:
-                rate = (int) ((accept / (double) goal) * 100);
-                break;
-            case LEASTNOT:
-                rate = (int) ((Math.max(goal - refuse, 0) / (double) goal) * 100);
-                break;
-            default:
-                rate = 0;
-                break;
-        }
+        if (all >= least) {
+            switch (type) {
+                case NORMAL:
+                    rate = (int) ((accept / (double) all) * 100);
+                    break;
+                case REACHAMOUNT:
+                    rate = (int) ((accept / (double) goal) * 100);
+                    break;
+                case LEASTNOT:
+                    rate = (int) ((Math.max(goal - refuse, 0) / (double) goal) * 100);
+                    break;
+                default:
+                    rate = 0;
+                    break;
+            }
+        } else rate = (int) ((all / (double) least) * 100);
+
         return rate;
     }
 
@@ -321,7 +327,7 @@ public class Vote implements PData, Owned, Timestamp {
 
             ConfigurationSection setting = data.getConfigurationSection("Settings");
             if (setting != null) {
-                this.title = I18n.color(setting.getString("Title", "&7" + getOwnerName() + " 的投票"));
+                this.title = I18n.color(setting.getString("Title", getOwnerName() + " 的投票"));
                 this.description = setting.getStringList("Description");
                 this.description.replaceAll(I18n::color);
             }
@@ -338,7 +344,7 @@ public class Vote implements PData, Owned, Timestamp {
 
             this.autocast = setting.getStringList("Autocast");
 
-            ConfigurationSection resultSection = setting.getConfigurationSection("Results");
+            ConfigurationSection resultSection = setting.getConfigurationSection("Results"); // 这里有一个全都是 null 的问题
             this.results = new HashMap<>();
             if (resultSection != null) {
                 for (String resultKey : resultSection.getKeys(false)) {
@@ -496,10 +502,10 @@ public class Vote implements PData, Owned, Timestamp {
 
     public enum Duration {
         // yyyy-MM-dd HH:mm:ss
-        DAY('d', "天", 86400),
+        DAY('D', "天", 86400),
         HOUR('H', "时", 3600),
         MINUTE('M', "分", 60),
-        SECOND('s', "秒", 1);
+        SECOND('S', "秒", 1);
 
         public final char code;
         public final String name;

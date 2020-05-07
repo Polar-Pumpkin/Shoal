@@ -182,6 +182,9 @@ Status:
         Material: LIME_STAINED_GLASS_PANE
         Lore:
           - ''
+          - '  &7投票完成度 &b▶'
+          - '  &f%PROCESS%'
+          - ''
           - '  &7投票参与情况 &b▶'
           - '  %PARTICIPANT%'
           - ''

@@ -28,8 +28,7 @@ public class ConfigManager extends PConfig {
         AUTOCAST_BLACKLIST("Autocast.Blacklist"),
         AUTOCAST_LIST("Autocast.List"),
         ADMIN("Admin"),
-        SETTINGS_PASSLEAST_AGREE("Settings.PassLeast.Agree"),
-        SETTINGS_PASSLEAST_REFUSE("Settings.PassLeast.Refuse"),
+        SETTINGS_PARTICIPANT_LEAST("Settings.ParticipantLeast"),
         SETTINGS_BROADCAST_TITLE_VOTESTART("Settings.Broadcast.Title.VoteStart"),
         SETTINGS_BROADCAST_TITLE_VOTEEND("Settings.Broadcast.Title.VoteEnd"),
         SETTINGS_BROADCAST_TITLE_FADEIN("Settings.Broadcast.Title.FadeIn"),
@@ -38,6 +37,7 @@ public class ConfigManager extends PConfig {
         ;
 
         public final String path;
+
         Path(String path) {
             this.path = path;
         }

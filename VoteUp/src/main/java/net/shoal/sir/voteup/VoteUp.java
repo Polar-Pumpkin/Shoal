@@ -33,6 +33,7 @@ public final class VoteUp extends PPlugin {
     @Override
     public void onDisable() {
         VoteUpAPI.VOTE_MANAGER.saveAll();
+        VoteUpAPI.CACHE_MANAGER.save();
         super.onDisable();
     }
 }

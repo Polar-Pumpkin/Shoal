@@ -47,7 +47,6 @@ public class VoteManager extends PFolder {
     }
 
     private void startCountdown(String voteID) {
-        // TODO 这里有一个 Bug, 重载配置文件会立刻结束所有投票, 目测是时长解析出了问题
         Vote data = voteMap.getOrDefault(voteID, null);
         if (data == null) return;
         if (!data.open) return;
@@ -67,7 +66,7 @@ public class VoteManager extends PFolder {
     }
 
     public Vote create(UUID uuid) {
-        Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PASSLEAST_AGREE.path, 3), uuid, "1d");
+        Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 3), uuid, "1d");
         voteMap.put(vote.voteID, vote);
         return vote;
     }
@@ -106,13 +105,14 @@ public class VoteManager extends PFolder {
         vote.isDraft = false;
 
         VoteUpAPI.SOUND.voteEvent(true);
-        BasicUtil.broadcastTitle(
-                "",
-                VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
-                plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
-        );
+        if (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_VOTESTART.path, true))
+            BasicUtil.broadcastTitle(
+                    "",
+                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
+                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+            );
         Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(JsonChatUtil.buildClickText(
                 VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Start.Broadcast")),
                 new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + vote.voteID),
@@ -144,14 +144,7 @@ public class VoteManager extends PFolder {
         I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name()));
 
         Player starter = Bukkit.getPlayer(vote.owner);
-        if (starter != null && starter.isOnline()) {
-            String noticeMsg = plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Voted.Starter")
-                    .replace("%Voter%", user.getName())
-                    .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
-                    .replace("%Reason%", I18n.color(reason));
-            // TODO 修复这个提示信息无法发出的问题
-            I18n.send(starter, VoteUpPlaceholder.parse(vote, noticeMsg));
-        } else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
+        Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
             {
                 put("Voter", user.getName());
                 put("Choice", choice.name());
@@ -159,16 +152,19 @@ public class VoteManager extends PFolder {
             }
         });
 
-        // TODO 管理员不在线时的提醒挂起规则
+        if (starter != null && starter.isOnline()) {
+            String announce = notice.announce(user.getUniqueId());
+            if (announce != null)
+                I18n.send(starter, VoteUpPlaceholder.parse(vote, announce));
+        }
+
         plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path).forEach(
                 adminID -> {
                     Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
                     if (admin != null) {
-                        String noticeMsg = plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Voted.Noticer")
-                                .replace("%Voter%", user.getName())
-                                .replace("%Choice%", I18n.color(vote.choices.getOrDefault(choice, BuiltinMsg.ERROR_GET_CHOICE.msg)))
-                                .replace("%Reason%", I18n.color(reason));
-                        I18n.send(admin, VoteUpPlaceholder.parse(vote, noticeMsg));
+                        String announce = notice.announce(admin.getUniqueId());
+                        if (announce != null)
+                            I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
                     }
                 }
         );
@@ -183,16 +179,27 @@ public class VoteManager extends PFolder {
 
             if (vote.isPassed()) vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
             VoteUpAPI.SOUND.voteEvent(false);
-            BasicUtil.broadcastTitle(
-                    "",
-                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
-            );
+            if (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_VOTEEND.path, false))
+                BasicUtil.broadcastTitle(
+                        "",
+                        VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                );
             BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.End.Broadcast")));
-            // TODO 管理员不在线时的提醒挂起规则
-            VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
+
+            Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
+            plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path).forEach(
+                    adminID -> {
+                        Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
+                        if (admin != null) {
+                            String announce = notice.announce(admin.getUniqueId());
+                            if (announce != null)
+                                I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
+                        }
+                    }
+            );
         }
     }
 
