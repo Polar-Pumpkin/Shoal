@@ -1,4 +1,5 @@
 Debug: false
+bStats: true
 Language: Chinese
 Sound:
   Enable: true

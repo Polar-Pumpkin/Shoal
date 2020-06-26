@@ -5,10 +5,13 @@ import net.shoal.sir.voteup.command.VoteUpCmd;
 import net.shoal.sir.voteup.config.ConfigManager;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.serverct.parrot.parrotx.PPlugin;
 
 public final class VoteUp extends PPlugin {
+    public final static int PLUGIN_ID = 7972;
+
     @Override
     protected void registerListener() {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
@@ -26,6 +29,13 @@ public final class VoteUp extends PPlugin {
         VoteUpAPI.VOTE_MANAGER.init();
         VoteUpAPI.GUI_MANAGER.init();
         VoteUpAPI.CACHE_MANAGER.init();
+
+        if (pConfig.getConfig().getBoolean(ConfigManager.Path.BSTATS.path, true)) {
+            Metrics metrics = new Metrics(this, PLUGIN_ID);
+            metrics.addCustomChart(new Metrics.SingleLineChart("totalVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft).size()));
+            metrics.addCustomChart(new Metrics.SingleLineChart("openVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && vote.open).size()));
+            metrics.addCustomChart(new Metrics.SingleLineChart("closeVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && !vote.open).size()));
+        }
 
         super.registerCommand(new VoteUpCmd());
     }

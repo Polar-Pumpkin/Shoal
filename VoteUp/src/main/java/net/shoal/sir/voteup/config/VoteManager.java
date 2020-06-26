@@ -23,6 +23,7 @@ import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class VoteManager extends PFolder {
 
@@ -69,6 +70,14 @@ public class VoteManager extends PFolder {
         if (votes.isEmpty()) return null;
         votes.sort(Comparator.comparing(Vote::getTimestamp).reversed());
         return votes.get(0);
+    }
+
+    public List<Vote> list(Predicate<Vote> filter) {
+        List<Vote> result = new ArrayList<>();
+        voteMap.values().forEach(vote -> {
+            if (filter.test(vote)) result.add(vote);
+        });
+        return result;
     }
 
     public Vote create(UUID uuid) {

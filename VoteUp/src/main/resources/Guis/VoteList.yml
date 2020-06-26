@@ -1,0 +1,48 @@
+Settings:
+  Title: "检索结果"
+  Row: 5
+Items:
+  GLASS:
+    ItemStack:
+      Material: GRAY_STAINED_GLASS_PANE
+    Position:
+      X: 1-9
+      Y: 1,5
+    BACK:
+      ItemStack:
+        Display: "&b返回"
+        Material: MAP
+        Lore:
+          - ''
+          - '  &7导航 &b▶'
+          - '  %BACK%'
+          - ''
+          - '  &b▶ &f返回上一个界面'
+          - ''
+      Position:
+        X: 2
+        Y: 5
+    MODEL:
+      ItemStack:
+        Display: "&9投票 %TITLE% (%OPEN%)"
+        Material: WRITABLE_BOOK
+        Lore:
+          - ''
+          - '  &7投票类型 &b▶'
+          - '  &f%TYPE%'
+          - '  &7&o%TYPE_desc%'
+          - ''
+          - '  &7目标人数 &b▶'
+          - '  &f%GOAL% 人'
+          - ''
+          - '  &7投票简述 &b▶ '
+          - '  &f&o%DESCRIPTION%'
+          - ''
+          - '  &7由 &f%OWNER% &7于 &f%STARTTIME% &7发起'
+          - '  &7持续 &f%DURATION%'
+          - ''
+          - '  &b▶ &f左键查看投票详细信息'
+          - ''
+      Position:
+        X: 2-8
+        Y: 2-3

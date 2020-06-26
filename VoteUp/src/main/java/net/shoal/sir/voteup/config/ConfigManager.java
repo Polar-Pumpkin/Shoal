@@ -18,6 +18,7 @@ public class ConfigManager extends PConfig {
     }
 
     public enum Path {
+        BSTATS("bStats"),
         SOUND_ENABLE("Sound.Enable"),
         SOUND_ACTION_START("Sound.Action.Start"),
         SOUND_ACTION_SUCCESS("Sound.Action.Success"),
