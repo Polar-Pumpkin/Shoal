@@ -1,6 +1,7 @@
 package net.shoal.sir.voteup.api;
 
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.config.ConfigManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
 import org.bukkit.ChatColor;
@@ -76,6 +77,14 @@ public class VoteUpPlaceholder {
                 if (choice == null) return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
                 return vote.choices.getOrDefault(choice, ChatColor.BLUE + choice.name);
             case AUTOCAST:
+                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_USERMODE.path, true);
+                boolean blacklist = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_BLACKLIST.path, true);
+                if ("mode".equalsIgnoreCase(params))
+                    return usermode ? "玩家权限模式" : (blacklist ? "黑名单模式" : "白名单模式");
+                else if ("desc".equalsIgnoreCase(params))
+                    return blacklist ? "不可以执行的指令" : "可以执行的指令";
+                else if ("content".equalsIgnoreCase(params))
+                    return usermode ? "所有您可以执行的指令" : Arrays.toString(plugin.pConfig.getConfig().getStringList(ConfigManager.Path.AUTOCAST_LIST.path).toArray());
                 return String.format(BuiltinMsg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size());
             case RESULT:
                 Vote.Result result = EnumUtil.valueOf(Vote.Result.class, params.toUpperCase());

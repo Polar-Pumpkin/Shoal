@@ -20,6 +20,7 @@ Settings:
       FadeOut: 7
 Autocast:
   Enable: true
+  Usermode: true
   BlackList: true
   List:
     - 'op'

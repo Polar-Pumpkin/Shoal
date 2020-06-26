@@ -25,6 +25,7 @@ public class ConfigManager extends PConfig {
         SOUND_VOTE_START("Sound.Vote.Start"),
         SOUND_VOTE_END("Sound.Vote.End"),
         AUTOCAST_ENABLE("Autocast.Enable"),
+        AUTOCAST_USERMODE("Autocast.Usermode"),
         AUTOCAST_BLACKLIST("Autocast.Blacklist"),
         AUTOCAST_LIST("Autocast.List"),
         ADMIN("Admin"),

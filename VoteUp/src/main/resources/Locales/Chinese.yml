@@ -10,6 +10,9 @@ Vote:
     Processing: "&a进行中"
     End: "&e已结束"
   Event:
+    Join:
+      Subtitle: "&7您未参与过的投票 &c%TITLE% &7正在进行中"
+      Broadcast: "&7您未参与过的投票 &c%TITLE% &7正在进行中. (点击查看)"
     Start:
       Subtitle: "&7投票 &c%TITLE% &7已开始"
       Broadcast: "&7投票 &c%TITLE% &7已开始. (点击查看)"

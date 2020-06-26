@@ -22,9 +22,7 @@ import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class VoteManager extends PFolder {
 
@@ -63,6 +61,14 @@ public class VoteManager extends PFolder {
 
     public Vote getVote(String id) {
         return voteMap.getOrDefault(id, null);
+    }
+
+    public Vote getNewest() {
+        List<Vote> votes = new ArrayList<>(voteMap.values());
+        votes.removeIf(vote -> vote.isDraft || !vote.open);
+        if (votes.isEmpty()) return null;
+        votes.sort(Comparator.comparing(Vote::getTimestamp).reversed());
+        return votes.get(0);
     }
 
     public Vote create(UUID uuid) {
@@ -177,7 +183,12 @@ public class VoteManager extends PFolder {
             vote.open = false;
             vote.save();
 
-            if (vote.isPassed()) vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
+            if (vote.isPassed())
+                if (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_USERMODE.path, true)) {
+                    Player owner = Bukkit.getPlayer(vote.getOwner());
+                    if (owner != null) vote.autocast.forEach(owner::performCommand);
+                    else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.AUTOCAST_WAIT_EXECUTE, voteID, new HashMap<>());
+                } else vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
             VoteUpAPI.SOUND.voteEvent(false);
             if (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_VOTEEND.path, false))
                 BasicUtil.broadcastTitle(

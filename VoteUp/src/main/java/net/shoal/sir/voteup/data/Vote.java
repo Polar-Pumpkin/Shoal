@@ -29,7 +29,9 @@ public class Vote implements PData, Owned, Timestamp {
     public boolean open;
     public boolean cancelled;
     public boolean isDraft;
-    public boolean anonymous; // TODO 匿名投票设置
+    public boolean allowAnonymous; // TODO 匿名投票设置
+    public boolean isPublic; // TODO 结果公开
+    public boolean allowEdit; // TODO 允许投票后编辑
     public Type type;
     public int goal;
     public UUID owner;
