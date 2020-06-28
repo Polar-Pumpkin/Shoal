@@ -21,6 +21,7 @@ import org.serverct.parrot.parrotx.utils.I18n;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class Vote implements PData, Owned, Timestamp {
 
@@ -42,7 +43,7 @@ public class Vote implements PData, Owned, Timestamp {
     public Map<Choice, String> choices;
     public List<String> autocast;
     public Map<Result, String> results;
-    public Map<Choice, Map<UUID, String>> participants;
+    public List<Participant> participants;
     private PID id;
     private File file;
 
@@ -54,23 +55,6 @@ public class Vote implements PData, Owned, Timestamp {
         this.id = new PID(plugin, "VOTE_" + voteID);
     }
 
-    public Vote(String voteID, Type type, int goal, UUID owner, String duration) {
-        this.plugin = VoteUp.getInstance();
-        this.id = new PID(plugin, "VOTE_" + voteID);
-        this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
-
-        this.voteID = voteID;
-        this.open = false;
-        this.cancelled = false;
-        this.isDraft = true;
-        this.type = type;
-        this.goal = goal;
-        this.owner = owner;
-        this.startTime = System.currentTimeMillis();
-        this.duration = duration;
-        init();
-    }
-
     public Vote(int goal, UUID owner, String duration) {
         this.voteID = UUID.randomUUID().toString();
         this.plugin = VoteUp.getInstance();
@@ -80,6 +64,9 @@ public class Vote implements PData, Owned, Timestamp {
         this.open = false;
         this.cancelled = false;
         this.isDraft = true;
+        this.allowAnonymous = false;
+        this.isPublic = false;
+        this.allowEdit = false;
         this.type = Type.NORMAL;
         this.goal = goal;
         this.owner = owner;
@@ -122,66 +109,37 @@ public class Vote implements PData, Owned, Timestamp {
         return durationType;
     }
 
-    public void set(Data dataType, Object value) {
-        switch (dataType) {
-            case ID:
-                this.voteID = (String) value;
-                break;
-            case OPEN:
-                this.open = (boolean) value;
-                break;
-            case CANCELLED:
-                this.cancelled = (boolean) value;
-                break;
-            case DRAFT:
-                this.isDraft = (boolean) value;
-                break;
-            case TYPE:
-                this.type = (Type) value;
-                break;
-            case GOAL:
-                this.goal = (int) value;
-                break;
-            case OWNER:
-                this.owner = (UUID) value;
-                break;
-            case STARTTIME:
-                this.startTime = (long) value;
-                break;
-            case DURATION:
-                this.duration = (String) value;
-                break;
-            case TITLE:
-                this.title = (String) value;
-                break;
-            case DESCRIPTION:
-                this.description = (List<String>) value;
-                break;
-            case CHOICE:
-                this.choices = (Map<Choice, String>) value;
-                break;
-            case AUTOCAST:
-                this.autocast = (List<String>) value;
-                break;
-            case RESULT:
-                this.results = (Map<Result, String>) value;
-                break;
-            case PARTICIPANT:
-                this.participants = (Map<Choice, Map<UUID, String>>) value;
-                break;
-        }
+    public Participant getParticipant(UUID uuid) {
+        for (Participant participant : participants) if (participant.uuid == uuid) return participant;
+        return null;
+    }
+
+    public List<Participant> listParticipants(Predicate<Participant> filter) {
+        List<Participant> result = new ArrayList<>();
+        this.participants.forEach(
+                participant -> {
+                    if (filter.test(participant))
+                        result.add(participant);
+                }
+        );
+        return result;
     }
 
     public boolean isPassed() {
-        Map<UUID, String> accept = participants.getOrDefault(Choice.ACCEPT, new HashMap<>());
-        Map<UUID, String> refuse = participants.getOrDefault(Choice.REFUSE, new HashMap<>());
+        int all = participants.size();
+        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
+        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
+
+        if (all < plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 5))
+            return false;
+
         switch (type) {
             case NORMAL:
-                return accept.size() > refuse.size();
+                return accept > refuse;
             case REACHAMOUNT:
-                return accept.size() >= goal;
+                return accept >= goal;
             case LEASTNOT:
-                return refuse.size() <= goal;
+                return refuse <= goal;
             default:
                 return false;
         }
@@ -191,7 +149,7 @@ public class Vote implements PData, Owned, Timestamp {
         if (cancelled) return Result.CANCEL;
 
         if (type == Type.NORMAL)
-            if (participants.getOrDefault(Choice.ACCEPT, new HashMap<>()).size() == participants.getOrDefault(Choice.REFUSE, new HashMap<>()).size())
+            if (listParticipants(user -> user.choice == Choice.ACCEPT).size() == listParticipants(user -> user.choice == Choice.REFUSE).size())
                 return Result.DRAW;
 
         if (isPassed()) return Result.PASS;
@@ -199,36 +157,33 @@ public class Vote implements PData, Owned, Timestamp {
     }
 
     public boolean isVoted(UUID uuid) {
-        for (Map<UUID, String> choiceMap : participants.values()) if (choiceMap.containsKey(uuid)) return true;
-        return false;
+        return getParticipant(uuid) != null;
     }
 
     public boolean hasReason(UUID uuid) {
-        for (Map<UUID, String> choiceMap : participants.values()) {
-            String reason = choiceMap.getOrDefault(uuid, BuiltinMsg.REASON_NOT_YET.msg);
-            if (!reason.equalsIgnoreCase(BuiltinMsg.REASON_NOT_YET.msg) && !reason.equalsIgnoreCase(BuiltinMsg.REASON_NO_PERM.msg))
-                return true;
-        }
+        Participant user = getParticipant(uuid);
+        if (user != null)
+            return !user.reason.equalsIgnoreCase(BuiltinMsg.REASON_NOT_YET.msg) && !user.reason.equalsIgnoreCase(BuiltinMsg.REASON_NO_PERM.msg);
         return false;
     }
 
     public String getReason(UUID uuid) {
-        for (Map<UUID, String> choiceMap : participants.values())
-            if (choiceMap.containsKey(uuid)) return I18n.color(choiceMap.get(uuid));
+        Participant user = getParticipant(uuid);
+        if (user != null) return I18n.color(user.reason);
         return I18n.color(BuiltinMsg.REASON_NOT_YET.msg);
     }
 
     public Choice getChoice(UUID uuid) {
-        for (Choice type : participants.keySet()) if (participants.get(type).containsKey(uuid)) return type;
+        Participant user = getParticipant(uuid);
+        if (user != null) return user.choice;
         return null;
     }
 
     public int getProcess() {
-        int accept = participants.getOrDefault(Choice.ACCEPT, new HashMap<>()).size();
-        int neutral = participants.getOrDefault(Choice.NEUTRAL, new HashMap<>()).size();
-        int refuse = participants.getOrDefault(Choice.REFUSE, new HashMap<>()).size();
-        int all = accept + neutral + refuse;
-        int least = plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 3);
+        int all = participants.size();
+        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
+        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
+        int least = plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 5);
 
         int rate;
         if (all >= least) {
@@ -291,7 +246,7 @@ public class Vote implements PData, Owned, Timestamp {
             }
         };
 
-        this.participants = new HashMap<>();
+        this.participants = new ArrayList<>();
     }
 
     @Override
@@ -346,7 +301,7 @@ public class Vote implements PData, Owned, Timestamp {
 
             this.autocast = setting.getStringList("Autocast");
 
-            ConfigurationSection resultSection = setting.getConfigurationSection("Results"); // 这里有一个全都是 null 的问题
+            ConfigurationSection resultSection = setting.getConfigurationSection("Results"); // TODO 这里有一个全都是 null 的问题
             this.results = new HashMap<>();
             if (resultSection != null) {
                 for (String resultKey : resultSection.getKeys(false)) {
@@ -356,14 +311,12 @@ public class Vote implements PData, Owned, Timestamp {
             }
 
             ConfigurationSection participantSection = data.getConfigurationSection("Participants");
-            this.participants = new HashMap<>();
+            this.participants = new ArrayList<>();
             if (participantSection != null) {
-                for (String choiceKey : participantSection.getKeys(false)) {
-                    Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
-                    Map<UUID, String> reasons = this.participants.getOrDefault(choice, new HashMap<>());
-                    ConfigurationSection section = participantSection.getConfigurationSection(choiceKey);
-                    if (section != null) for (String uuid : section.getKeys(false))
-                        reasons.put(UUID.fromString(uuid), I18n.color(section.getString(uuid)));
+                for (String uuid : participantSection.getKeys(false)) {
+                    ConfigurationSection userSection = participantSection.getConfigurationSection(uuid);
+                    if (userSection == null) continue;
+                    this.participants.add(new Participant(userSection));
                 }
             }
 
@@ -404,11 +357,8 @@ public class Vote implements PData, Owned, Timestamp {
                 (result, s) -> setting.set("Results." + result.name(), I18n.deColor(s, '&'))
         );
 
-        this.participants.forEach(
-                (choice, reasons) -> reasons.forEach(
-                        (uuid, s) -> data.set("Participants." + choice.name() + "." + uuid.toString(), I18n.deColor(s, '&'))
-                )
-        );
+        ConfigurationSection participantSection = data.createSection("Participants");
+        this.participants.forEach(participant -> participant.save(participantSection));
 
         try {
             data.save(file);
@@ -504,10 +454,10 @@ public class Vote implements PData, Owned, Timestamp {
 
     public enum Duration {
         // yyyy-MM-dd HH:mm:ss
-        DAY('D', "天", 86400),
+        DAY('d', "天", 86400),
         HOUR('H', "时", 3600),
-        MINUTE('M', "分", 60),
-        SECOND('S', "秒", 1);
+        MINUTE('m', "分", 60),
+        SECOND('s', "秒", 1);
 
         public final char code;
         public final String name;
@@ -548,6 +498,48 @@ public class Vote implements PData, Owned, Timestamp {
 
         Data(String type) {
             this.name = type;
+        }
+    }
+
+    public static class Participant implements Timestamp {
+        public final UUID uuid;
+        public final Choice choice;
+        public final boolean anonymous;
+        public final String reason;
+        public long timestamp;
+
+        public Participant(UUID uuid, Choice choice, boolean anonymous, String reason) {
+            this.uuid = uuid;
+            this.choice = choice;
+            this.anonymous = anonymous;
+            this.reason = reason;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        public Participant(@NonNull ConfigurationSection section) {
+            this.uuid = UUID.fromString(section.getName());
+            this.choice = EnumUtil.valueOf(Choice.class, section.getString("Choice"));
+            this.anonymous = section.getBoolean("Anonymous", false);
+            this.reason = section.getString("Reason", BuiltinMsg.REASON_NOT_YET.msg);
+            this.timestamp = section.getLong("Timestamp");
+        }
+
+        public void save(ConfigurationSection participantSection) {
+            ConfigurationSection userSection = participantSection.createSection(uuid.toString());
+            userSection.set("Choice", choice.name());
+            userSection.set("Anonymous", anonymous);
+            userSection.set("Reason", reason);
+            userSection.set("Timestamp", timestamp);
+        }
+
+        @Override
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        @Override
+        public void setTime(long l) {
+            this.timestamp = l;
         }
     }
 }

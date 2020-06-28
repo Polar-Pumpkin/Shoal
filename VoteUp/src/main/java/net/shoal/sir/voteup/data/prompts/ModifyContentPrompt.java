@@ -13,6 +13,7 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.PPlugin;
+import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
@@ -60,11 +61,15 @@ public class ModifyContentPrompt extends StringPrompt {
             if (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_ENABLE.path, true)) {
                 String[] inputArgs = input.split(" ");
                 List<String> commandList = plugin.pConfig.getConfig().getStringList(ConfigManager.Path.AUTOCAST_LIST.path);
-                boolean blackMode = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_BLACKLIST.path, false);
+                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_USERMODE.path, true);
 
-                if ((blackMode && commandList.contains(inputArgs[0])) || (!blackMode && !commandList.contains(inputArgs[0]))) {
-                    I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_AUTOCAST_IGNORE.msg));
-                    return Prompt.END_OF_CONVERSATION;
+                if (!usermode) {
+                    boolean blackMode = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_BLACKLIST.path, false);
+
+                    if ((blackMode && commandList.contains(inputArgs[0])) || (!blackMode && !commandList.contains(inputArgs[0]))) {
+                        I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_AUTOCAST_IGNORE.msg));
+                        return Prompt.END_OF_CONVERSATION;
+                    }
                 }
             } else
                 I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_AUTOCAST_DISABLE.msg));
@@ -84,11 +89,15 @@ public class ModifyContentPrompt extends StringPrompt {
                 return Prompt.END_OF_CONVERSATION;
         }
 
-        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, list);
+        if (targetDesc) vote.description = list;
+        else vote.autocast = list;
+        BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
+        VoteUpAPI.SOUND.success(user);
+
         JsonChatUtil.sendEditableList(
                 user,
                 list,
-                VoteUpPlaceholder.parse(vote, (targetDesc ? BuiltinMsg.VOTE_VALUE_DESCRIPTION : BuiltinMsg.VOTE_VALUE_AUTOCAST).msg),
+                VoteUpPlaceholder.parse(vote, String.format((targetDesc ? BuiltinMsg.VOTE_VALUE_DESCRIPTION : BuiltinMsg.VOTE_VALUE_AUTOCAST).msg, list.size())),
                 "&a&l[插入] ",
                 "/vote modify " + (targetDesc ? "desc" : "autocast") + " add ",
                 "&e&l[编辑] ",

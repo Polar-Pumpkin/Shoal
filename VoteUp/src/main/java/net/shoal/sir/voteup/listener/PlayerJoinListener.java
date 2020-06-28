@@ -31,19 +31,21 @@ public class PlayerJoinListener implements Listener {
 
         Vote newest = VoteUpAPI.VOTE_MANAGER.getNewest();
         if (newest != null) {
-            VoteUpAPI.SOUND.ding(user);
-            BasicUtil.broadcastTitle(
-                    "",
-                    VoteUpPlaceholder.parse(newest, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Join.Subtitle")),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                    plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
-            );
-            user.spigot().sendMessage(JsonChatUtil.buildClickText(
-                    VoteUpPlaceholder.parse(newest, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Join.Broadcast")),
-                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + newest.voteID),
-                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(BuiltinMsg.VOTE_CLICK.msg)))
-            ));
+            if (!newest.isVoted(user.getUniqueId())) {
+                VoteUpAPI.SOUND.ding(user);
+                BasicUtil.broadcastTitle(
+                        "",
+                        VoteUpPlaceholder.parse(newest, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Join.Subtitle")),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                );
+                user.spigot().sendMessage(JsonChatUtil.buildClickText(
+                        VoteUpPlaceholder.parse(newest, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Join.Broadcast")),
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + newest.voteID),
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(BuiltinMsg.VOTE_CLICK.msg)))
+                ));
+            }
         }
 
         List<String> admins = plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path);

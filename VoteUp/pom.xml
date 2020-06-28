@@ -6,7 +6,7 @@
 
     <groupId>net.shoal.sir</groupId>
     <artifactId>VoteUp</artifactId>
-    <version>2.0.2-BETA</version>
+    <version>2.0.3-BETA</version>
     <packaging>jar</packaging>
 
     <name>VoteUp</name>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>com.github.Polar-Pumpkin</groupId>
             <artifactId>ParrotX</artifactId>
-            <version>f0f4340df0</version>
+            <version>086ea233af</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

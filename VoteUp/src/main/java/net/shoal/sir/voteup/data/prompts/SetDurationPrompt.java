@@ -11,6 +11,7 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.ValidatingPrompt;
 import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.PPlugin;
+import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 
 import java.util.regex.Pattern;
@@ -57,7 +58,9 @@ public class SetDurationPrompt extends ValidatingPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, input);
+        vote.duration = input;
+        BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
+        VoteUpAPI.SOUND.success(user);
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;
     }

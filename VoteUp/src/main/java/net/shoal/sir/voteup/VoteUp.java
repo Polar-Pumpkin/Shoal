@@ -8,6 +8,7 @@ import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.serverct.parrot.parrotx.PPlugin;
+import org.serverct.parrot.parrotx.utils.I18n;
 
 public final class VoteUp extends PPlugin {
     public final static int PLUGIN_ID = 7972;
@@ -35,7 +36,9 @@ public final class VoteUp extends PPlugin {
             metrics.addCustomChart(new Metrics.SingleLineChart("totalVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft).size()));
             metrics.addCustomChart(new Metrics.SingleLineChart("openVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && vote.open).size()));
             metrics.addCustomChart(new Metrics.SingleLineChart("closeVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && !vote.open).size()));
-        }
+
+            this.lang.log("bStats 统计信息已启用, 感谢您的支持!", I18n.Type.INFO, false);
+        } else this.lang.log("bStats 统计信息已禁用.", I18n.Type.WARN, false);
 
         super.registerCommand(new VoteUpCmd());
     }

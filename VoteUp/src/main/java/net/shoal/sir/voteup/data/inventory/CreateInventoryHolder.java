@@ -7,10 +7,7 @@ import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.data.prompts.SetChoicePrompt;
-import net.shoal.sir.voteup.data.prompts.SetDurationPrompt;
-import net.shoal.sir.voteup.data.prompts.SetResultPrompt;
-import net.shoal.sir.voteup.data.prompts.SetTitlePrompt;
+import net.shoal.sir.voteup.data.prompts.*;
 import net.shoal.sir.voteup.enums.BuiltinMsg;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -106,8 +103,8 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 refresh(inv);
                 break;
             case SET_TITLE:
-                if (validate(user, (event.isLeftClick() ? Vote.Data.TITLE : Vote.Data.ID))) break;
-                ConversationUtil.start(plugin, user, new SetTitlePrompt(user, vote), 300);
+                if (validate(user, event.isLeftClick() ? Vote.Data.TITLE : Vote.Data.ID)) break;
+                ConversationUtil.start(plugin, user, event.isLeftClick() ? new SetTitlePrompt(user, vote) : new SetIDPrompt(user, vote), 300);
                 break;
             case SWITCH_TYPE:
                 if (validate(user, Vote.Data.TYPE)) break;

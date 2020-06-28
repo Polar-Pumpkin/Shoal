@@ -13,14 +13,14 @@ import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.utils.I18n;
 
-public class SetTitlePrompt extends StringPrompt {
+public class SetIDPrompt extends StringPrompt {
 
-    public static final Vote.Data TARGET = Vote.Data.TITLE;
+    public static final Vote.Data TARGET = Vote.Data.ID;
     private final PPlugin plugin;
     private final Player user;
     private final Vote vote;
 
-    public SetTitlePrompt(@NonNull Player player, @NonNull Vote vote) {
+    public SetIDPrompt(@NonNull Player player, @NonNull Vote vote) {
         this.plugin = VoteUp.getInstance();
         this.user = player;
         this.vote = vote;
@@ -44,7 +44,7 @@ public class SetTitlePrompt extends StringPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
-        vote.title = I18n.color(input);
+        vote.voteID = I18n.deColor(input, '&');
         // VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, I18n.color(input));
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;

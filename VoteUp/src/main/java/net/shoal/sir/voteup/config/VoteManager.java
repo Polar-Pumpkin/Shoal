@@ -86,19 +86,6 @@ public class VoteManager extends PFolder {
         return vote;
     }
 
-    public boolean setVoteData(String voteID, @NonNull Player editor, Vote.Data dataType, Object value) {
-        Vote vote = getVote(voteID);
-        if (vote == null) {
-            BasicUtil.send(plugin, editor, plugin.lang.build(plugin.localeKey, I18n.Type.ERROR, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_FAIL.msg), dataType.name)));
-            VoteUpAPI.SOUND.fail(editor);
-            return false;
-        }
-        vote.set(dataType, value);
-        BasicUtil.send(plugin, editor, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_SUCCESS.msg), dataType.name)));
-        VoteUpAPI.SOUND.success(editor);
-        return true;
-    }
-
     public Vote draftVote(UUID uuid) {
         for (Map.Entry<String, Vote> entry : voteMap.entrySet()) {
             Vote vote = entry.getValue();
@@ -135,7 +122,7 @@ public class VoteManager extends PFolder {
         )));
     }
 
-    public void vote(String voteID, @NonNull Player user, Vote.Choice choice, String reason) {
+    public void vote(String voteID, @NonNull Player user, Vote.Choice choice, boolean anonymous, String reason) {
         UUID uuid = user.getUniqueId();
         Vote vote = getVote(voteID);
         if (vote == null) return;
@@ -145,19 +132,22 @@ public class VoteManager extends PFolder {
         }
         if (!VoteUpPerm.VOTE.hasPermission(user, choice)) return;
 
-        Map<Vote.Choice, Map<UUID, String>> participant = vote.participants;
-        Map<UUID, String> choiceMap = participant.getOrDefault(choice, new HashMap<>());
-
-        if (choiceMap.containsKey(uuid))
+        if (vote.isVoted(uuid))
             I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Logged"));
 
-        choiceMap.put(uuid, VoteUpPerm.REASON.hasPermission(user) ? (reason.length() == 0 ? BuiltinMsg.REASON_NOT_YET.msg : reason) : BuiltinMsg.REASON_NO_PERM.msg);
-        participant.put(choice, choiceMap);
-        vote.participants = participant;
+        vote.participants.add(
+                new Vote.Participant(
+                        uuid,
+                        choice,
+                        anonymous,
+                        VoteUpPerm.REASON.hasPermission(user) ? (reason.length() == 0 ? BuiltinMsg.REASON_NOT_YET.msg : reason) : BuiltinMsg.REASON_NO_PERM.msg
+                )
+        );
         vote.save();
 
         I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name()));
 
+        if (anonymous) return;
         Player starter = Bukkit.getPlayer(vote.owner);
         Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
             {

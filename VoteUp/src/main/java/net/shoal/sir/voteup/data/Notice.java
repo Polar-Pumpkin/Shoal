@@ -78,15 +78,11 @@ public class Notice implements Timestamp {
             default:
                 if (this.announced.contains(uuid)) return null;
                 this.announced.add(uuid);
-                result = VoteUpPlaceholder.parse(
-                        vote,
-                        plugin.lang.getRaw(plugin.localeKey,
-                                "Vote",
-                                "Notice." + type.name() + (vote.isOwner(uuid) ? ".Noticer" : ".Starter")
-                        )
-                ).replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]");
+                result = plugin.lang.getRaw(plugin.localeKey, "Vote", "Notice." + type.name() + (vote.isOwner(uuid) ? ".Noticer" : ".Starter"));
                 for (Map.Entry<String, Object> entry : this.params.entrySet())
                     result = result.replace("%" + entry.getKey().toLowerCase() + "%", (String) entry.getValue());
+                result = VoteUpPlaceholder.parse(vote, result)
+                        .replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]");
                 break;
             case AUTOCAST_WAIT_EXECUTE:
                 if (uuid != vote.getOwner() || this.announced.contains(uuid)) return null;

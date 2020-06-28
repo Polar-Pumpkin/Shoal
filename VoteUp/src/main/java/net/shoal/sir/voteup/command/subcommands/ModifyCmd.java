@@ -66,7 +66,8 @@ public class ModifyCmd implements PCommand {
                 ConversationUtil.start(plugin, user, new ModifyContentPrompt(user, creating, Integer.parseInt(args[3]), isDesc, SET), 300);
             else if (DEL.equalsIgnoreCase(args[2])) {
                 list.remove((args.length == 4 ? Integer.parseInt(args[3]) : list.size() - 1));
-                VoteUpAPI.VOTE_MANAGER.setVoteData(creating.voteID, user, dataType, list);
+                if (isDesc) creating.description = list;
+                else creating.autocast = list;
             } else user.sendMessage(plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
         }
     }

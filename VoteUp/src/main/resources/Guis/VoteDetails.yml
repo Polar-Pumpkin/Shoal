@@ -1,5 +1,5 @@
 Settings:
-  Title: "投票 %TITLE% (%OPEN%)"
+  Title: "投票 %TITLE% (%OPEN%&r)"
   Row: 5
 Items:
   GLASS:

@@ -11,7 +11,7 @@ Sound:
     Start: ENTITY_ARROW_HIT_PLAYER
     End: BLOCK_ANVIL_HIT
 Settings:
-  ParticipantLeast: 3
+  ParticipantLeast: 5
   Broadcast:
     Title:
       VoteStart: true
@@ -22,7 +22,7 @@ Settings:
 Autocast:
   Enable: true
   Usermode: true
-  BlackList: true
+  Blacklist: false
   List:
     - 'op'
     - 'gamemode'

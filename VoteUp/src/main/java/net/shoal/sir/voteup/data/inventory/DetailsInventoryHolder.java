@@ -159,7 +159,7 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
         Vote vote = (Vote) data;
         Inventory inv = event.getInventory();
 
-        switch (keyWord) {
+        switch (keyWord) { // TODO 匿名投票的实现
             case VOTE_ACCEPT:
                 if (event.isRightClick())
                     ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.ACCEPT), 300);
