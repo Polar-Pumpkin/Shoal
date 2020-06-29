@@ -1,9 +1,9 @@
 package net.shoal.sir.voteup.api;
 
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.config.ConfigManager;
+import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,7 +44,7 @@ public class VoteUpPlaceholder {
     }
 
     private static String request(Vote vote, Vote.Data identifier, String params) {
-        if (vote == null) return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
+        if (vote == null) return Msg.ERROR_PLACEHOLDER_REQUEST.msg;
         if (params.equalsIgnoreCase("display")) return identifier.name;
         PPlugin plugin = VoteUp.getInstance();
 
@@ -73,21 +73,21 @@ public class VoteUpPlaceholder {
             case TITLE:
                 return vote.title;
             case DESCRIPTION:
-                return String.format(BuiltinMsg.VOTE_VALUE_DESCRIPTION.msg, vote.description.size());
+                return String.format(Msg.VOTE_VALUE_DESCRIPTION.msg, vote.description.size());
             case CHOICE:
                 Vote.Choice choice = EnumUtil.valueOf(Vote.Choice.class, params.toUpperCase());
-                if (choice == null) return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
+                if (choice == null) return Msg.ERROR_PLACEHOLDER_REQUEST.msg;
                 return vote.choices.getOrDefault(choice, ChatColor.BLUE + choice.name);
             case AUTOCAST:
-                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_USERMODE.path, true);
-                boolean blacklist = plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_BLACKLIST.path, true);
+                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true);
+                boolean blacklist = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_BLACKLIST.path, true);
                 if ("mode".equalsIgnoreCase(params))
-                    return usermode ? "玩家权限模式" : (blacklist ? "黑名单模式" : "白名单模式");
+                    return usermode ? Msg.AUTOCAST_MODE_USERMODE.msg : (blacklist ? Msg.AUTOCAST_MODE_BLACKLIST.msg : Msg.AUTOCAST_MODE_WHITELIST.msg);
                 else if ("desc".equalsIgnoreCase(params))
-                    return blacklist ? "不可以执行的指令" : "可以执行的指令";
+                    return blacklist ? Msg.AUTOCAST_MODE_BLACKLIST_DESC.msg : Msg.AUTOCAST_MODE_WHITELIST_DESC.msg;
                 else if ("content".equalsIgnoreCase(params))
-                    return usermode ? "所有您可以执行的指令" : Arrays.toString(plugin.pConfig.getConfig().getStringList(ConfigManager.Path.AUTOCAST_LIST.path).toArray());
-                return String.format(BuiltinMsg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size());
+                    return usermode ? Msg.AUTOCAST_MODE_USERMODE_DESC.msg : Arrays.toString(plugin.pConfig.getConfig().getStringList(ConfPath.Path.AUTOCAST_LIST.path).toArray());
+                return String.format(Msg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size());
             case RESULT:
                 Vote.Result result = EnumUtil.valueOf(Vote.Result.class, params.toUpperCase());
                 if (result == null) return vote.result().name;
@@ -96,11 +96,19 @@ public class VoteUpPlaceholder {
                 Vote.Choice choiceType = EnumUtil.valueOf(Vote.Choice.class, params.toUpperCase());
                 if (choiceType != null)
                     return String.valueOf(vote.listParticipants(user -> user.choice == choiceType).size());
-                return String.format(BuiltinMsg.VOTE_VALUE_PARTICIPANT.msg, vote.participants.size());
+                return String.format(Msg.VOTE_VALUE_PARTICIPANT.msg, vote.participants.size());
             case PROCESS:
                 return vote.getProcess() + "%";
+            case ANONYMOUS:
+                if ("desc".equalsIgnoreCase(params))
+                    return Msg.VOTE_ANONYMOUS_DESC.msg;
+                return vote.allowAnonymous ? Msg.VOTE_ANONYMOUS_ENABLE.msg : Msg.VOTE_ANONYMOUS_DISABLE.msg;
+            case PUBLIC:
+                return vote.isPublic ? Msg.VOTE_PUBLIC_ENABLE.msg : Msg.VOTE_PUBLIC_DISABLE.msg;
+            case EDITABLE:
+                return vote.allowEdit ? Msg.VOTE_EDITABLE_ENABLE.msg : Msg.VOTE_EDITABLE_DISABLE.msg;
             default:
-                return BuiltinMsg.ERROR_PLACEHOLDER_REQUEST.msg;
+                return Msg.ERROR_PLACEHOLDER_REQUEST.msg;
         }
     }
 

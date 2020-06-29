@@ -9,10 +9,11 @@ import org.serverct.parrot.parrotx.utils.I18n;
 
 public enum VoteUpPerm {
     VOTE("VoteUp.vote."),
+    REASON("VoteUp.vote.reason"),
     CREATE("VoteUp.create"),
     VIEW("VoteUp.view"),
+    ANONYMOUS("VoteUp.view.anonymous"),
     EDIT("VoteUp.edit."),
-    REASON("VoteUp.vote.reason"),
     NOTICE("VoteUp.notice"),
     ADMIN("VoteUp.admin"),
     ALL("VoteUp.*"),

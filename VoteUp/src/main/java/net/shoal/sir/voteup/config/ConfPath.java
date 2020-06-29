@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ConfigManager extends PConfig {
-    public ConfigManager() {
+public class ConfPath extends PConfig {
+    public ConfPath() {
         super(VoteUp.getInstance(), "config", "主配置文件");
     }
 
@@ -36,6 +36,10 @@ public class ConfigManager extends PConfig {
         SETTINGS_BROADCAST_TITLE_FADEIN("Settings.Broadcast.Title.FadeIn"),
         SETTINGS_BROADCAST_TITLE_STAY("Settings.Broadcast.Title.Stay"),
         SETTINGS_BROADCAST_TITLE_FADEOUT("Settings.Broadcast.Title.FadeOut"),
+        SETTINGS_ALLOW_ANONYMOUS("Settings.Allow.Anonymous"),
+        SETTINGS_ALLOW_PUBLIC("Settings.Allow.Public"),
+        SETTINGS_ALLOW_EDIT_VOTE("Settings.Allow.Edit.Vote"),
+        SETTINGS_ALLOW_EDIT_PARTICIPANT("Settings.Allow.Edit.Participant"),
         ;
 
         public final String path;

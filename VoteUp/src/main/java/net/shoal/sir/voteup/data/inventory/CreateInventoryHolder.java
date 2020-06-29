@@ -5,18 +5,22 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
+import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.prompts.*;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.data.InventoryExecutor;
@@ -47,7 +51,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
         FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_CREATE.filename);
         String title = "未初始化菜单";
         if (file == null) return Bukkit.createInventory(this, 0, title);
-        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", BuiltinMsg.ERROR_GUI_TITLE.msg));
+        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", Msg.ERROR_GUI_TITLE.msg));
         Inventory inv = Bukkit.createInventory(this, file.getInt("Settings.Row", 0) * 9, title);
 
         ConfigurationSection itemSection = file.getConfigurationSection("Items");
@@ -70,6 +74,50 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 ConfigurationSection noPerm = file.getConfigurationSection("Settings.NoPerm");
                 if (noPerm != null) item = ItemUtil.build(plugin, noPerm);
                 else item = new ItemStack(Material.BARRIER);
+
+                switch (keyWord) {
+                    case ALLOW_EDIT:
+                    case PUBLIC_MODE:
+                    case ALLOW_ANONYMOUS:
+                        boolean unlock;
+                        boolean enable;
+                        switch (keyWord) {
+                            case ALLOW_ANONYMOUS:
+                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_ANONYMOUS.path, true);
+                                enable = vote.allowAnonymous;
+                                break;
+                            case PUBLIC_MODE:
+                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_PUBLIC.path, true);
+                                enable = vote.isPublic;
+                                break;
+                            case ALLOW_EDIT:
+                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_EDIT_PARTICIPANT.path, true);
+                                enable = vote.allowEdit;
+                                break;
+                            default:
+                                unlock = false;
+                                enable = false;
+                                break;
+                        }
+
+                        ItemUtil.replace(item, "%feature%", unlock ? Msg.VOTE_FEATURE_SWITCH.msg : Msg.VOTE_FEATURE_LOCK.msg);
+
+                        if (!unlock) {
+                            item.setType(Material.BARRIER);
+                            break;
+                        }
+
+                        if (item.getType().name().endsWith("DYE")) if (!enable) item.setType(Material.LIGHT_GRAY_DYE);
+                        if (enable) {
+                            ItemMeta meta = item.getItemMeta();
+                            if (meta != null) {
+                                meta.addEnchant(Enchantment.LUCK, 10, true);
+                                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                                item.setItemMeta(meta);
+                            }
+                        }
+                        break;
+                }
             }
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
@@ -122,7 +170,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 JsonChatUtil.sendEditableList(
                         user,
                         vote.description,
-                        VoteUpPlaceholder.parse(vote, BuiltinMsg.VOTE_VALUE_DESCRIPTION.msg),
+                        VoteUpPlaceholder.parse(vote, Msg.VOTE_VALUE_DESCRIPTION.msg),
                         "&a&l[插入] ",
                         "/vote modify desc add ",
                         "&e&l[编辑] ",
@@ -132,6 +180,18 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                         "&7[&a&l>>> &7返回菜单]",
                         "/vote create back"
                 );
+                break;
+            case ALLOW_ANONYMOUS:
+                if (validate(user, Vote.Data.ANONYMOUS) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_ANONYMOUS.path, true))
+                    break;
+                vote.allowEdit = !vote.allowAnonymous;
+                refresh(inv);
+                break;
+            case PUBLIC_MODE:
+                if (validate(user, Vote.Data.PUBLIC) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_PUBLIC.path, true))
+                    break;
+                vote.isPublic = !vote.isPublic;
+                refresh(inv);
                 break;
             case SET_DURATION:
                 if (validate(user, Vote.Data.DURATION)) break;
@@ -147,7 +207,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 JsonChatUtil.sendEditableList(
                         user,
                         vote.autocast,
-                        VoteUpPlaceholder.parse(vote, BuiltinMsg.VOTE_VALUE_AUTOCAST.msg),
+                        VoteUpPlaceholder.parse(vote, Msg.VOTE_VALUE_AUTOCAST.msg),
                         "&a&l[插入] ",
                         "/vote modify autocast add ",
                         "&e&l[编辑] ",
@@ -161,6 +221,12 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
             case SET_RESULT:
                 if (validate(user, Vote.Data.RESULT)) break;
                 ConversationUtil.start(plugin, user, new SetResultPrompt(user, vote, Vote.Result.PASS), 300);
+                break;
+            case ALLOW_EDIT:
+                if (validate(user, Vote.Data.EDITABLE) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_EDIT_PARTICIPANT.path, true))
+                    break;
+                vote.allowEdit = !vote.allowEdit;
+                refresh(inv);
                 break;
             case VOTE_START:
                 BasicUtil.closeInventory(plugin, user);
@@ -177,7 +243,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
     private boolean validate(@NonNull Player user, Vote.Data type) {
         if (!VoteUpPerm.EDIT.hasPermission(user, type)) {
             VoteUpAPI.SOUND.fail(user);
-            I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_NO_PERM.msg));
+            I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_NO_PERM.msg));
             return true;
         }
         return false;
@@ -194,10 +260,13 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
         SWITCH_TYPE(Vote.Data.TYPE),
         SET_GOAL(Vote.Data.GOAL),
         MODIFY_DESCRIPTION(Vote.Data.DESCRIPTION),
+        ALLOW_ANONYMOUS(Vote.Data.ANONYMOUS),
+        PUBLIC_MODE(Vote.Data.PUBLIC),
         SET_DURATION(Vote.Data.DURATION),
         SET_CHOICE(Vote.Data.CHOICE),
         MODIFY_AUTOCAST(Vote.Data.AUTOCAST),
         SET_RESULT(Vote.Data.RESULT),
+        ALLOW_EDIT(Vote.Data.EDITABLE),
         VOTE_START(null),
         DRAFT_DELETE(null);
 

@@ -4,7 +4,7 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.inventory.DetailsInventoryHolder;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.PPlugin;
@@ -34,11 +34,11 @@ public class ViewCmd implements PCommand {
                     if (vote != null)
                         BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, null).getInventory());
                     else
-                        I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_GET_VOTE.msg));
+                        I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_GET_VOTE.msg));
                 } else I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
             }
         } else
-            sender.sendMessage(plugin.lang.build(plugin.localeKey, I18n.Type.ERROR, BuiltinMsg.ERROR_COMMAND_NOT_PLAYER.msg));
+            sender.sendMessage(plugin.lang.build(plugin.localeKey, I18n.Type.ERROR, Msg.ERROR_COMMAND_NOT_PLAYER.msg));
         return true;
     }
 }

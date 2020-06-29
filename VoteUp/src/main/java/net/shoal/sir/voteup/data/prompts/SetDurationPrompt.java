@@ -5,7 +5,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.ValidatingPrompt;
@@ -35,31 +35,31 @@ public class SetDurationPrompt extends ValidatingPrompt {
             Pattern r = Pattern.compile("^[0-9dhmDHM]*$");
             if (r.matcher(input).matches()) return true;
         }
-        I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_DURATION.msg));
+        I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_DURATION.msg));
         VoteUpAPI.SOUND.fail(user);
         return false;
     }
 
     @Override
     public String getPromptText(ConversationContext context) {
-        return plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(BuiltinMsg.VOTE_EDIT.msg, TARGET.name + "(符号: &dd &7天, &dH &7小时, &dm &7分)"));
+        return plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(Msg.VOTE_EDIT.msg, TARGET.name + "(符号: &dd &7天, &dH &7小时, &dm &7分)"));
     }
 
     @Override
     protected Prompt acceptValidatedInput(ConversationContext context, String input) {
         if (!VoteUpPerm.EDIT.hasPermission(user, TARGET)) {
-            I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, BuiltinMsg.ERROR_EDIT_NO_PERM.msg));
+            I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_NO_PERM.msg));
             return Prompt.END_OF_CONVERSATION;
         }
 
         if ("exit".equalsIgnoreCase(input)) {
-            I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(BuiltinMsg.VOTE_EDIT_CANCELLED.msg, TARGET.name)));
+            I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(Msg.VOTE_EDIT_CANCELLED.msg, TARGET.name)));
             VoteUpAPI.VOTE_MANAGER.back(user);
             return Prompt.END_OF_CONVERSATION;
         }
 
         vote.duration = input;
-        BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(BuiltinMsg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
+        BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(Msg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
         VoteUpAPI.SOUND.success(user);
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;

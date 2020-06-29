@@ -2,7 +2,8 @@ package net.shoal.sir.voteup;
 
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.command.VoteUpCmd;
-import net.shoal.sir.voteup.config.ConfigManager;
+import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.enums.Msg;
 import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import org.bstats.bukkit.Metrics;
@@ -21,7 +22,7 @@ public final class VoteUp extends PPlugin {
 
     @Override
     protected void preload() {
-        this.pConfig = new ConfigManager();
+        this.pConfig = new ConfPath();
         this.pConfig.init();
     }
 
@@ -31,14 +32,14 @@ public final class VoteUp extends PPlugin {
         VoteUpAPI.GUI_MANAGER.init();
         VoteUpAPI.CACHE_MANAGER.init();
 
-        if (pConfig.getConfig().getBoolean(ConfigManager.Path.BSTATS.path, true)) {
+        if (pConfig.getConfig().getBoolean(ConfPath.Path.BSTATS.path, true)) {
             Metrics metrics = new Metrics(this, PLUGIN_ID);
             metrics.addCustomChart(new Metrics.SingleLineChart("totalVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft).size()));
             metrics.addCustomChart(new Metrics.SingleLineChart("openVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && vote.open).size()));
             metrics.addCustomChart(new Metrics.SingleLineChart("closeVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && !vote.open).size()));
 
-            this.lang.log("bStats 统计信息已启用, 感谢您的支持!", I18n.Type.INFO, false);
-        } else this.lang.log("bStats 统计信息已禁用.", I18n.Type.WARN, false);
+            this.lang.log(Msg.BSTATS_ENABLE.msg, I18n.Type.INFO, false);
+        } else this.lang.log(Msg.BSTATS_DISABLE.msg, I18n.Type.WARN, false);
 
         super.registerCommand(new VoteUpCmd());
     }

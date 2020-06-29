@@ -12,6 +12,12 @@ Sound:
     End: BLOCK_ANVIL_HIT
 Settings:
   ParticipantLeast: 5
+  Allow:
+    Anonymous: true
+    Public: true
+    Edit:
+      Vote: true
+      Participant: true
   Broadcast:
     Title:
       VoteStart: true

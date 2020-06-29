@@ -125,6 +125,7 @@ Status:
           - ''
           - '  &b▶ &f左键投票'
           - '  &b▶ &f右键投票并发表看法'
+          - '%ANONYMOUS%'
           - ''
       Position:
         X: 1-3
@@ -140,6 +141,7 @@ Status:
           - ''
           - '  &b▶ &f左键投票'
           - '  &b▶ &f右键投票并发表看法'
+          - '%ANONYMOUS%'
           - ''
       Position:
         X: 4-6
@@ -155,6 +157,7 @@ Status:
           - ''
           - '  &b▶ &f左键投票'
           - '  &b▶ &f右键投票并发表看法'
+          - '%ANONYMOUS%'
           - ''
       Position:
         X: 7-9

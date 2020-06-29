@@ -71,7 +71,7 @@ Items:
         - '  &b▶ &f右键切换至上一个类型'
         - ''
     Position:
-      X: 4
+      X: 3
       Y: 3
   SET_GOAL:
     ItemStack:
@@ -90,7 +90,7 @@ Items:
         - '  &b▶ &f潜行+左/右键 (+/-5)'
         - ''
     Position:
-      X: 6
+      X: 4
       Y: 3
   MODIFY_DESCRIPTION:
     ItemStack:
@@ -108,8 +108,45 @@ Items:
         - '  &b▶ &f点击在聊天栏中编辑简述'
         - ''
     Position:
-      X: 8
+      X: 5
       Y: 3
+  ALLOW_ANONYMOUS:
+    ItemStack:
+      Display: "&b%ANONYMOUS_display%"
+      Material: LIME_DYE
+      Lore:
+        - ''
+        - '  &7&o是否允许匿名投票,'
+        - '  &7&o投票匿名后将在投票参与者界面中'
+        - '  &7&o隐藏个人信息.'
+        - ''
+        - '  &7当前值 &b▶'
+        - '  &f%ANONYMOUS%'
+        - ''
+        - '  &b▶ &f%feature%'
+        - ''
+    Position:
+      X: 7
+      Y: 3
+  PUBLIC_MODE:
+    ItemStack:
+    Display: "&b%PUBLIC_display%"
+    Material: LIME_DYE
+    Lore:
+      - ''
+      - '  &7&o是否公开投票进度,'
+      - '  &7&o公开后任何玩家都可以查看'
+      - '  &7&o当前投票参与者以及他们所投的票.'
+      - '  &7&o且在收到新投票时会全服公告.'
+      - ''
+      - '  &7当前值 &b▶'
+      - '  &f%PUBLIC%'
+      - ''
+      - '  &b▶ &f%feature%'
+      - ''
+  Position:
+    X: 8
+    Y: 3
   SET_DURATION:
     ItemStack:
       Display: "&b%DURATION_display%"
@@ -119,7 +156,7 @@ Items:
         - '  &7&o投票将在多久后自动关闭,'
         - '  &7&o结算并公布投票结果.'
         - '  &7&o如果设定了自动执行,'
-        - '  &7&o将会在投票通过后依次执行命令'
+        - '  &7&o将会在投票通过后依次执行命令.'
         - ''
         - '  &7当前值 &b▶'
         - '  &f%DURATION%'
@@ -153,7 +190,7 @@ Items:
         - '  &b▶ &f点击在聊天栏中输入新的选项内容'
         - ''
     Position:
-      X: 4
+      X: 3
       Y: 4
   MODIFY_AUTOCAST:
     ItemStack:
@@ -178,7 +215,7 @@ Items:
         - '  &b▶ &f点击在聊天栏中编辑自动执行内容'
         - ''
     Position:
-      X: 6
+      X: 4
       Y: 4
   SET_RESULT:
     ItemStack:
@@ -205,7 +242,25 @@ Items:
         - '  &b▶ &f点击在聊天栏中输入新的投票结果内容'
         - ''
     Position:
-      X: 8
+      X: 5
+      Y: 4
+  ALLOW_EDIT:
+    ItemStack:
+      Display: "&b%EDITABLE_display%"
+      Material: LIME_DYE
+      Lore:
+        - ''
+          - '  &7&o是否允许事后编辑自己所投的票,'
+          - '  &7&o开启后参与者可以在投票结束前'
+          - '  &7&o任意更改自己投的票和投票看法.'
+          - ''
+          - '  &7当前值 &b▶'
+          - '  &f%EDITABLE%'
+          - ''
+          - '  &b▶ &f%feature%'
+          - ''
+    Position:
+      X: 7
       Y: 4
   VOTE_START:
     ItemStack:

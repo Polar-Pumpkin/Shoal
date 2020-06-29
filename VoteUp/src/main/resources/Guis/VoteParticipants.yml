@@ -1,0 +1,37 @@
+Settings:
+  Title: "投票参与者"
+  Row: 6
+Items:
+  GLASS:
+    ItemStack:
+      Material: GRAY_STAINED_GLASS_PANE
+    Position:
+      X: 1-9
+      Y: 1,6
+  BACK:
+    ItemStack:
+      Display: "&b返回"
+      Material: MAP
+      Lore:
+        - ''
+        - '  &7导航 &b▶'
+        - '  %BACK%'
+        - ''
+        - '  &b▶ &f返回上一个界面'
+        - ''
+    Position:
+      X: 2
+      Y: 6
+  PARTICIPANT:
+    ItemStack:
+      Display: "&a%participant%"
+      Material: PLAYER_HEAD
+      Lore:
+        - ''
+        - '  &7于 &c%time%'
+        - '  &7投了 &c%choice%'
+        - '  &f&o%reason%'
+        - ''
+    Position:
+      X: 2-8
+      Y: 2-5

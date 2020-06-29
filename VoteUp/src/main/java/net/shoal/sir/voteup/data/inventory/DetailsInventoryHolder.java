@@ -5,16 +5,17 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfigManager;
+import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.prompts.CollectReasonPrompt;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DetailsInventoryHolder<T> implements InventoryExecutor {
-
+    public final static GuiManager.GuiKey GUI_KEY = GuiManager.GuiKey.VOTE_DETAILS;
     private final PPlugin plugin;
     private final Map<Integer, KeyWord> slotItemMap = new HashMap<>();
     protected T data;
@@ -53,7 +54,7 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
         FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_DETAILS.filename);
         String title = "未初始化菜单";
         if (file == null) return Bukkit.createInventory(this, 0, title);
-        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", BuiltinMsg.ERROR_GUI_TITLE.msg));
+        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", Msg.ERROR_GUI_TITLE.msg));
         Inventory inv = Bukkit.createInventory(this, file.getInt("Settings.Row", 0) * 9, title);
 
         ConfigurationSection itemSection = file.getConfigurationSection("Items");
@@ -73,11 +74,13 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
             }
 
             if (keyWord == KeyWord.BACK) ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
-            else if (keyWord == KeyWord.AUTOCAST && (plugin.pConfig.getConfig().getBoolean(ConfigManager.Path.AUTOCAST_ENABLE.path, true) || vote.autocast.isEmpty()))
+            else if (keyWord == KeyWord.AUTOCAST && (!(plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_ENABLE.path, true) || vote.autocast.isEmpty())))
                 continue;
             else if ((keyWord == KeyWord.EDIT || keyWord == KeyWord.CANCEL) && !(VoteUpPerm.ADMIN.hasPermission(viewer) || vote.isOwner(viewer.getUniqueId())))
                 continue;
             else if ((keyWord == KeyWord.VOTE_ACCEPT || keyWord == KeyWord.VOTE_NEUTRAL || keyWord == KeyWord.VOTE_REFUSE) && !VoteUpPerm.VOTE.hasPermission(viewer, EnumUtil.valueOf(Vote.Choice.class, keyWord.name().split("[_]")[1])))
+                continue;
+            else if (keyWord == KeyWord.PARTICIPANT && !vote.isPublic)
                 continue;
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
@@ -158,35 +161,50 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
         Player user = (Player) event.getWhoClicked();
         Vote vote = (Vote) data;
         Inventory inv = event.getInventory();
+        boolean anonymous = vote.allowAnonymous && (event.getClick() == ClickType.DROP);
 
-        switch (keyWord) { // TODO 匿名投票的实现
+        switch (keyWord) {
             case VOTE_ACCEPT:
-                if (event.isRightClick())
-                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.ACCEPT), 300);
-                else voteWithoutReason(user, Vote.Choice.ACCEPT);
+                if (event.isRightClick() || (anonymous && event.isShiftClick()))
+                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.ACCEPT, anonymous), 300);
+                else voteWithoutReason(user, Vote.Choice.ACCEPT, anonymous);
                 refresh(inv);
                 break;
             case VOTE_NEUTRAL:
-                if (event.isRightClick())
-                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.NEUTRAL), 300);
-                else voteWithoutReason(user, Vote.Choice.NEUTRAL);
+                if (event.isRightClick() || (anonymous && event.isShiftClick()))
+                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.NEUTRAL, anonymous), 300);
+                else voteWithoutReason(user, Vote.Choice.NEUTRAL, anonymous);
                 refresh(inv);
                 break;
             case VOTE_REFUSE:
-                if (event.isRightClick())
-                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.REFUSE), 300);
-                else voteWithoutReason(user, Vote.Choice.REFUSE);
+                if (event.isRightClick() || (anonymous && event.isShiftClick()))
+                    ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, Vote.Choice.REFUSE, anonymous), 300);
+                else voteWithoutReason(user, Vote.Choice.REFUSE, anonymous);
                 refresh(inv);
                 break;
             case VOTE_REASON:
-                ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, vote.getChoice(user.getUniqueId())), 300);
+                Vote.Participant participant = vote.getParticipant(user.getUniqueId());
+                if (participant == null) break;
+                ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, participant.choice, participant.anonymous), 300);
                 break;
-            case BACK:
-                if (lastGui != null) ; // TODO 返回的逻辑
-                else BasicUtil.closeInventory(plugin, user);
+            case BACK: // TODO 导航链条优化，不能只记上一个菜单，会造成覆写死循环。
+                if (lastGui != null) {
+                    switch (lastGui) {
+                        case MAIN_MENU:
+                            // TODO 返回主菜单。
+                            break;
+                        case VOTE_LIST:
+                            // TODO 返回检索菜单。
+                            break;
+                        case VOTE_DETAILS:
+                        case VOTE_CREATE:
+                        case VOTE_PARTICIPANTS:
+                            break;
+                    }
+                } else BasicUtil.closeInventory(plugin, user);
                 break;
             case PARTICIPANT:
-                // TODO 投票参与者界面
+                BasicUtil.openInventory(plugin, user, new ParticipantInventoryHolder<>(vote, user, GUI_KEY).getInventory());
                 break;
             case CANCEL:
                 // TODO 取消投票的实现
@@ -204,9 +222,9 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
         }
     }
 
-    private void voteWithoutReason(@NonNull Player user, Vote.Choice choice) {
+    private void voteWithoutReason(@NonNull Player user, Vote.Choice choice, boolean anonymous) {
         Vote vote = (Vote) data;
-        VoteUpAPI.VOTE_MANAGER.vote(vote.voteID, user, choice, BuiltinMsg.REASON_NOT_YET.msg);
+        VoteUpAPI.VOTE_MANAGER.vote(vote.voteID, user, choice, anonymous, Msg.REASON_NOT_YET.msg);
     }
 
     @Override

@@ -7,10 +7,10 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfigManager;
+import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.data.Notice;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,19 +36,19 @@ public class PlayerJoinListener implements Listener {
                 BasicUtil.broadcastTitle(
                         "",
                         VoteUpPlaceholder.parse(newest, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Join.Subtitle")),
-                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                        plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
                 );
                 user.spigot().sendMessage(JsonChatUtil.buildClickText(
                         VoteUpPlaceholder.parse(newest, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Join.Broadcast")),
                         new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + newest.voteID),
-                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(BuiltinMsg.VOTE_CLICK.msg)))
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(Msg.VOTE_CLICK.msg)))
                 ));
             }
         }
 
-        List<String> admins = plugin.pConfig.getConfig().getStringList(ConfigManager.Path.ADMIN.path);
+        List<String> admins = plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path);
 
         String uuid = user.getUniqueId().toString();
         boolean inList = admins.contains(uuid);
@@ -57,7 +57,7 @@ public class PlayerJoinListener implements Listener {
         if (inList && !hasPerm) admins.remove(uuid);
         else if (!inList && hasPerm) admins.add(uuid);
 
-        plugin.pConfig.getConfig().set(ConfigManager.Path.ADMIN.path, admins);
+        plugin.pConfig.getConfig().set(ConfPath.Path.ADMIN.path, admins);
         plugin.pConfig.save();
 
         for (Notice.Type type : Notice.Type.values()) VoteUpAPI.CACHE_MANAGER.report(type, user);

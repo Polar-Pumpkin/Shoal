@@ -3,8 +3,8 @@ package net.shoal.sir.voteup.data;
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.config.ConfigManager;
-import net.shoal.sir.voteup.enums.BuiltinMsg;
+import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -130,7 +130,7 @@ public class Vote implements PData, Owned, Timestamp {
         int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
         int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
 
-        if (all < plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 5))
+        if (all < plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5))
             return false;
 
         switch (type) {
@@ -163,14 +163,14 @@ public class Vote implements PData, Owned, Timestamp {
     public boolean hasReason(UUID uuid) {
         Participant user = getParticipant(uuid);
         if (user != null)
-            return !user.reason.equalsIgnoreCase(BuiltinMsg.REASON_NOT_YET.msg) && !user.reason.equalsIgnoreCase(BuiltinMsg.REASON_NO_PERM.msg);
+            return !user.reason.equalsIgnoreCase(Msg.REASON_NOT_YET.msg) && !user.reason.equalsIgnoreCase(Msg.REASON_NO_PERM.msg);
         return false;
     }
 
     public String getReason(UUID uuid) {
         Participant user = getParticipant(uuid);
         if (user != null) return I18n.color(user.reason);
-        return I18n.color(BuiltinMsg.REASON_NOT_YET.msg);
+        return I18n.color(Msg.REASON_NOT_YET.msg);
     }
 
     public Choice getChoice(UUID uuid) {
@@ -183,7 +183,7 @@ public class Vote implements PData, Owned, Timestamp {
         int all = participants.size();
         int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
         int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
-        int least = plugin.pConfig.getConfig().getInt(ConfigManager.Path.SETTINGS_PARTICIPANT_LEAST.path, 5);
+        int least = plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5);
 
         int rate;
         if (all >= least) {
@@ -228,7 +228,7 @@ public class Vote implements PData, Owned, Timestamp {
     @Override
     public void init() {
         this.title = getOwnerName() + " 的投票";
-        this.description = new ArrayList<>(Collections.singletonList(BuiltinMsg.NO_DESCRIPTION.msg));
+        this.description = new ArrayList<>(Collections.singletonList(Msg.NO_DESCRIPTION.msg));
         this.choices = new HashMap<Choice, String>() {
             {
                 put(Choice.ACCEPT, ChatColor.GREEN + Choice.ACCEPT.name);
@@ -314,6 +314,16 @@ public class Vote implements PData, Owned, Timestamp {
             this.participants = new ArrayList<>();
             if (participantSection != null) {
                 for (String uuid : participantSection.getKeys(false)) {
+
+                    // 旧版本数据文件的转换
+                    Choice choice = EnumUtil.valueOf(Choice.class, uuid.toUpperCase());
+                    if (choice != null) {
+                        ConfigurationSection targetOldSection = participantSection.getConfigurationSection(uuid);
+                        for (String oldUUID : targetOldSection.getKeys(false))
+                            this.participants.add(new Participant(UUID.fromString(oldUUID), choice, false, targetOldSection.getString(oldUUID)));
+                        continue;
+                    }
+
                     ConfigurationSection userSection = participantSection.getConfigurationSection(uuid);
                     if (userSection == null) continue;
                     this.participants.add(new Participant(userSection));
@@ -479,8 +489,11 @@ public class Vote implements PData, Owned, Timestamp {
     public enum Data {
         ID("投票ID"),
         OPEN("进行状态"),
-        CANCELLED("投票被取消"),
-        DRAFT("草稿"),
+        CANCELLED("取消状态"),
+        DRAFT("草稿状态"),
+        ANONYMOUS("允许匿名投票"),
+        PUBLIC("公开投票进度"),
+        EDITABLE("可编辑所投票"),
         TYPE("投票类型"),
         GOAL("目标人数"),
         OWNER("发起者"),
@@ -520,7 +533,7 @@ public class Vote implements PData, Owned, Timestamp {
             this.uuid = UUID.fromString(section.getName());
             this.choice = EnumUtil.valueOf(Choice.class, section.getString("Choice"));
             this.anonymous = section.getBoolean("Anonymous", false);
-            this.reason = section.getString("Reason", BuiltinMsg.REASON_NOT_YET.msg);
+            this.reason = section.getString("Reason", Msg.REASON_NOT_YET.msg);
             this.timestamp = section.getLong("Timestamp");
         }
 
