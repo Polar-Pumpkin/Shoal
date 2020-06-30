@@ -70,11 +70,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 }
             }
 
-            if (keyWord != null && keyWord.target != null && !VoteUpPerm.EDIT.hasPermission(viewer, keyWord.target)) {
-                ConfigurationSection noPerm = file.getConfigurationSection("Settings.NoPerm");
-                if (noPerm != null) item = ItemUtil.build(plugin, noPerm);
-                else item = new ItemStack(Material.BARRIER);
-
+            if (keyWord != null && keyWord.target != null) {
                 switch (keyWord) {
                     case ALLOW_EDIT:
                     case PUBLIC_MODE:
@@ -107,7 +103,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                             break;
                         }
 
-                        if (item.getType().name().endsWith("DYE")) if (!enable) item.setType(Material.LIGHT_GRAY_DYE);
+                        if (item.getType().name().endsWith("DYE")) if (!enable) item.setType(Material.GRAY_DYE);
                         if (enable) {
                             ItemMeta meta = item.getItemMeta();
                             if (meta != null) {
@@ -117,6 +113,12 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                             }
                         }
                         break;
+                }
+
+                if (!VoteUpPerm.EDIT.hasPermission(viewer, keyWord.target)) {
+                    ConfigurationSection noPerm = file.getConfigurationSection("Settings.NoPerm");
+                    if (noPerm != null) item = ItemUtil.build(plugin, noPerm);
+                    else item = new ItemStack(Material.BARRIER);
                 }
             }
 
@@ -170,7 +172,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 JsonChatUtil.sendEditableList(
                         user,
                         vote.description,
-                        VoteUpPlaceholder.parse(vote, Msg.VOTE_VALUE_DESCRIPTION.msg),
+                        VoteUpPlaceholder.parse(vote, String.format(Msg.VOTE_VALUE_DESCRIPTION.msg, vote.description.size())),
                         "&a&l[插入] ",
                         "/vote modify desc add ",
                         "&e&l[编辑] ",
@@ -184,7 +186,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
             case ALLOW_ANONYMOUS:
                 if (validate(user, Vote.Data.ANONYMOUS) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_ANONYMOUS.path, true))
                     break;
-                vote.allowEdit = !vote.allowAnonymous;
+                vote.allowAnonymous = !vote.allowAnonymous;
                 refresh(inv);
                 break;
             case PUBLIC_MODE:
@@ -207,7 +209,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
                 JsonChatUtil.sendEditableList(
                         user,
                         vote.autocast,
-                        VoteUpPlaceholder.parse(vote, Msg.VOTE_VALUE_AUTOCAST.msg),
+                        VoteUpPlaceholder.parse(vote, String.format(Msg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size())),
                         "&a&l[插入] ",
                         "/vote modify autocast add ",
                         "&e&l[编辑] ",

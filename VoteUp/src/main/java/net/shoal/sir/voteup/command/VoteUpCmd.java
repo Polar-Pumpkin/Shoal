@@ -35,7 +35,7 @@ public class VoteUpCmd extends CommandHandler {
 
     public VoteUpCmd() {
         super(VoteUp.getInstance(), "voteup");
-        registerSubCommand("help", new HelpCommand(plugin, null));
+        registerSubCommand("help", new HelpCommand(plugin, null, this));
         registerSubCommand("create", new CreateCmd());
         registerSubCommand("reload", new ReloadCommand(plugin, VoteUpPerm.ADMIN.node));
         registerSubCommand("modify", new ModifyCmd());

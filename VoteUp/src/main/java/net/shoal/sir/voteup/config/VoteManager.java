@@ -45,10 +45,15 @@ public class VoteManager extends PFolder {
         voteMap.put(BasicUtil.getNoExFileName(file.getName()), new Vote(file));
     }
 
+    public void load(@NonNull Vote vote) {
+        voteMap.put(vote.voteID, vote);
+    }
+
     private void startCountdown(String voteID) {
         Vote data = voteMap.getOrDefault(voteID, null);
         if (data == null) return;
         if (!data.open) return;
+        if (data.isDraft) return;
         if (endTaskMap.containsKey(voteID)) return;
         long timeRemain = data.startTime + Vote.getDurationTimestamp(data.duration) - System.currentTimeMillis();
         if (timeRemain <= 0) {
@@ -101,10 +106,10 @@ public class VoteManager extends PFolder {
     public void start(@NonNull Player user) {
         Vote vote = draftVote(user.getUniqueId());
         if (vote == null) return;
-        startCountdown(vote.voteID);
         vote.startTime = System.currentTimeMillis();
         vote.open = true;
         vote.isDraft = false;
+        startCountdown(vote.voteID);
 
         VoteUpAPI.SOUND.voteEvent(true);
         if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTESTART.path, true))
@@ -135,6 +140,7 @@ public class VoteManager extends PFolder {
         if (vote.isVoted(uuid))
             I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Logged"));
 
+        vote.participants.removeIf(participant -> participant.uuid == uuid);
         vote.participants.add(
                 new Vote.Participant(
                         uuid,
@@ -168,7 +174,7 @@ public class VoteManager extends PFolder {
                     Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
                     if (admin != null) {
                         String announce = notice.announce(admin.getUniqueId());
-                        if (announce != null)
+                        if (announce != null) // TODO 这里有一个发错误格式的收到新投票信息的问题。
                             I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
                     }
                 }

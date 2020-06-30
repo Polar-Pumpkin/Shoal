@@ -80,7 +80,7 @@ public class DetailsInventoryHolder<T> implements InventoryExecutor {
                 continue;
             else if ((keyWord == KeyWord.VOTE_ACCEPT || keyWord == KeyWord.VOTE_NEUTRAL || keyWord == KeyWord.VOTE_REFUSE) && !VoteUpPerm.VOTE.hasPermission(viewer, EnumUtil.valueOf(Vote.Choice.class, keyWord.name().split("[_]")[1])))
                 continue;
-            else if (keyWord == KeyWord.PARTICIPANT && !vote.isPublic)
+            else if (keyWord == KeyWord.PARTICIPANT && !vote.isPublic && vote.isOwner(viewer.getUniqueId()))
                 continue;
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");

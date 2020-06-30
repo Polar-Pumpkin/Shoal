@@ -22,9 +22,9 @@ Settings:
     Title:
       VoteStart: true
       VoteEnd: false
-      FadeIn: 5
+      FadeIn: 3
       Stay: 10
-      FadeOut: 7
+      FadeOut: 5
 Autocast:
   Enable: true
   Usermode: true

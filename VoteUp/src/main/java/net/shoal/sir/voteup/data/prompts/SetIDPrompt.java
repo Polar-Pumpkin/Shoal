@@ -44,7 +44,9 @@ public class SetIDPrompt extends StringPrompt {
             return Prompt.END_OF_CONVERSATION;
         }
 
+        VoteUpAPI.VOTE_MANAGER.delete(vote.voteID);
         vote.voteID = I18n.deColor(input, '&');
+        VoteUpAPI.VOTE_MANAGER.load(vote);
         // VoteUpAPI.VOTE_MANAGER.setVoteData(vote.voteID, user, TARGET, I18n.color(input));
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;

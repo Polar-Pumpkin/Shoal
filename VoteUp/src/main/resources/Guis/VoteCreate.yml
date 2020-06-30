@@ -130,23 +130,23 @@ Items:
       Y: 3
   PUBLIC_MODE:
     ItemStack:
-    Display: "&b%PUBLIC_display%"
-    Material: LIME_DYE
-    Lore:
-      - ''
-      - '  &7&o是否公开投票进度,'
-      - '  &7&o公开后任何玩家都可以查看'
-      - '  &7&o当前投票参与者以及他们所投的票.'
-      - '  &7&o且在收到新投票时会全服公告.'
-      - ''
-      - '  &7当前值 &b▶'
-      - '  &f%PUBLIC%'
-      - ''
-      - '  &b▶ &f%feature%'
-      - ''
-  Position:
-    X: 8
-    Y: 3
+      Display: "&b%PUBLIC_display%"
+      Material: LIME_DYE
+      Lore:
+        - ''
+        - '  &7&o是否公开投票进度,'
+        - '  &7&o公开后任何玩家都可以查看'
+        - '  &7&o当前投票参与者以及他们所投的票.'
+        - '  &7&o且在收到新投票时会全服公告.'
+        - ''
+        - '  &7当前值 &b▶'
+        - '  &f%PUBLIC%'
+        - ''
+        - '  &b▶ &f%feature%'
+        - ''
+    Position:
+      X: 8
+      Y: 3
   SET_DURATION:
     ItemStack:
       Display: "&b%DURATION_display%"
@@ -250,15 +250,15 @@ Items:
       Material: LIME_DYE
       Lore:
         - ''
-          - '  &7&o是否允许事后编辑自己所投的票,'
-          - '  &7&o开启后参与者可以在投票结束前'
-          - '  &7&o任意更改自己投的票和投票看法.'
-          - ''
-          - '  &7当前值 &b▶'
-          - '  &f%EDITABLE%'
-          - ''
-          - '  &b▶ &f%feature%'
-          - ''
+        - '  &7&o是否允许事后编辑自己所投的票,'
+        - '  &7&o开启后参与者可以在投票结束前'
+        - '  &7&o任意更改自己投的票和投票看法.'
+        - ''
+        - '  &7当前值 &b▶'
+        - '  &f%EDITABLE%'
+        - ''
+        - '  &b▶ &f%feature%'
+        - ''
     Position:
       X: 7
       Y: 4

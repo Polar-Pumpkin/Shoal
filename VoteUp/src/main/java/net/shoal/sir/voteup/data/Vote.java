@@ -30,8 +30,8 @@ public class Vote implements PData, Owned, Timestamp {
     public boolean open;
     public boolean cancelled;
     public boolean isDraft;
-    public boolean allowAnonymous; // TODO 匿名投票设置
-    public boolean isPublic; // TODO 结果公开
+    public boolean allowAnonymous;
+    public boolean isPublic;
     public boolean allowEdit; // TODO 允许投票后编辑
     public Type type;
     public int goal;
@@ -78,7 +78,7 @@ public class Vote implements PData, Owned, Timestamp {
     public static long getDurationTimestamp(String duration) {
         long result = 0;
 
-        String clone = duration.toUpperCase();
+        String clone = duration;
         Duration durationType;
         while ((durationType = getFirstIndexOf(clone)) != null) {
             int index = clone.indexOf(durationType.code);
@@ -165,18 +165,6 @@ public class Vote implements PData, Owned, Timestamp {
         if (user != null)
             return !user.reason.equalsIgnoreCase(Msg.REASON_NOT_YET.msg) && !user.reason.equalsIgnoreCase(Msg.REASON_NO_PERM.msg);
         return false;
-    }
-
-    public String getReason(UUID uuid) {
-        Participant user = getParticipant(uuid);
-        if (user != null) return I18n.color(user.reason);
-        return I18n.color(Msg.REASON_NOT_YET.msg);
-    }
-
-    public Choice getChoice(UUID uuid) {
-        Participant user = getParticipant(uuid);
-        if (user != null) return user.choice;
-        return null;
     }
 
     public int getProcess() {
@@ -287,6 +275,10 @@ public class Vote implements PData, Owned, Timestamp {
                 this.title = I18n.color(setting.getString("Title", getOwnerName() + " 的投票"));
                 this.description = setting.getStringList("Description");
                 this.description.replaceAll(I18n::color);
+
+                this.allowAnonymous = setting.getBoolean("Anonymous", false);
+                this.isPublic = setting.getBoolean("Public", false);
+                this.allowEdit = setting.getBoolean("Editable", false);
             }
 
             ConfigurationSection choiceSection = setting.getConfigurationSection("Choices");
@@ -301,12 +293,12 @@ public class Vote implements PData, Owned, Timestamp {
 
             this.autocast = setting.getStringList("Autocast");
 
-            ConfigurationSection resultSection = setting.getConfigurationSection("Results"); // TODO 这里有一个全都是 null 的问题
+            ConfigurationSection resultSection = setting.getConfigurationSection("Results");
             this.results = new HashMap<>();
             if (resultSection != null) {
                 for (String resultKey : resultSection.getKeys(false)) {
                     Result result = EnumUtil.valueOf(Result.class, resultKey.toUpperCase());
-                    this.results.put(result, I18n.color(choiceSection.getString(resultKey)));
+                    this.results.put(result, I18n.color(resultSection.getString(resultKey)));
                 }
             }
 
@@ -343,6 +335,9 @@ public class Vote implements PData, Owned, Timestamp {
 
     @Override
     public void save() {
+        if (!BasicUtil.getNoExFileName(file.getName()).equals(voteID))
+            this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
+
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection information = data.createSection("Information");
         information.set("Open", open);
@@ -359,6 +354,10 @@ public class Vote implements PData, Owned, Timestamp {
         List<String> desc2save = new ArrayList<>(description);
         desc2save.replaceAll(s -> I18n.deColor(s, '&'));
         setting.set("Description", desc2save);
+        setting.set("Anonymous", allowAnonymous);
+        setting.set("Public", isPublic);
+        setting.set("Editable", allowEdit);
+
         this.choices.forEach(
                 (choice, s) -> setting.set("Choices." + choice.name(), I18n.deColor(s, '&'))
         );

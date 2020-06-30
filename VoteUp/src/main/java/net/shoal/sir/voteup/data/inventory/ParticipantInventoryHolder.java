@@ -78,7 +78,7 @@ public class ParticipantInventoryHolder<T> implements InventoryExecutor {
     @Override
     public Inventory construct() {
         Vote vote = (Vote) data;
-        FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_DETAILS.filename);
+        FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_PARTICIPANTS.filename);
         String title = "未初始化菜单";
         if (file == null) return Bukkit.createInventory(this, 0, title);
         title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", Msg.ERROR_GUI_TITLE.msg));
@@ -115,7 +115,7 @@ public class ParticipantInventoryHolder<T> implements InventoryExecutor {
                         {
                             put("participant", Bukkit.getOfflinePlayer(user.uuid).getName());
                             put("time", TimeUtil.getDescriptionTimeFromTimestamp(user.timestamp) + " &8&o" + TimeUtil.getChineseDateFormat(new Date(user.timestamp)));
-                            put("choice", user.choice.name + " &8&o" + vote.choices.get(user.choice));
+                            put("choice", vote.choices.get(user.choice));
                             put("reason", user.reason);
                         }
                     };
@@ -123,7 +123,7 @@ public class ParticipantInventoryHolder<T> implements InventoryExecutor {
                     if (user.anonymous) {
                         String[] names = anonymousItem.keySet().toArray(new String[0]);
                         String name = names[new Random().nextInt(names.length)];
-                        variableMap.put("participant", VoteUpPerm.ANONYMOUS.hasPermission(viewer) ? name + " &8&o(" + variableMap.get("participant") + ")" : name);
+                        variableMap.put("participant", VoteUpPerm.ANONYMOUS.hasPermission(viewer) ? name + " &8&o(" + variableMap.get("participant") + " 已匿名)" : name);
                         resultItem.setType(anonymousItem.get(name));
                     } else if (resultItem.getType() == Material.PLAYER_HEAD) {
                         SkullMeta skull = (SkullMeta) resultItem.getItemMeta();
@@ -134,9 +134,9 @@ public class ParticipantInventoryHolder<T> implements InventoryExecutor {
                     }
 
                     variableMap.forEach((k, v) -> ItemUtil.replace(resultItem, "%" + k + "%", v));
-                    inv.setItem(slot, resultItem);
+                    inv.setItem(slot, VoteUpPlaceholder.applyPlaceholder(resultItem, vote));
                     participantMap.put(slot, user.uuid);
-                } else inv.setItem(slot, item);
+                } else inv.setItem(slot, VoteUpPlaceholder.applyPlaceholder(item, vote));
                 slotItemMap.put(slot, keyWord);
             }
         }

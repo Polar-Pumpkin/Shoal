@@ -101,7 +101,7 @@ public class VoteUpPlaceholder {
                 return vote.getProcess() + "%";
             case ANONYMOUS:
                 if ("desc".equalsIgnoreCase(params))
-                    return Msg.VOTE_ANONYMOUS_DESC.msg;
+                    return vote.allowAnonymous ? Msg.VOTE_ANONYMOUS_DESC.msg : "";
                 return vote.allowAnonymous ? Msg.VOTE_ANONYMOUS_ENABLE.msg : Msg.VOTE_ANONYMOUS_DISABLE.msg;
             case PUBLIC:
                 return vote.isPublic ? Msg.VOTE_PUBLIC_ENABLE.msg : Msg.VOTE_PUBLIC_DISABLE.msg;

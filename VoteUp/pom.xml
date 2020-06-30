@@ -6,7 +6,7 @@
 
     <groupId>net.shoal.sir</groupId>
     <artifactId>VoteUp</artifactId>
-    <version>2.0.3-BETA</version>
+    <version>2.0.4-BETA</version>
     <packaging>jar</packaging>
 
     <name>VoteUp</name>
