@@ -1,6 +1,7 @@
 package net.shoal.sir.voteup
 
 import net.shoal.sir.voteup.commands.SubCommandHandler
+import net.shoal.sir.voteup.util.ListenerManager
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.sct.easylib.EasyLibAPI
@@ -11,12 +12,14 @@ class VoteUp : JavaPlugin() {
         Metrics(this, 7972)
         instance = this
         Bukkit.getPluginCommand("voteup")!!.setExecutor(SubCommandHandler(instance, "voteup"))
+        ListenerManager.register()
     }
 
     companion object {
         @JvmStatic
         lateinit var instance: VoteUp
             private set
+
         @JvmStatic
         lateinit var easyLibAPI: EasyLibAPI
             private set

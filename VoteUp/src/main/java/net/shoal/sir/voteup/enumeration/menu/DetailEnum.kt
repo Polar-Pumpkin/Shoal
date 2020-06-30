@@ -1,5 +1,5 @@
 package net.shoal.sir.voteup.enumeration.menu
 
-enum class Detail  {
+enum class DetailEnum  {
 
 }
