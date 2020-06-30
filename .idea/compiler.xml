@@ -3,17 +3,11 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="LimitedRiptide" />
-        <module name="VoteUp" />
-      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="LimitedRiptide" target="1.8" />
-      <module name="VoteUp" target="1.8" />
+      <module name="net.shoal.sir.VoteUp" target="1.8" />
+      <module name="net.shoal.sir.VoteUp.main" target="1.8" />
+      <module name="net.shoal.sir.VoteUp.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,558 +1,424 @@
-package net.shoal.sir.voteup.data;
+package net.shoal.sir.voteup.data
 
-import lombok.NonNull;
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.config.ConfPath;
-import net.shoal.sir.voteup.enums.Msg;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.data.PData;
-import org.serverct.parrot.parrotx.data.PID;
-import org.serverct.parrot.parrotx.data.flags.Owned;
-import org.serverct.parrot.parrotx.data.flags.Timestamp;
-import org.serverct.parrot.parrotx.utils.BasicUtil;
-import org.serverct.parrot.parrotx.utils.EnumUtil;
-import org.serverct.parrot.parrotx.utils.I18n;
+import net.shoal.sir.voteup.api.VoteUpAPI
+import net.shoal.sir.voteup.config.ConfPath
+import net.shoal.sir.voteup.enums.Msg
+import org.bukkit.ChatColor
+import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.data.PData
+import org.serverct.parrot.parrotx.data.PID
+import org.serverct.parrot.parrotx.data.flags.Owned
+import org.serverct.parrot.parrotx.data.flags.Timestamp
+import org.serverct.parrot.parrotx.utils.BasicUtil
+import org.serverct.parrot.parrotx.utils.EnumUtil
+import org.serverct.parrot.parrotx.utils.I18n
+import java.io.File
+import java.io.IOException
+import java.util.*
+import java.util.function.Consumer
+import java.util.function.Predicate
+import java.util.function.UnaryOperator
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Predicate;
+class Vote : PData, Owned, Timestamp {
+    private val plugin: PPlugin
+    var voteID: String? = null
+    var open = false
+    var cancelled = false
+    var isDraft = false
+    var allowAnonymous // TODO 匿名投票设置 = false
+    var isPublic // TODO 结果公开 = false
+    var allowEdit // TODO 允许投票后编辑 = false
+    var type: Type? = null
+    var goal = 0
+    var owner: UUID? = null
+    var startTime: Long = 0
+    var duration: String? = null
+    var title: String? = null
+    var description: MutableList<String?>? = null
+    var choices: MutableMap<Choice?, String?>? = null
+    var autocast: List<String?>? = null
+    var results: MutableMap<Result?, String?>? = null
+    var participants: MutableList<Participant?>? = null
+    private var id: PID
+    private var file: File
 
-public class Vote implements PData, Owned, Timestamp {
-
-    private final PPlugin plugin;
-    public String voteID;
-    public boolean open;
-    public boolean cancelled;
-    public boolean isDraft;
-    public boolean allowAnonymous; // TODO 匿名投票设置
-    public boolean isPublic; // TODO 结果公开
-    public boolean allowEdit; // TODO 允许投票后编辑
-    public Type type;
-    public int goal;
-    public UUID owner;
-    public long startTime;
-    public String duration;
-    public String title;
-    public List<String> description;
-    public Map<Choice, String> choices;
-    public List<String> autocast;
-    public Map<Result, String> results;
-    public List<Participant> participants;
-    private PID id;
-    private File file;
-
-    public Vote(@NonNull File file) {
-        this.plugin = VoteUp.getInstance();
-        this.file = file;
-        load(file);
-
-        this.id = new PID(plugin, "VOTE_" + voteID);
+    constructor(@NonNull file: File) {
+        plugin = PPlugin.getInstance()
+        this.file = file
+        load(file)
+        id = PID(plugin, "VOTE_$voteID")
     }
 
-    public Vote(int goal, UUID owner, String duration) {
-        this.voteID = UUID.randomUUID().toString();
-        this.plugin = VoteUp.getInstance();
-        this.id = new PID(plugin, "VOTE_" + voteID);
-        this.file = new File(VoteUpAPI.VOTE_MANAGER.getFolder(), voteID + ".yml");
-
-        this.open = false;
-        this.cancelled = false;
-        this.isDraft = true;
-        this.allowAnonymous = false;
-        this.isPublic = false;
-        this.allowEdit = false;
-        this.type = Type.NORMAL;
-        this.goal = goal;
-        this.owner = owner;
-        this.startTime = System.currentTimeMillis();
-        this.duration = duration;
-        init();
+    constructor(goal: Int, owner: UUID?, duration: String?) {
+        voteID = UUID.randomUUID().toString()
+        plugin = PPlugin.getInstance()
+        id = PID(plugin, "VOTE_$voteID")
+        file = File(VoteUpAPI.VOTE_MANAGER!!.folder, "$voteID.yml")
+        open = false
+        cancelled = false
+        isDraft = true
+        allowAnonymous = false
+        isPublic = false
+        allowEdit = false
+        type = Type.NORMAL
+        this.goal = goal
+        this.owner = owner
+        startTime = System.currentTimeMillis()
+        this.duration = duration
+        init()
     }
 
-    public static long getDurationTimestamp(String duration) {
-        long result = 0;
+    fun getParticipant(uuid: UUID): Participant? {
+        for (participant in participants!!) if (participant!!.uuid === uuid) return participant
+        return null
+    }
 
-        String clone = duration.toUpperCase();
-        Duration durationType;
-        while ((durationType = getFirstIndexOf(clone)) != null) {
-            int index = clone.indexOf(durationType.code);
-            try {
-                String target = clone.substring(0, index);
-                int amount = Integer.parseInt(target);
-                result += amount * durationType.time;
-                clone = clone.substring(index + 1);
-            } catch (Throwable e) {
-                break;
+    fun listParticipants(filter: Predicate<Participant?>): List<Participant?> {
+        val result: MutableList<Participant?> = ArrayList()
+        participants!!.forEach(
+                Consumer { participant: Participant? -> if (filter.test(participant)) result.add(participant) }
+        )
+        return result
+    }
+
+    val isPassed: Boolean
+        get() {
+            val all = participants!!.size
+            val accept = listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.ACCEPT }).size
+            val refuse = listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.REFUSE }).size
+            return if (all < plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5)) false else when (type) {
+                Type.NORMAL -> accept > refuse
+                Type.REACHAMOUNT -> accept >= goal
+                Type.LEASTNOT -> refuse <= goal
+                else -> false
             }
         }
 
-        return result * 1000;
+    fun result(): Result {
+        if (cancelled) return Result.CANCEL
+        if (type == Type.NORMAL) if (listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.ACCEPT }).size == listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.REFUSE }).size) return Result.DRAW
+        return if (isPassed) Result.PASS else Result.REJECT
     }
 
-    public static Duration getFirstIndexOf(String target) {
-        int index = Integer.MAX_VALUE;
-        Duration durationType = null;
-        for (Duration type : Duration.values()) {
-            int currentIndex = target.indexOf(type.code);
-            if (currentIndex == -1) continue;
-            if (currentIndex < index) {
-                index = currentIndex;
-                durationType = type;
-            }
-        }
-        return durationType;
+    fun isVoted(uuid: UUID): Boolean {
+        return getParticipant(uuid) != null
     }
 
-    public Participant getParticipant(UUID uuid) {
-        for (Participant participant : participants) if (participant.uuid == uuid) return participant;
-        return null;
+    fun hasReason(uuid: UUID): Boolean {
+        val user = getParticipant(uuid)
+        return if (user != null) !user.reason.equals(Msg.REASON_NOT_YET.msg, ignoreCase = true) && !user.reason.equals(Msg.REASON_NO_PERM.msg, ignoreCase = true) else false
     }
 
-    public List<Participant> listParticipants(Predicate<Participant> filter) {
-        List<Participant> result = new ArrayList<>();
-        this.participants.forEach(
-                participant -> {
-                    if (filter.test(participant))
-                        result.add(participant);
+    fun getReason(uuid: UUID): String {
+        val user = getParticipant(uuid)
+        return if (user != null) I18n.color(user.reason) else I18n.color(Msg.REASON_NOT_YET.msg)
+    }
+
+    fun getChoice(uuid: UUID): Choice? {
+        val user = getParticipant(uuid)
+        return user?.choice
+    }
+
+    val process: Int
+        get() {
+            val all = participants!!.size
+            val accept = listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.ACCEPT }).size
+            val refuse = listParticipants(Predicate { user: Participant? -> user!!.choice == Choice.REFUSE }).size
+            val least = plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5)
+            val rate: Int
+            rate = if (all >= least) {
+                when (type) {
+                    Type.NORMAL -> (accept / all.toDouble() * 100).toInt()
+                    Type.REACHAMOUNT -> (accept / goal.toDouble() * 100).toInt()
+                    Type.LEASTNOT -> (Math.max(goal - refuse, 0) / goal.toDouble() * 100).toInt()
+                    else -> 0
                 }
-        );
-        return result;
-    }
-
-    public boolean isPassed() {
-        int all = participants.size();
-        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
-        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
-
-        if (all < plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5))
-            return false;
-
-        switch (type) {
-            case NORMAL:
-                return accept > refuse;
-            case REACHAMOUNT:
-                return accept >= goal;
-            case LEASTNOT:
-                return refuse <= goal;
-            default:
-                return false;
+            } else (all / least.toDouble() * 100).toInt()
+            return rate
         }
+
+    fun getUserStatus(uuid: UUID): UserStatus {
+        if (!open) return UserStatus.DONE
+        val isVoted = isVoted(uuid)
+        val hasReason = hasReason(uuid)
+        return if (isVoted && hasReason) UserStatus.DONE else if (isVoted) UserStatus.NO_REASON else UserStatus.FIRST
     }
 
-    public Result result() {
-        if (cancelled) return Result.CANCEL;
-
-        if (type == Type.NORMAL)
-            if (listParticipants(user -> user.choice == Choice.ACCEPT).size() == listParticipants(user -> user.choice == Choice.REFUSE).size())
-                return Result.DRAW;
-
-        if (isPassed()) return Result.PASS;
-        else return Result.REJECT;
+    override fun getTypeName(): String {
+        return "投票数据文件/$fileName"
     }
 
-    public boolean isVoted(UUID uuid) {
-        return getParticipant(uuid) != null;
+    override fun getFileName(): String {
+        return BasicUtil.getNoExFileName(file.name)
     }
 
-    public boolean hasReason(UUID uuid) {
-        Participant user = getParticipant(uuid);
-        if (user != null)
-            return !user.reason.equalsIgnoreCase(Msg.REASON_NOT_YET.msg) && !user.reason.equalsIgnoreCase(Msg.REASON_NO_PERM.msg);
-        return false;
-    }
-
-    public String getReason(UUID uuid) {
-        Participant user = getParticipant(uuid);
-        if (user != null) return I18n.color(user.reason);
-        return I18n.color(Msg.REASON_NOT_YET.msg);
-    }
-
-    public Choice getChoice(UUID uuid) {
-        Participant user = getParticipant(uuid);
-        if (user != null) return user.choice;
-        return null;
-    }
-
-    public int getProcess() {
-        int all = participants.size();
-        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
-        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
-        int least = plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5);
-
-        int rate;
-        if (all >= least) {
-            switch (type) {
-                case NORMAL:
-                    rate = (int) ((accept / (double) all) * 100);
-                    break;
-                case REACHAMOUNT:
-                    rate = (int) ((accept / (double) goal) * 100);
-                    break;
-                case LEASTNOT:
-                    rate = (int) ((Math.max(goal - refuse, 0) / (double) goal) * 100);
-                    break;
-                default:
-                    rate = 0;
-                    break;
+    override fun init() {
+        title = "$ownerName 的投票"
+        description = ArrayList(listOf(Msg.NO_DESCRIPTION.msg))
+        choices = object : HashMap<Choice?, String?>() {
+            init {
+                put(Choice.ACCEPT, ChatColor.GREEN.toString() + Choice.ACCEPT.name)
+                put(Choice.NEUTRAL, ChatColor.YELLOW.toString() + Choice.NEUTRAL.name)
+                put(Choice.REFUSE, ChatColor.RED.toString() + Choice.REFUSE.name)
             }
-        } else rate = (int) ((all / (double) least) * 100);
-
-        return rate;
-    }
-
-    public UserStatus getUserStatus(UUID uuid) {
-        if (!open) return UserStatus.DONE;
-        boolean isVoted = isVoted(uuid);
-        boolean hasReason = hasReason(uuid);
-        if (isVoted && hasReason) return UserStatus.DONE;
-        else if (isVoted) return UserStatus.NO_REASON;
-        else return UserStatus.FIRST;
-    }
-
-    @Override
-    public String getTypeName() {
-        return "投票数据文件/" + getFileName();
-    }
-
-    @Override
-    public String getFileName() {
-        return BasicUtil.getNoExFileName(this.file.getName());
-    }
-
-    @Override
-    public void init() {
-        this.title = getOwnerName() + " 的投票";
-        this.description = new ArrayList<>(Collections.singletonList(Msg.NO_DESCRIPTION.msg));
-        this.choices = new HashMap<Choice, String>() {
-            {
-                put(Choice.ACCEPT, ChatColor.GREEN + Choice.ACCEPT.name);
-                put(Choice.NEUTRAL, ChatColor.YELLOW + Choice.NEUTRAL.name);
-                put(Choice.REFUSE, ChatColor.RED + Choice.REFUSE.name);
+        }
+        autocast = ArrayList()
+        results = object : HashMap<Result?, String?>() {
+            init {
+                put(Result.PASS, ChatColor.GREEN.toString() + Result.PASS.name)
+                put(Result.DRAW, ChatColor.YELLOW.toString() + Result.DRAW.name)
+                put(Result.REJECT, ChatColor.RED.toString() + Result.REJECT.name)
+                put(Result.CANCEL, ChatColor.RED.toString() + Result.CANCEL.name)
             }
-        };
-        this.autocast = new ArrayList<>();
-        this.results = new HashMap<Result, String>() {
-            {
-                put(Result.PASS, ChatColor.GREEN + Result.PASS.name);
-                put(Result.DRAW, ChatColor.YELLOW + Result.DRAW.name);
-                put(Result.REJECT, ChatColor.RED + Result.REJECT.name);
-                put(Result.CANCEL, ChatColor.RED + Result.CANCEL.name);
-            }
-        };
-
-        this.participants = new ArrayList<>();
+        }
+        participants = ArrayList()
     }
 
-    @Override
-    public void saveDefault() {
-        init();
-        save();
+    override fun saveDefault() {
+        init()
+        save()
     }
 
-    @Override
-    public File getFile() {
-        return file;
+    override fun getFile(): File {
+        return file
     }
 
-    @Override
-    public void setFile(@NonNull File file) {
-        this.file = file;
+    override fun setFile(@NonNull file: File) {
+        this.file = file
     }
 
-    @Override
-    public void load(@NonNull File file) {
+    override fun load(@NonNull file: File) {
         try {
-            FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-            this.voteID = getFileName();
-
-            ConfigurationSection information = data.getConfigurationSection("Information");
-            if (information == null) return;
-            this.open = information.getBoolean("Open", true);
-            this.cancelled = information.getBoolean("Cancelled", false);
-            this.isDraft = information.getBoolean("Draft", false);
-            this.type = Type.valueOf(information.getString("Type", "NORMAL").toUpperCase());
-            this.goal = information.getInt("Goal", Integer.MAX_VALUE);
-            this.owner = UUID.fromString(information.getString("Owner"));
-            this.startTime = information.getLong("Timestamp");
-            this.duration = information.getString("Duration");
-
-            ConfigurationSection setting = data.getConfigurationSection("Settings");
+            val data: FileConfiguration = YamlConfiguration.loadConfiguration(file)
+            voteID = fileName
+            val information = data.getConfigurationSection("Information") ?: return
+            open = information.getBoolean("Open", true)
+            cancelled = information.getBoolean("Cancelled", false)
+            isDraft = information.getBoolean("Draft", false)
+            type = Type.valueOf(information.getString("Type", "NORMAL")!!.toUpperCase())
+            goal = information.getInt("Goal", Int.MAX_VALUE)
+            owner = UUID.fromString(information.getString("Owner"))
+            startTime = information.getLong("Timestamp")
+            duration = information.getString("Duration")
+            val setting = data.getConfigurationSection("Settings")
             if (setting != null) {
-                this.title = I18n.color(setting.getString("Title", getOwnerName() + " 的投票"));
-                this.description = setting.getStringList("Description");
-                this.description.replaceAll(I18n::color);
+                title = I18n.color(setting.getString("Title", "$ownerName 的投票"))
+                description = setting.getStringList("Description")
+                description!!.replaceAll { text: String? -> I18n.color(text) }
             }
-
-            ConfigurationSection choiceSection = setting.getConfigurationSection("Choices");
-            this.choices = new HashMap<>();
+            val choiceSection = setting!!.getConfigurationSection("Choices")
+            choices = HashMap()
             if (choiceSection != null) {
-                for (String choiceKey : choiceSection.getKeys(false)) {
-                    Choice choice = EnumUtil.valueOf(Choice.class, choiceKey.toUpperCase());
-                    this.choices.put(choice, I18n.color(choiceSection.getString(choiceKey)));
+                for (choiceKey in choiceSection.getKeys(false)) {
+                    val choice = EnumUtil.valueOf(Choice::class.java, choiceKey.toUpperCase())
+                    choices[choice] = I18n.color(choiceSection.getString(choiceKey))
                 }
             }
-
-
-            this.autocast = setting.getStringList("Autocast");
-
-            ConfigurationSection resultSection = setting.getConfigurationSection("Results"); // TODO 这里有一个全都是 null 的问题
-            this.results = new HashMap<>();
+            autocast = setting.getStringList("Autocast")
+            val resultSection = setting.getConfigurationSection("Results") // TODO 这里有一个全都是 null 的问题
+            results = HashMap()
             if (resultSection != null) {
-                for (String resultKey : resultSection.getKeys(false)) {
-                    Result result = EnumUtil.valueOf(Result.class, resultKey.toUpperCase());
-                    this.results.put(result, I18n.color(choiceSection.getString(resultKey)));
+                for (resultKey in resultSection.getKeys(false)) {
+                    val result = EnumUtil.valueOf(Result::class.java, resultKey.toUpperCase())
+                    results[result] = I18n.color(choiceSection!!.getString(resultKey))
                 }
             }
-
-            ConfigurationSection participantSection = data.getConfigurationSection("Participants");
-            this.participants = new ArrayList<>();
+            val participantSection = data.getConfigurationSection("Participants")
+            participants = ArrayList()
             if (participantSection != null) {
-                for (String uuid : participantSection.getKeys(false)) {
+                for (uuid in participantSection.getKeys(false)) {
 
                     // 旧版本数据文件的转换
-                    Choice choice = EnumUtil.valueOf(Choice.class, uuid.toUpperCase());
+                    val choice = EnumUtil.valueOf(Choice::class.java, uuid.toUpperCase())
                     if (choice != null) {
-                        ConfigurationSection targetOldSection = participantSection.getConfigurationSection(uuid);
-                        for (String oldUUID : targetOldSection.getKeys(false))
-                            this.participants.add(new Participant(UUID.fromString(oldUUID), choice, false, targetOldSection.getString(oldUUID)));
-                        continue;
+                        val targetOldSection = participantSection.getConfigurationSection(uuid)
+                        for (oldUUID in targetOldSection!!.getKeys(false)) participants.add(Participant(UUID.fromString(oldUUID), choice, false, targetOldSection.getString(oldUUID!!)))
+                        continue
                     }
-
-                    ConfigurationSection userSection = participantSection.getConfigurationSection(uuid);
-                    if (userSection == null) continue;
-                    this.participants.add(new Participant(userSection));
+                    val userSection = participantSection.getConfigurationSection(uuid) ?: continue
+                    participants.add(Participant(userSection))
                 }
             }
-
-        } catch (Throwable e) {
-            plugin.lang.logError(I18n.LOAD, getTypeName(), e, null);
+        } catch (e: Throwable) {
+            plugin.lang.logError(I18n.LOAD, typeName, e, null)
         }
     }
 
-    @Override
-    public void reload() {
-        plugin.lang.logAction(I18n.RELOAD, getTypeName());
-        load(file);
+    override fun reload() {
+        plugin.lang.logAction(I18n.RELOAD, typeName)
+        load(file)
     }
 
-    @Override
-    public void save() {
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-        ConfigurationSection information = data.createSection("Information");
-        information.set("Open", open);
-        information.set("Cancelled", cancelled);
-        information.set("Draft", isDraft);
-        information.set("Type", type.name());
-        information.set("Goal", goal);
-        information.set("Owner", owner.toString());
-        information.set("Timestamp", startTime);
-        information.set("Duration", duration);
-
-        ConfigurationSection setting = data.createSection("Settings");
-        setting.set("Title", I18n.deColor(title, '&'));
-        List<String> desc2save = new ArrayList<>(description);
-        desc2save.replaceAll(s -> I18n.deColor(s, '&'));
-        setting.set("Description", desc2save);
-        this.choices.forEach(
-                (choice, s) -> setting.set("Choices." + choice.name(), I18n.deColor(s, '&'))
-        );
-        setting.set("Autocast", autocast);
-        this.results.forEach(
-                (result, s) -> setting.set("Results." + result.name(), I18n.deColor(s, '&'))
-        );
-
-        ConfigurationSection participantSection = data.createSection("Participants");
-        this.participants.forEach(participant -> participant.save(participantSection));
-
+    override fun save() {
+        val data: FileConfiguration = YamlConfiguration.loadConfiguration(file)
+        val information = data.createSection("Information")
+        information["Open"] = open
+        information["Cancelled"] = cancelled
+        information["Draft"] = isDraft
+        information["Type"] = type!!.name
+        information["Goal"] = goal
+        information["Owner"] = owner.toString()
+        information["Timestamp"] = startTime
+        information["Duration"] = duration
+        val setting = data.createSection("Settings")
+        setting["Title"] = I18n.deColor(title, '&')
+        val desc2save: List<String?> = ArrayList(description)
+        desc2save.replaceAll(UnaryOperator { s: String? -> I18n.deColor(s, '&') })
+        setting["Description"] = desc2save
+        choices!!.forEach { (choice: Choice?, s: String?) -> setting["Choices." + choice!!.name] = I18n.deColor(s, '&') }
+        setting["Autocast"] = autocast
+        results!!.forEach { (result: Result?, s: String?) -> setting["Results." + result!!.name] = I18n.deColor(s, '&') }
+        val participantSection = data.createSection("Participants")
+        participants!!.forEach(Consumer { participant: Participant? -> participant!!.save(participantSection) })
         try {
-            data.save(file);
-        } catch (IOException e) {
-            plugin.lang.logError(I18n.SAVE, getTypeName(), e, null);
+            data.save(file)
+        } catch (e: IOException) {
+            plugin.lang.logError(I18n.SAVE, typeName, e, null)
         }
     }
 
-    @Override
-    public PID getID() {
-        return id;
+    override fun getID(): PID {
+        return id
     }
 
-    @Override
-    public void setID(@NonNull PID pid) {
-        this.id = pid;
+    override fun setID(@NonNull pid: PID) {
+        id = pid
     }
 
-    @Override
-    public UUID getOwner() {
-        return owner;
+    override fun getOwner(): UUID {
+        return owner!!
     }
 
-    @Override
-    public void setOwner(UUID uuid) {
-        this.owner = uuid;
+    override fun setOwner(uuid: UUID) {
+        owner = uuid
     }
 
-    @Override
-    public long getTimestamp() {
-        return startTime;
+    override fun getTimestamp(): Long {
+        return startTime
     }
 
-    @Override
-    public void setTime(long time) {
-        this.startTime = time;
+    override fun setTime(time: Long) {
+        startTime = time
     }
 
-    public enum Type {
-        NORMAL(0, "普通投票", "同意人数大于反对人数"),
-        REACHAMOUNT(1, "多数同意投票", "同意人数需达到指定数量"),
-        LEASTNOT(2, "否决投票", "反对人数不超过指定数量");
+    enum class Type(val mode: Int, override val name: String, val desc: String) {
+        NORMAL(0, "普通投票", "同意人数大于反对人数"), REACHAMOUNT(1, "多数同意投票", "同意人数需达到指定数量"), LEASTNOT(2, "否决投票", "反对人数不超过指定数量");
 
-        public final String desc;
-        public final String name;
-        public final int mode;
-
-        Type(int mode, String name, String type) {
-            this.desc = type;
-            this.name = name;
-            this.mode = mode;
-        }
-
-        public static Type mode(int mode) {
-            if (mode > 2) mode = 0;
-            if (mode < 0) mode = 2;
-            switch (mode) {
-                case 0:
-                default:
-                    return NORMAL;
-                case 1:
-                    return REACHAMOUNT;
-                case 2:
-                    return LEASTNOT;
+        companion object {
+            fun mode(mode: Int): Type {
+                var mode = mode
+                if (mode > 2) mode = 0
+                if (mode < 0) mode = 2
+                return when (mode) {
+                    0 -> NORMAL
+                    1 -> REACHAMOUNT
+                    2 -> LEASTNOT
+                    else -> NORMAL
+                }
             }
         }
+
     }
 
-    public enum Choice {
-        ACCEPT("同意"),
-        NEUTRAL("中立"),
-        REFUSE("反对");
+    enum class Choice(override val name: String) {
+        ACCEPT("同意"), NEUTRAL("中立"), REFUSE("反对");
 
-        public final String name;
-
-        Choice(String name) {
-            this.name = name;
-        }
     }
 
-    public enum Result {
-        PASS("通过"),
-        REJECT("未通过"),
-        DRAW("平票"),
-        CANCEL("被取消");
+    enum class Result(override val name: String) {
+        PASS("通过"), REJECT("未通过"), DRAW("平票"), CANCEL("被取消");
 
-        public final String name;
-
-        Result(String name) {
-            this.name = name;
-        }
     }
 
-    public enum Duration {
+    enum class Duration(val code: Char, override val name: String, val time: Int) {
         // yyyy-MM-dd HH:mm:ss
-        DAY('d', "天", 86400),
-        HOUR('H', "时", 3600),
-        MINUTE('m', "分", 60),
-        SECOND('s', "秒", 1);
+        DAY('d', "天", 86400), HOUR('H', "时", 3600), MINUTE('m', "分", 60), SECOND('s', "秒", 1);
 
-        public final char code;
-        public final String name;
-        public final int time;
+    }
 
-        Duration(char code, String name, int time) {
-            this.code = code;
-            this.name = name;
-            this.time = time;
+    enum class UserStatus {
+        FIRST, NO_REASON, DONE
+    }
+
+    enum class Data(override val name: String) {
+        ID("投票ID"), OPEN("进行状态"), CANCELLED("取消状态"), DRAFT("草稿状态"), ANONYMOUS("允许匿名投票"), PUBLIC("公开投票进度"), EDITABLE("可编辑所投票"), TYPE("投票类型"), GOAL("目标人数"), OWNER("发起者"), STARTTIME("发起时间"), DURATION("持续时间"), TITLE("投票标题"), DESCRIPTION("投票简述"), CHOICE("投票选项"), AUTOCAST("自动执行内容"), RESULT("投票结果"), PARTICIPANT("参加者"), PROCESS("投票进度");
+
+    }
+
+    class Participant : Timestamp {
+        val uuid: UUID
+        val choice: Choice?
+        val anonymous: Boolean
+        val reason: String?
+        var timestamp: Long
+
+        constructor(uuid: UUID, choice: Choice?, anonymous: Boolean, reason: String?) {
+            this.uuid = uuid
+            this.choice = choice
+            this.anonymous = anonymous
+            this.reason = reason
+            timestamp = System.currentTimeMillis()
+        }
+
+        constructor(@NonNull section: ConfigurationSection) {
+            uuid = UUID.fromString(section.name)
+            choice = EnumUtil.valueOf(Choice::class.java, section.getString("Choice"))
+            anonymous = section.getBoolean("Anonymous", false)
+            reason = section.getString("Reason", Msg.REASON_NOT_YET.msg)
+            timestamp = section.getLong("Timestamp")
+        }
+
+        fun save(participantSection: ConfigurationSection) {
+            val userSection = participantSection.createSection(uuid.toString())
+            userSection["Choice"] = choice!!.name
+            userSection["Anonymous"] = anonymous
+            userSection["Reason"] = reason
+            userSection["Timestamp"] = timestamp
+        }
+
+        override fun getTimestamp(): Long {
+            return timestamp
+        }
+
+        override fun setTime(l: Long) {
+            timestamp = l
         }
     }
 
-    public enum UserStatus {
-        FIRST,
-        NO_REASON,
-        DONE
-    }
-
-    public enum Data {
-        ID("投票ID"),
-        OPEN("进行状态"),
-        CANCELLED("取消状态"),
-        DRAFT("草稿状态"),
-        ANONYMOUS("允许匿名投票"),
-        PUBLIC("公开投票进度"),
-        EDITABLE("可编辑所投票"),
-        TYPE("投票类型"),
-        GOAL("目标人数"),
-        OWNER("发起者"),
-        STARTTIME("发起时间"),
-        DURATION("持续时间"),
-        TITLE("投票标题"),
-        DESCRIPTION("投票简述"),
-        CHOICE("投票选项"),
-        AUTOCAST("自动执行内容"),
-        RESULT("投票结果"),
-        PARTICIPANT("参加者"),
-        PROCESS("投票进度");
-
-        public final String name;
-
-        Data(String type) {
-            this.name = type;
-        }
-    }
-
-    public static class Participant implements Timestamp {
-        public final UUID uuid;
-        public final Choice choice;
-        public final boolean anonymous;
-        public final String reason;
-        public long timestamp;
-
-        public Participant(UUID uuid, Choice choice, boolean anonymous, String reason) {
-            this.uuid = uuid;
-            this.choice = choice;
-            this.anonymous = anonymous;
-            this.reason = reason;
-            this.timestamp = System.currentTimeMillis();
+    companion object {
+        fun getDurationTimestamp(duration: String?): Long {
+            var result: Long = 0
+            var clone = duration!!.toUpperCase()
+            var durationType: Duration
+            while (getFirstIndexOf(clone).also { durationType = it!! } != null) {
+                val index = clone.indexOf(durationType.code)
+                try {
+                    val target = clone.substring(0, index)
+                    val amount = target.toInt()
+                    result += amount * durationType.time.toLong()
+                    clone = clone.substring(index + 1)
+                } catch (e: Throwable) {
+                    break
+                }
+            }
+            return result * 1000
         }
 
-        public Participant(@NonNull ConfigurationSection section) {
-            this.uuid = UUID.fromString(section.getName());
-            this.choice = EnumUtil.valueOf(Choice.class, section.getString("Choice"));
-            this.anonymous = section.getBoolean("Anonymous", false);
-            this.reason = section.getString("Reason", Msg.REASON_NOT_YET.msg);
-            this.timestamp = section.getLong("Timestamp");
-        }
-
-        public void save(ConfigurationSection participantSection) {
-            ConfigurationSection userSection = participantSection.createSection(uuid.toString());
-            userSection.set("Choice", choice.name());
-            userSection.set("Anonymous", anonymous);
-            userSection.set("Reason", reason);
-            userSection.set("Timestamp", timestamp);
-        }
-
-        @Override
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        @Override
-        public void setTime(long l) {
-            this.timestamp = l;
+        fun getFirstIndexOf(target: String): Duration? {
+            var index = Int.MAX_VALUE
+            var durationType: Duration? = null
+            for (type in Duration.values()) {
+                val currentIndex = target.indexOf(type.code)
+                if (currentIndex == -1) continue
+                if (currentIndex < index) {
+                    index = currentIndex
+                    durationType = type
+                }
+            }
+            return durationType
         }
     }
 }

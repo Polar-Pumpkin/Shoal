@@ -1,74 +1,58 @@
-package net.shoal.sir.voteup.command.subcommands;
+package net.shoal.sir.voteup.command.subcommands
 
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.api.VoteUpPerm;
-import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.data.prompts.ModifyContentPrompt;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.command.PCommand;
-import org.serverct.parrot.parrotx.utils.ConversationUtil;
-import org.serverct.parrot.parrotx.utils.I18n;
+import net.shoal.sir.voteup.api.VoteUpAPI
+import net.shoal.sir.voteup.api.VoteUpPerm
+import net.shoal.sir.voteup.data.Vote
+import net.shoal.sir.voteup.data.prompts.ModifyContentPrompt
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.command.PCommand
+import org.serverct.parrot.parrotx.utils.ConversationUtil
+import org.serverct.parrot.parrotx.utils.I18n
 
-import java.util.List;
-
-public class ModifyCmd implements PCommand {
-
-    public static final String ADD = "add";
-    public static final String SET = "set";
-    public static final String DEL = "del";
-
-    @Override
-    public String getPermission() {
-        return null;
+class ModifyCmd : PCommand {
+    override fun getPermission(): String {
+        return null
     }
 
-    @Override
-    public String getDescription() {
-        return "修改投票的复合内容, 例如投票简述或自动执行";
+    override fun getDescription(): String {
+        return "修改投票的复合内容, 例如投票简述或自动执行"
     }
 
-    @Override
-    public boolean execute(PPlugin plugin, CommandSender sender, String[] args) {
+    override fun execute(plugin: PPlugin, sender: CommandSender, args: Array<String>): Boolean {
         // /vote modify desc/autocast add/set/del line
-        if (sender instanceof Player) {
-            Player user = (Player) sender;
-            Vote creating = VoteUpAPI.VOTE_MANAGER.draftVote(user.getUniqueId());
+        if (sender is Player) {
+            val user = sender
+            val creating = VoteUpAPI.VOTE_MANAGER!!.draftVote(user.uniqueId)
             if (creating != null) {
-                if (args.length == 3 || args.length == 4) {
-                    switch (args[1]) {
-                        case "desc":
-                            modify(user, creating, args, true);
-                            break;
-                        case "autocast":
-                            modify(user, creating, args, false);
-                            break;
-                        default:
-                            user.sendMessage(plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
-                            break;
+                if (args.size == 3 || args.size == 4) {
+                    when (args[1]) {
+                        "desc" -> modify(user, creating, args, true)
+                        "autocast" -> modify(user, creating, args, false)
+                        else -> user.sendMessage(plugin.lang[plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"])
                     }
-                } else user.sendMessage(plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
+                } else user.sendMessage(plugin.lang[plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"])
             }
         }
-        return true;
+        return true
     }
 
-    private void modify(Player user, Vote creating, String[] args, boolean isDesc) {
-        Vote.Data dataType = isDesc ? Vote.Data.DESCRIPTION : Vote.Data.AUTOCAST;
+    private fun modify(user: Player, creating: Vote, args: Array<String>, isDesc: Boolean) {
+        val dataType = if (isDesc) Vote.Data.DESCRIPTION else Vote.Data.AUTOCAST
         if (VoteUpPerm.EDIT.hasPermission(user, dataType)) {
-            PPlugin plugin = VoteUp.getInstance();
-            List<String> list = isDesc ? creating.description : creating.autocast;
-            if (ADD.equalsIgnoreCase(args[2]))
-                ConversationUtil.start(plugin, user, new ModifyContentPrompt(user, creating, (args.length == 4 ? Integer.parseInt(args[3]) : list.size() + 1), isDesc, ADD), 300);
-            else if (SET.equalsIgnoreCase(args[2]))
-                ConversationUtil.start(plugin, user, new ModifyContentPrompt(user, creating, Integer.parseInt(args[3]), isDesc, SET), 300);
-            else if (DEL.equalsIgnoreCase(args[2])) {
-                list.remove((args.length == 4 ? Integer.parseInt(args[3]) : list.size() - 1));
-                if (isDesc) creating.description = list;
-                else creating.autocast = list;
-            } else user.sendMessage(plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
+            val plugin = PPlugin.getInstance()
+            val list = if (isDesc) creating.description else creating.autocast
+            if (ADD.equals(args[2], ignoreCase = true)) ConversationUtil.start(plugin, user, ModifyContentPrompt(user, creating, if (args.size == 4) args[3].toInt() else list!!.size + 1, isDesc, ADD), 300) else if (SET.equals(args[2], ignoreCase = true)) ConversationUtil.start(plugin, user, ModifyContentPrompt(user, creating, args[3].toInt(), isDesc, SET), 300) else if (DEL.equals(args[2], ignoreCase = true)) {
+                list!!.removeAt(if (args.size == 4) args[3].toInt() else list.size - 1)
+                if (isDesc) creating.description = list else creating.autocast = list
+            } else user.sendMessage(plugin.lang[plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"])
         }
+    }
+
+    companion object {
+        const val ADD = "add"
+        const val SET = "set"
+        const val DEL = "del"
     }
 }

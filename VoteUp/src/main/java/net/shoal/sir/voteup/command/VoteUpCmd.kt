@@ -1,16 +1,15 @@
-package net.shoal.sir.voteup.command;
+package net.shoal.sir.voteup.command
 
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpPerm;
-import net.shoal.sir.voteup.command.subcommands.CreateCmd;
-import net.shoal.sir.voteup.command.subcommands.ModifyCmd;
-import net.shoal.sir.voteup.command.subcommands.ViewCmd;
-import org.serverct.parrot.parrotx.command.CommandHandler;
-import org.serverct.parrot.parrotx.command.subcommands.HelpCommand;
-import org.serverct.parrot.parrotx.command.subcommands.ReloadCommand;
+import net.shoal.sir.voteup.api.VoteUpPerm
+import net.shoal.sir.voteup.command.subcommands.CreateCmd
+import net.shoal.sir.voteup.command.subcommands.ModifyCmd
+import net.shoal.sir.voteup.command.subcommands.ViewCmd
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.command.CommandHandler
+import org.serverct.parrot.parrotx.command.subcommands.HelpCommand
+import org.serverct.parrot.parrotx.command.subcommands.ReloadCommand
 
-public class VoteUpCmd extends CommandHandler {
-
+class VoteUpCmd : CommandHandler(PPlugin.getInstance(), "voteup") {
     /*private String[] helpList = {
             "&6&lVote Up &8&o(v1.4-SNAPSHOT)",
             "",
@@ -32,13 +31,11 @@ public class VoteUpCmd extends CommandHandler {
             "  &d/vote reload &9- &7重载插件配置文件.",
             "  &d/vote debug &9- &7切换 Debug 模式."
     };*/
-
-    public VoteUpCmd() {
-        super(VoteUp.getInstance(), "voteup");
-        registerSubCommand("help", new HelpCommand(plugin, null));
-        registerSubCommand("create", new CreateCmd());
-        registerSubCommand("reload", new ReloadCommand(plugin, VoteUpPerm.ADMIN.node));
-        registerSubCommand("modify", new ModifyCmd());
-        registerSubCommand("view", new ViewCmd());
+    init {
+        registerSubCommand("help", HelpCommand(plugin, null))
+        registerSubCommand("create", CreateCmd())
+        registerSubCommand("reload", ReloadCommand(plugin, VoteUpPerm.ADMIN.node))
+        registerSubCommand("modify", ModifyCmd())
+        registerSubCommand("view", ViewCmd())
     }
 }

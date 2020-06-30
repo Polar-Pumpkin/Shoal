@@ -1,20 +1,19 @@
-package net.shoal.sir.voteup.api;
+package net.shoal.sir.voteup.api
 
-import net.shoal.sir.voteup.config.CacheManager;
-import net.shoal.sir.voteup.config.GuiManager;
-import net.shoal.sir.voteup.config.VoteManager;
+import net.shoal.sir.voteup.config.CacheManager
+import net.shoal.sir.voteup.config.GuiManager
+import net.shoal.sir.voteup.config.VoteManager
 
-public class VoteUpAPI {
+object VoteUpAPI {
+    var SOUND: SoundUtil? = null
+    var VOTE_MANAGER: VoteManager? = null
+    var GUI_MANAGER: GuiManager? = null
+    var CACHE_MANAGER: CacheManager? = null
 
-    public static final SoundUtil SOUND;
-    public static final VoteManager VOTE_MANAGER;
-    public static final GuiManager GUI_MANAGER;
-    public static final CacheManager CACHE_MANAGER;
-
-    static {
-        SOUND = new SoundUtil();
-        VOTE_MANAGER = new VoteManager();
-        GUI_MANAGER = new GuiManager();
-        CACHE_MANAGER = new CacheManager();
+    init {
+        SOUND = SoundUtil()
+        VOTE_MANAGER = VoteManager()
+        GUI_MANAGER = GuiManager()
+        CACHE_MANAGER = CacheManager()
     }
 }

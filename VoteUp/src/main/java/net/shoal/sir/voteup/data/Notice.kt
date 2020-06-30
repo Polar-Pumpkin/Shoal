@@ -1,37 +1,33 @@
-package net.shoal.sir.voteup.data;
+package net.shoal.sir.voteup.data
 
-import lombok.NonNull;
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.data.flags.Timestamp;
-import org.serverct.parrot.parrotx.utils.ConfigUtil;
-import org.serverct.parrot.parrotx.utils.EnumUtil;
-import org.serverct.parrot.parrotx.utils.TimeUtil;
+import net.shoal.sir.voteup.api.VoteUpAPI
+import net.shoal.sir.voteup.api.VoteUpPlaceholder
+import net.shoal.sir.voteup.config.ConfPath
+import org.bukkit.Bukkit
+import org.bukkit.configuration.ConfigurationSection
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.data.flags.Timestamp
+import org.serverct.parrot.parrotx.utils.ConfigUtil
+import org.serverct.parrot.parrotx.utils.EnumUtil
+import org.serverct.parrot.parrotx.utils.TimeUtil
+import java.util.*
+import java.util.function.Consumer
 
-import java.util.*;
+class Notice : Timestamp {
+    private val plugin = PPlugin.getInstance()
+    var number: Int
+    var type: Type
+    var voteID: String?
+    var announced: MutableList<UUID> = ArrayList()
+    var params: MutableMap<String, Any> = HashMap()
+    private var time: Long
 
-public class Notice implements Timestamp {
-
-    private final PPlugin plugin = VoteUp.getInstance();
-    public int number;
-    public Type type;
-    public String voteID;
-    public List<UUID> announced = new ArrayList<>();
-    public Map<String, Object> params = new HashMap<>();
-    private long time;
-
-    public Notice(Type type, String voteID, int number, Map<String, Object> params) {
-        this.type = type;
-        this.voteID = voteID;
-        this.number = number;
-        this.params.putAll(params);
-        this.time = System.currentTimeMillis();
+    constructor(type: Type, voteID: String?, number: Int, params: Map<String, Any>?) {
+        this.type = type
+        this.voteID = voteID
+        this.number = number
+        this.params.putAll(params!!)
+        time = System.currentTimeMillis()
     }
 
     /*
@@ -47,85 +43,84 @@ public class Notice implements Timestamp {
           Choice: ACCEPT
           Reason: string
      */
-
-    public Notice(String voteID, @NonNull ConfigurationSection section) {
-        this.voteID = voteID;
-        this.number = Integer.parseInt(section.getName());
-        this.type = EnumUtil.valueOf(Type.class, section.getString("Type").toUpperCase());
-        this.time = section.getLong("Timestamp");
-        section.getStringList("Announced").forEach(uuid -> this.announced.add(UUID.fromString(uuid)));
-        this.params.putAll(ConfigUtil.getMap(section, "Params"));
+    constructor(voteID: String?, @NonNull section: ConfigurationSection) {
+        this.voteID = voteID
+        number = section.name.toInt()
+        type = EnumUtil.valueOf(Type::class.java, section.getString("Type")!!.toUpperCase())
+        time = section.getLong("Timestamp")
+        section.getStringList("Announced").forEach(Consumer { uuid: String? -> announced.add(UUID.fromString(uuid)) })
+        params.putAll(ConfigUtil.getMap(section, "Params"))
     }
 
-    public void save(@NonNull ConfigurationSection section) {
-        section.set("Type", type.name());
-        section.set("Timestamp", time);
-        List<String> strList = new ArrayList<>();
-        this.announced.forEach(uuid -> strList.add(uuid.toString()));
-        section.set("Announced", strList);
-        ConfigurationSection params = section.createSection("Params");
-        this.params.forEach(params::set);
+    fun save(@NonNull section: ConfigurationSection) {
+        section["Type"] = type.name
+        section["Timestamp"] = time
+        val strList: MutableList<String> = ArrayList()
+        announced.forEach(Consumer { uuid: UUID -> strList.add(uuid.toString()) })
+        section["Announced"] = strList
+        val params = section.createSection("Params")
+        this.params.forEach { (s: String?, o: Any?) -> params[s] = o }
     }
 
-    public String announce(UUID uuid) {
-        Vote vote = VoteUpAPI.VOTE_MANAGER.getVote(voteID);
-        if (vote == null) return null;
-        String result = null;
-
-        switch (type) {
-            case VOTE_END:
-            case VOTE:
-            default:
-                if (this.announced.contains(uuid)) return null;
-                this.announced.add(uuid);
-                result = plugin.lang.getRaw(plugin.localeKey, "Vote", "Notice." + type.name() + (vote.isOwner(uuid) ? ".Noticer" : ".Starter"));
-                for (Map.Entry<String, Object> entry : this.params.entrySet())
-                    result = result.replace("%" + entry.getKey().toLowerCase() + "%", (String) entry.getValue());
+    fun announce(uuid: UUID): String? {
+        val vote = VoteUpAPI.VOTE_MANAGER!!.getVote(voteID) ?: return null
+        var result: String? = null
+        when (type) {
+            Type.VOTE_END, Type.VOTE -> {
+                if (announced.contains(uuid)) return null
+                announced.add(uuid)
+                result = plugin.lang.getRaw(plugin.localeKey, "Vote", "Notice." + type.name + if (vote.isOwner(uuid)) ".Noticer" else ".Starter")
+                for ((key, value) in params) result = result.replace("%" + key.toLowerCase() + "%", value as String)
                 result = VoteUpPlaceholder.parse(vote, result)
-                        .replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]");
-                break;
-            case AUTOCAST_WAIT_EXECUTE:
-                if (uuid != vote.getOwner() || this.announced.contains(uuid)) return null;
-                this.announced.add(uuid);
-                Player owner = Bukkit.getPlayer(vote.getOwner());
-                if (owner == null) break;
-                vote.autocast.forEach(owner::performCommand);
-                break;
+                        .replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]")
+            }
+            Type.AUTOCAST_WAIT_EXECUTE -> {
+                if (uuid !== vote.getOwner() || announced.contains(uuid)) return null
+                announced.add(uuid)
+                val owner = Bukkit.getPlayer(vote.getOwner()) ?: break
+                vote.autocast!!.forEach(Consumer { s: String? -> owner.performCommand(s!!) })
+            }
+            else -> {
+                if (announced.contains(uuid)) return null
+                announced.add(uuid)
+                result = plugin.lang.getRaw(plugin.localeKey, "Vote", "Notice." + type.name + if (vote.isOwner(uuid)) ".Noticer" else ".Starter")
+                for ((key, value) in params) result = result.replace("%" + key.toLowerCase() + "%", value as String)
+                result = VoteUpPlaceholder.parse(vote, result)
+                        .replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]")
+            }
+        }
+        return result
+    }
+
+    val isOver: Boolean
+        get() {
+            val vote = VoteUpAPI.VOTE_MANAGER!!.getVote(voteID) ?: return true
+            return when (type) {
+                Type.VOTE, Type.VOTE_END -> {
+                    val admins = plugin.pConfig.config.getStringList(ConfPath.Path.ADMIN.path)
+                    val announced: MutableList<String> = ArrayList()
+                    this.announced.forEach(Consumer { uuid: UUID -> announced.add(uuid.toString()) })
+                    announced == admins
+                }
+                Type.AUTOCAST_WAIT_EXECUTE -> announced.contains(vote.getOwner())
+                else -> {
+                    val admins = plugin.pConfig.config.getStringList(ConfPath.Path.ADMIN.path)
+                    val announced: MutableList<String> = ArrayList()
+                    this.announced.forEach(Consumer { uuid: UUID -> announced.add(uuid.toString()) })
+                    announced == admins
+                }
+            }
         }
 
-        return result;
+    override fun getTimestamp(): Long {
+        return time
     }
 
-    public boolean isOver() {
-        Vote vote = VoteUpAPI.VOTE_MANAGER.getVote(voteID);
-        if (vote == null) return true;
-
-        switch (type) {
-            case VOTE:
-            case VOTE_END:
-            default:
-                List<String> admins = plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path);
-                List<String> announced = new ArrayList<>();
-                this.announced.forEach(uuid -> announced.add(uuid.toString()));
-                return announced.equals(admins);
-            case AUTOCAST_WAIT_EXECUTE:
-                return this.announced.contains(vote.getOwner());
-        }
+    override fun setTime(l: Long) {
+        time = l
     }
 
-    @Override
-    public long getTimestamp() {
-        return time;
-    }
-
-    @Override
-    public void setTime(long l) {
-        this.time = l;
-    }
-
-    public enum Type {
-        VOTE_END,
-        VOTE,
-        AUTOCAST_WAIT_EXECUTE,
+    enum class Type {
+        VOTE_END, VOTE, AUTOCAST_WAIT_EXECUTE
     }
 }

@@ -1,225 +1,193 @@
-package net.shoal.sir.voteup.config;
+package net.shoal.sir.voteup.config
 
-import lombok.NonNull;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.api.VoteUpPerm;
-import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.data.Notice;
-import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder;
-import net.shoal.sir.voteup.enums.Msg;
-import net.shoal.sir.voteup.task.VoteEndTask;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.serverct.parrot.parrotx.config.PFolder;
-import org.serverct.parrot.parrotx.utils.BasicUtil;
-import org.serverct.parrot.parrotx.utils.I18n;
-import org.serverct.parrot.parrotx.utils.JsonChatUtil;
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
+import net.shoal.sir.voteup.api.VoteUpAPI
+import net.shoal.sir.voteup.api.VoteUpPerm
+import net.shoal.sir.voteup.api.VoteUpPlaceholder
+import net.shoal.sir.voteup.data.Notice
+import net.shoal.sir.voteup.data.Vote
+import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder
+import net.shoal.sir.voteup.enums.Msg
+import net.shoal.sir.voteup.task.VoteEndTask
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.config.PFolder
+import org.serverct.parrot.parrotx.utils.BasicUtil
+import org.serverct.parrot.parrotx.utils.I18n
+import org.serverct.parrot.parrotx.utils.JsonChatUtil
+import java.io.File
+import java.util.*
+import java.util.function.Consumer
+import java.util.function.Predicate
 
-import java.io.File;
-import java.util.*;
-import java.util.function.Predicate;
-
-public class VoteManager extends PFolder {
-
-    private final Map<String, Vote> voteMap = new HashMap<>();
-    private final Map<String, Integer> endTaskMap = new HashMap<>();
-
-    public VoteManager() {
-        super(VoteUp.getInstance(), "Votes", "投票数据文件夹");
+class VoteManager : PFolder(PPlugin.getInstance(), "Votes", "投票数据文件夹") {
+    private val voteMap: MutableMap<String?, Vote> = HashMap()
+    private val endTaskMap: MutableMap<String?, Int?> = HashMap()
+    override fun init() {
+        super.init()
+        voteMap.forEach { (s: String?, vote: Vote?) -> startCountdown(s) }
     }
 
-    @Override
-    public void init() {
-        super.init();
-        voteMap.forEach((s, vote) -> startCountdown(s));
+    override fun load(@NonNull file: File) {
+        voteMap[BasicUtil.getNoExFileName(file.name)] = Vote(file)
     }
 
-    @Override
-    public void load(@NonNull File file) {
-        voteMap.put(BasicUtil.getNoExFileName(file.getName()), new Vote(file));
-    }
-
-    private void startCountdown(String voteID) {
-        Vote data = voteMap.getOrDefault(voteID, null);
-        if (data == null) return;
-        if (!data.open) return;
-        if (endTaskMap.containsKey(voteID)) return;
-        long timeRemain = data.startTime + Vote.getDurationTimestamp(data.duration) - System.currentTimeMillis();
+    private fun startCountdown(voteID: String?) {
+        val data = voteMap.getOrDefault(voteID, null) ?: return
+        if (!data.open) return
+        if (endTaskMap.containsKey(voteID)) return
+        val timeRemain: Long = data.startTime + Vote.Companion.getDurationTimestamp(data.duration) - System.currentTimeMillis()
         if (timeRemain <= 0) {
-            endVote(voteID);
-            return;
+            endVote(voteID)
+            return
         }
-        BukkitRunnable endTask = new VoteEndTask(voteID);
-        endTask.runTaskLater(plugin, (timeRemain / 1000) * 20);
-        endTaskMap.put(voteID, endTask.getTaskId());
+        val endTask: BukkitRunnable = VoteEndTask(voteID)
+        endTask.runTaskLater(plugin, timeRemain / 1000 * 20)
+        endTaskMap[voteID] = endTask.taskId
     }
 
-    public Vote getVote(String id) {
-        return voteMap.getOrDefault(id, null);
+    fun getVote(id: String?): Vote {
+        return voteMap.getOrDefault(id, null)
     }
 
-    public Vote getNewest() {
-        List<Vote> votes = new ArrayList<>(voteMap.values());
-        votes.removeIf(vote -> vote.isDraft || !vote.open);
-        if (votes.isEmpty()) return null;
-        votes.sort(Comparator.comparing(Vote::getTimestamp).reversed());
-        return votes.get(0);
-    }
-
-    public List<Vote> list(Predicate<Vote> filter) {
-        List<Vote> result = new ArrayList<>();
-        voteMap.values().forEach(vote -> {
-            if (filter.test(vote)) result.add(vote);
-        });
-        return result;
-    }
-
-    public Vote create(UUID uuid) {
-        Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 3), uuid, "1d");
-        voteMap.put(vote.voteID, vote);
-        return vote;
-    }
-
-    public Vote draftVote(UUID uuid) {
-        for (Map.Entry<String, Vote> entry : voteMap.entrySet()) {
-            Vote vote = entry.getValue();
-            if (vote.isOwner(uuid) && vote.isDraft) return vote;
+    val newest: Vote?
+        get() {
+            val votes: MutableList<Vote> = ArrayList(voteMap.values)
+            votes.removeIf { vote: Vote -> vote.isDraft || !vote.open }
+            if (votes.isEmpty()) return null
+            votes.sort(Comparator.comparing { obj: Vote -> obj.timestamp }.reversed())
+            return votes[0]
         }
-        return create(uuid);
+
+    fun list(filter: Predicate<Vote>): List<Vote> {
+        val result: MutableList<Vote> = ArrayList()
+        voteMap.values.forEach(Consumer { vote: Vote -> if (filter.test(vote)) result.add(vote) })
+        return result
     }
 
-    public void back(@NonNull Player user) {
-        BasicUtil.openInventory(plugin, user, new CreateInventoryHolder<>(draftVote(user.getUniqueId()), user).getInventory());
+    fun create(uuid: UUID?): Vote {
+        val vote = Vote(plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 3), uuid, "1d")
+        voteMap[vote.voteID] = vote
+        return vote
     }
 
-    public void start(@NonNull Player user) {
-        Vote vote = draftVote(user.getUniqueId());
-        if (vote == null) return;
-        startCountdown(vote.voteID);
-        vote.startTime = System.currentTimeMillis();
-        vote.open = true;
-        vote.isDraft = false;
-
-        VoteUpAPI.SOUND.voteEvent(true);
-        if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTESTART.path, true))
-            BasicUtil.broadcastTitle(
-                    "",
-                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
-            );
-        Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(JsonChatUtil.buildClickText(
-                VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Start.Broadcast")),
-                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + vote.voteID),
-                new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(Msg.VOTE_CLICK.msg)))
-        )));
+    fun draftVote(uuid: UUID?): Vote {
+        for ((_, vote) in voteMap) {
+            if (vote.isOwner(uuid) && vote.isDraft) return vote
+        }
+        return create(uuid)
     }
 
-    public void vote(String voteID, @NonNull Player user, Vote.Choice choice, boolean anonymous, String reason) {
-        UUID uuid = user.getUniqueId();
-        Vote vote = getVote(voteID);
-        if (vote == null) return;
+    fun back(@NonNull user: Player) {
+        BasicUtil.openInventory(plugin, user, CreateInventoryHolder(draftVote(user.uniqueId), user).inventory)
+    }
+
+    fun start(@NonNull user: Player) {
+        val vote = draftVote(user.uniqueId) ?: return
+        startCountdown(vote.voteID)
+        vote.startTime = System.currentTimeMillis()
+        vote.open = true
+        vote.isDraft = false
+        VoteUpAPI.SOUND!!.voteEvent(true)
+        if (plugin.pConfig.config.getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTESTART.path, true)) BasicUtil.broadcastTitle(
+                "",
+                VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
+                plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+        )
+        Bukkit.getOnlinePlayers().forEach { player: Player ->
+            player.spigot().sendMessage(JsonChatUtil.buildClickText(
+                    VoteUpPlaceholder.parse(vote, plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Start.Broadcast"]),
+                    ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + vote.voteID),
+                    HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(Msg.VOTE_CLICK.msg)))
+            ))
+        }
+    }
+
+    fun vote(voteID: String?, @NonNull user: Player, choice: Vote.Choice?, anonymous: Boolean, reason: String?) {
+        val uuid = user.uniqueId
+        val vote = getVote(voteID) ?: return
         if (!vote.open) {
-            I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Closed"));
-            return;
+            I18n.send(user, plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Closed"])
+            return
         }
-        if (!VoteUpPerm.VOTE.hasPermission(user, choice)) return;
-
-        if (vote.isVoted(uuid))
-            I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Logged"));
-
-        vote.participants.add(
-                new Vote.Participant(
+        if (!VoteUpPerm.VOTE.hasPermission(user, choice!!)) return
+        if (vote.isVoted(uuid)) I18n.send(user, plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Logged"])
+        vote.participants!!.add(
+                Vote.Participant(
                         uuid,
                         choice,
                         anonymous,
-                        VoteUpPerm.REASON.hasPermission(user) ? (reason.length() == 0 ? Msg.REASON_NOT_YET.msg : reason) : Msg.REASON_NO_PERM.msg
+                        if (VoteUpPerm.REASON.hasPermission(user)) if (reason!!.length == 0) Msg.REASON_NOT_YET.msg else reason else Msg.REASON_NO_PERM.msg
                 )
-        );
-        vote.save();
-
-        I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name()));
-
-        if (anonymous) return;
-        Player starter = Bukkit.getPlayer(vote.owner);
-        Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
-            {
-                put("Voter", user.getName());
-                put("Choice", choice.name());
-                put("Reason", reason);
+        )
+        vote.save()
+        I18n.send(user, plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name])
+        if (anonymous) return
+        val starter = Bukkit.getPlayer(vote.owner!!)
+        val notice = VoteUpAPI.CACHE_MANAGER!!.log(Notice.Type.VOTE, voteID, object : HashMap<String?, Any?>() {
+            init {
+                put("Voter", user.name)
+                put("Choice", choice.name)
+                put("Reason", reason)
             }
-        });
-
-        if (starter != null && starter.isOnline()) {
-            String announce = notice.announce(user.getUniqueId());
-            if (announce != null)
-                I18n.send(starter, VoteUpPlaceholder.parse(vote, announce));
+        })
+        if (starter != null && starter.isOnline) {
+            val announce = notice!!.announce(user.uniqueId)
+            if (announce != null) I18n.send(starter, VoteUpPlaceholder.parse(vote, announce))
         }
-
-        plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path).forEach(
-                adminID -> {
-                    Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
+        plugin.pConfig.config.getStringList(ConfPath.Path.ADMIN.path).forEach(
+                Consumer { adminID: String? ->
+                    val admin = Bukkit.getPlayer(UUID.fromString(adminID))
                     if (admin != null) {
-                        String announce = notice.announce(admin.getUniqueId());
-                        if (announce != null)
-                            I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
+                        val announce = notice!!.announce(admin.uniqueId)
+                        if (announce != null) I18n.send(admin, VoteUpPlaceholder.parse(vote, announce))
                     }
                 }
-        );
+        )
     }
 
-    public void endVote(String voteID) {
-        Vote vote = getVote(voteID);
-        if (vote == null) return;
+    fun endVote(voteID: String?) {
+        val vote = getVote(voteID) ?: return
         if (vote.open) {
-            vote.open = false;
-            vote.save();
-
-            if (vote.isPassed())
-                if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true)) {
-                    Player owner = Bukkit.getPlayer(vote.getOwner());
-                    if (owner != null) vote.autocast.forEach(owner::performCommand);
-                    else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.AUTOCAST_WAIT_EXECUTE, voteID, new HashMap<>());
-                } else vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
-            VoteUpAPI.SOUND.voteEvent(false);
-            if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTEEND.path, false))
-                BasicUtil.broadcastTitle(
-                        "",
-                        VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
-                );
-            BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.End.Broadcast")));
-
-            Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
-            plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path).forEach(
-                    adminID -> {
-                        Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
+            vote.open = false
+            vote.save()
+            if (vote.isPassed) if (plugin.pConfig.config.getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true)) {
+                val owner = Bukkit.getPlayer(vote.getOwner())
+                if (owner != null) vote.autocast!!.forEach(Consumer { s: String? -> owner.performCommand(s!!) }) else VoteUpAPI.CACHE_MANAGER!!.log(Notice.Type.AUTOCAST_WAIT_EXECUTE, voteID, HashMap())
+            } else vote.autocast!!.forEach(Consumer { cmd: String? -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd!!) })
+            VoteUpAPI.SOUND!!.voteEvent(false)
+            if (plugin.pConfig.config.getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTEEND.path, false)) BasicUtil.broadcastTitle(
+                    "",
+                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
+                    plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
+                    plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
+                    plugin.pConfig.config.getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+            )
+            BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Event.End.Broadcast"]))
+            val notice = VoteUpAPI.CACHE_MANAGER!!.log(Notice.Type.VOTE_END, voteID, HashMap())
+            plugin.pConfig.config.getStringList(ConfPath.Path.ADMIN.path).forEach(
+                    Consumer { adminID: String? ->
+                        val admin = Bukkit.getPlayer(UUID.fromString(adminID))
                         if (admin != null) {
-                            String announce = notice.announce(admin.getUniqueId());
-                            if (announce != null)
-                                I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
+                            val announce = notice!!.announce(admin.uniqueId)
+                            if (announce != null) I18n.send(admin, VoteUpPlaceholder.parse(vote, announce))
                         }
                     }
-            );
+            )
         }
     }
 
-    @Override
-    public void saveAll() {
-        voteMap.forEach((voteID, vote) -> vote.save());
+    override fun saveAll() {
+        voteMap.forEach { (voteID: String?, vote: Vote) -> vote.save() }
     }
 
-    @Override
-    public void delete(String id) {
-        voteMap.remove(id);
+    override fun delete(id: String) {
+        voteMap.remove(id)
     }
 }

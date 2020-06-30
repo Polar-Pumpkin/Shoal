@@ -1,110 +1,88 @@
-package net.shoal.sir.voteup.config;
+package net.shoal.sir.voteup.config
 
-import lombok.NonNull;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.data.Notice;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.serverct.parrot.parrotx.config.PConfig;
-import org.serverct.parrot.parrotx.utils.I18n;
-import org.serverct.parrot.parrotx.utils.JsonChatUtil;
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
+import net.shoal.sir.voteup.data.Notice
+import org.bukkit.entity.Player
+import org.serverct.parrot.parrotx.PPlugin
+import org.serverct.parrot.parrotx.config.PConfig
+import org.serverct.parrot.parrotx.utils.I18n
+import org.serverct.parrot.parrotx.utils.JsonChatUtil
+import java.io.File
+import java.io.IOException
+import java.util.*
+import java.util.function.Consumer
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-public class CacheManager extends PConfig {
-
-    private final Map<String, Map<Integer, Notice>> notices = new HashMap<>();
-
-    public CacheManager() {
-        super(VoteUp.getInstance(), "cache", "缓存日志文件");
-    }
-
-    @Override
-    public void load(@NonNull File file) {
-        ConfigurationSection log = config.getConfigurationSection("Logs");
-        if (log == null) return;
+class CacheManager : PConfig(PPlugin.getInstance(), "cache", "缓存日志文件") {
+    private val notices: MutableMap<String?, Map<Int, Notice?>> = HashMap()
+    override fun load(@NonNull file: File) {
+        val log = config.getConfigurationSection("Logs") ?: return
         log.getKeys(false).forEach(
-                voteID -> {
-                    ConfigurationSection section = log.getConfigurationSection(voteID);
-                    if (section != null) {
-                        section.getKeys(false).forEach(
-                                number -> {
-                                    ConfigurationSection numberSection = section.getConfigurationSection(number);
-                                    if (numberSection != null) {
-                                        Map<Integer, Notice> map = notices.getOrDefault(voteID, new HashMap<>());
-                                        Notice notice = new Notice(voteID, numberSection);
-                                        map.put(notice.number, notice);
-                                        notices.put(voteID, map);
-                                    }
+                Consumer { voteID: String? ->
+                    val section = log.getConfigurationSection(voteID!!)
+                    section?.getKeys(false)?.forEach(
+                            Consumer { number: String? ->
+                                val numberSection = section.getConfigurationSection(number!!)
+                                if (numberSection != null) {
+                                    val map: MutableMap<Int, Notice?> = notices.getOrDefault(voteID, HashMap<Int, Notice>())
+                                    val notice = Notice(voteID, numberSection)
+                                    map[notice.number] = notice
+                                    notices[voteID] = map
                                 }
-                        );
-                    }
+                            }
+                    )
                 }
-        );
+        )
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Override
-    public void saveDefault() {
+    override fun saveDefault() {
         try {
-            this.file.createNewFile();
-        } catch (IOException e) {
-            plugin.lang.logError(I18n.LOAD, getTypeName(), e, null);
+            file.createNewFile()
+        } catch (e: IOException) {
+            plugin.lang.logError(I18n.LOAD, typeName, e, null)
         }
     }
 
-    @Override
-    public void save() {
-        ConfigurationSection log = config.createSection("Logs");
-        this.notices.forEach(
-                (voteID, map) -> {
-                    ConfigurationSection voteIDSection = log.createSection(voteID);
-                    map.forEach((number, notice) -> notice.save(voteIDSection.createSection(String.valueOf(number))));
-                }
-        );
-        super.save();
+    override fun save() {
+        val log = config.createSection("Logs")
+        notices.forEach { (voteID: String?, map: Map<Int, Notice?>) ->
+            val voteIDSection = log.createSection(voteID!!)
+            map.forEach { (number: Int, notice: Notice?) -> notice!!.save(voteIDSection.createSection(number.toString())) }
+        }
+        super.save()
     }
 
-    public Notice log(Notice.Type type, String voteID, Map<String, Object> params) {
-        Map<Integer, Notice> noticeMap = notices.getOrDefault(voteID, new HashMap<>());
-        int number = noticeMap.size() + 1;
-        while (noticeMap.containsKey(number)) number++;
-        Notice notice = new Notice(type, voteID, number, params);
-        noticeMap.put(number, notice);
-        notices.put(voteID, noticeMap);
-        return notice;
+    fun log(type: Notice.Type, voteID: String?, params: Map<String, Any>?): Notice {
+        val noticeMap: MutableMap<Int, Notice?> = notices.getOrDefault(voteID, HashMap<Int, Notice>())
+        var number = noticeMap.size + 1
+        while (noticeMap.containsKey(number)) number++
+        val notice = Notice(type, voteID, number, params)
+        noticeMap[number] = notice
+        notices[voteID] = noticeMap
+        return notice
     }
 
-    public void report(Notice.Type type, @NonNull Player user) {
-        List<String> content = new ArrayList<>();
-        StringBuilder hover = new StringBuilder();
-        this.notices.forEach(
-                (voteID, map) -> map.forEach(
-                        (number, notice) -> {
-                            String append = notice.announce(user.getUniqueId());
-                            if (append != null) content.add(append);
-                            if (notice.isOver()) map.remove(number);
-                        }
-                )
-        );
-        if (content.isEmpty()) return;
-
-        TextComponent text = JsonChatUtil.getFromLegacy(
-                plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Notice." + type.name() + ".Head")
-                        .replace("%amount%", String.valueOf(content.size()))
-        );
-
-        Iterator<String> iterator = content.iterator();
+    fun report(type: Notice.Type, @NonNull user: Player) {
+        val content: MutableList<String> = ArrayList()
+        val hover = StringBuilder()
+        notices.forEach { (voteID: String?, map: Map<Int, Notice?>) ->
+            map.forEach { (number: Int?, notice: Notice?) ->
+                val append = notice!!.announce(user.uniqueId)
+                if (append != null) content.add(append)
+                if (notice.isOver) map.remove(number)
+            }
+        }
+        if (content.isEmpty()) return
+        val text: TextComponent = JsonChatUtil.getFromLegacy(
+                plugin.lang[plugin.localeKey, I18n.Type.INFO, "Vote", "Notice." + type.name + ".Head"]
+                        .replace("%amount%", content.size.toString())
+        )
+        val iterator: Iterator<String> = content.iterator()
         while (iterator.hasNext()) {
-            hover.append(iterator.next());
-            if (iterator.hasNext()) hover.append("\n");
+            hover.append(iterator.next())
+            if (iterator.hasNext()) hover.append("\n")
         }
-
-        text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(hover.toString()))));
-        user.spigot().sendMessage(text);
+        text.setHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(hover.toString()))))
+        user.spigot().sendMessage(text)
     }
 }

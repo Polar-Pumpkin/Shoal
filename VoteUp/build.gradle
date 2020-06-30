@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.0.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
+}
+
+repositories {
+    mavenLocal()
+
+    maven {
+        url = 'https://jitpack.io'
+    }
+
+    maven {
+        url 'https://repo.codemc.io/repository/nms/'
+    }
+
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.bstats:bstats-bukkit:1.7'
+    compileOnly 'org.bukkit:craftbukkit:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'com.github.Polar-Pumpkin:ParrotX:086ea233af'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+
+group = 'net.shoal.sir'
+version = '2.0.3-BETA'
+description = 'VoteUp'
+sourceCompatibility = '1.8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.add('-Xlint:deprecation')
+    options.compilerArgs.add('-Xlint:unchecked')
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
