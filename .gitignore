@@ -56,5 +56,6 @@ hs_err_pid*
 /.idea
 VoteUp/.gradle/
 VoteUp/build
+VoteUp/src/test
 LimitedRiptide/.gradle/
 
