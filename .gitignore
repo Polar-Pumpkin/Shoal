@@ -55,4 +55,6 @@ hs_err_pid*
 /.gradle
 /.idea
 VoteUp/.gradle/
+VoteUp/build
 LimitedRiptide/.gradle/
+

@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.bstats:bstats-bukkit:1.7'
     compileOnly 'org.spigotmc:spigot:1.15.2-R0.1-SNAPSHOT'
     compileOnly 'com.github.Polar-Pumpkin:ParrotX:086ea233af'
+    compileOnly 'com.github.LovesAsuna:EasyLib:-SNAPSHOT'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
