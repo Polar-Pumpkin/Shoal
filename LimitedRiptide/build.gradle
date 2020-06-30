@@ -9,12 +9,16 @@ repositories {
     maven {
         url 'https://repo.codemc.io/repository/nms/'
     }
+    maven {
+        url 'https://repo.codemc.io/repository/maven-public/'
+    }
     mavenCentral()
 }
 
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.4'
     compileOnly 'org.bukkit:craftbukkit:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'net.md-5:bungeecord-chat:1.15-SNAPSHOT'
 }
 
 group = 'net.shoal.sir'
