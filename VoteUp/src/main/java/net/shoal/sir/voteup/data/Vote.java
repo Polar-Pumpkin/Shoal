@@ -31,7 +31,7 @@ public class Vote implements PData, Owned, Timestamp {
     public boolean cancelled;
     public boolean isDraft;
     public boolean allowAnonymous;
-    public boolean isPublic;
+    public boolean isPublic; // TODO 还有投票全服公告没写
     public boolean allowEdit; // TODO 允许投票后编辑
     public Type type;
     public int goal;

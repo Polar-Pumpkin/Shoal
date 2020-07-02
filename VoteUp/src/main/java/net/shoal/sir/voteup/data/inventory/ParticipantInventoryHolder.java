@@ -7,7 +7,7 @@ import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
-import net.shoal.sir.voteup.enums.Msg;
+import net.shoal.sir.voteup.data.VoteInventoryExecutor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,7 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.data.InventoryExecutor;
 import org.serverct.parrot.parrotx.enums.Position;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.EnumUtil;
@@ -27,7 +26,7 @@ import org.serverct.parrot.parrotx.utils.TimeUtil;
 
 import java.util.*;
 
-public class ParticipantInventoryHolder<T> implements InventoryExecutor {
+public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
     public final static GuiManager.GuiKey GUI_KEY = GuiManager.GuiKey.VOTE_PARTICIPANTS;
     private final PPlugin plugin;
     private final Map<Integer, KeyWord> slotItemMap = new HashMap<>();
@@ -76,13 +75,20 @@ public class ParticipantInventoryHolder<T> implements InventoryExecutor {
     }
 
     @Override
+    public FileConfiguration getFile() {
+        return VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_PARTICIPANTS.filename);
+    }
+
+    @Override
+    public Vote getVote() {
+        return (Vote) data;
+    }
+
+    @Override
     public Inventory construct() {
-        Vote vote = (Vote) data;
-        FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_PARTICIPANTS.filename);
-        String title = "未初始化菜单";
-        if (file == null) return Bukkit.createInventory(this, 0, title);
-        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", Msg.ERROR_GUI_TITLE.msg));
-        Inventory inv = Bukkit.createInventory(this, file.getInt("Settings.Row", 0) * 9, title);
+        Vote vote = getVote();
+        FileConfiguration file = getFile();
+        Inventory inv = basicConstruct();
 
         ConfigurationSection itemSection = file.getConfigurationSection("Items");
         if (itemSection == null) return inv;

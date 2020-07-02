@@ -4,7 +4,6 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.command.VoteUpCmd;
 import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.enums.Msg;
-import net.shoal.sir.voteup.listener.InventoryClickListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -17,7 +16,6 @@ public final class VoteUp extends PPlugin {
     @Override
     protected void registerListener() {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
-        Bukkit.getPluginManager().registerEvents(new InventoryClickListener(), this);
     }
 
     @Override

@@ -8,6 +8,7 @@ import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
+import net.shoal.sir.voteup.data.VoteInventoryExecutor;
 import net.shoal.sir.voteup.data.prompts.*;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.Bukkit;
@@ -23,14 +24,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.data.InventoryExecutor;
 import org.serverct.parrot.parrotx.enums.Position;
 import org.serverct.parrot.parrotx.utils.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateInventoryHolder<T> implements InventoryExecutor {
+public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
 
     private final PPlugin plugin;
     private final Map<Integer, KeyWord> slotItemMap = new HashMap<>();
@@ -46,13 +46,20 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
     }
 
     @Override
+    public FileConfiguration getFile() {
+        return VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_CREATE.filename);
+    }
+
+    @Override
+    public Vote getVote() {
+        return (Vote) data;
+    }
+
+    @Override
     public Inventory construct() {
-        Vote vote = (Vote) data;
-        FileConfiguration file = VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_CREATE.filename);
-        String title = "未初始化菜单";
-        if (file == null) return Bukkit.createInventory(this, 0, title);
-        title = VoteUpPlaceholder.parse(vote, file.getString("Settings.Title", Msg.ERROR_GUI_TITLE.msg));
-        Inventory inv = Bukkit.createInventory(this, file.getInt("Settings.Row", 0) * 9, title);
+        FileConfiguration file = getFile();
+        Vote vote = getVote();
+        Inventory inv = basicConstruct();
 
         ConfigurationSection itemSection = file.getConfigurationSection("Items");
         if (itemSection == null) return inv;
@@ -144,7 +151,7 @@ public class CreateInventoryHolder<T> implements InventoryExecutor {
         if (keyWord == null) return;
 
         Player user = (Player) event.getWhoClicked();
-        Vote vote = (Vote) data;
+        Vote vote = getVote();
         Inventory inv = event.getInventory();
 
         switch (keyWord) {
