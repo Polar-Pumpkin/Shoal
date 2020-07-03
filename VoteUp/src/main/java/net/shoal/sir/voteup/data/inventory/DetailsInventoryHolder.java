@@ -50,7 +50,7 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
 
     @Override
     public FileConfiguration getFile() {
-        return VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_DETAILS.filename);
+        return VoteUpAPI.GUI_MANAGER.get(GUI_KEY.filename);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
     @Override
     public void execute(InventoryClickEvent event) {
         event.setCancelled(true);
-        KeyWord keyWord = slotItemMap.getOrDefault(event.getSlot(), null);
+        KeyWord keyWord = slotItemMap.get(event.getSlot());
         if (keyWord == null) return;
 
         Player user = (Player) event.getWhoClicked();

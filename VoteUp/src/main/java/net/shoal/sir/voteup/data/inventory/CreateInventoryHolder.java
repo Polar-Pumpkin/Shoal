@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
-
+    public final static GuiManager.GuiKey GUI_KEY = GuiManager.GuiKey.VOTE_CREATE;
     private final PPlugin plugin;
     private final Map<Integer, KeyWord> slotItemMap = new HashMap<>();
     protected T data;
@@ -47,7 +47,7 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
 
     @Override
     public FileConfiguration getFile() {
-        return VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_CREATE.filename);
+        return VoteUpAPI.GUI_MANAGER.get(GUI_KEY.filename);
     }
 
     @Override
@@ -147,7 +147,7 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
     @Override
     public void execute(InventoryClickEvent event) {
         event.setCancelled(true);
-        KeyWord keyWord = slotItemMap.getOrDefault(event.getSlot(), null);
+        KeyWord keyWord = slotItemMap.get(event.getSlot());
         if (keyWord == null) return;
 
         Player user = (Player) event.getWhoClicked();

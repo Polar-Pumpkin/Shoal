@@ -32,7 +32,7 @@ public class GuiManager extends PFolder {
     }
 
     public FileConfiguration get(String filename) {
-        return guiMap.getOrDefault(filename, null);
+        return guiMap.get(filename);
     }
 
     public enum GuiKey {

@@ -12,12 +12,14 @@ import net.shoal.sir.voteup.data.Notice;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder;
 import net.shoal.sir.voteup.enums.Msg;
+import net.shoal.sir.voteup.enums.VoteFilter;
 import net.shoal.sir.voteup.task.VoteEndTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.serverct.parrot.parrotx.config.PFolder;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
+import org.serverct.parrot.parrotx.utils.EnumUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
@@ -50,7 +52,7 @@ public class VoteManager extends PFolder {
     }
 
     private void startCountdown(String voteID) {
-        Vote data = voteMap.getOrDefault(voteID, null);
+        Vote data = voteMap.get(voteID);
         if (data == null) return;
         if (!data.open) return;
         if (data.isDraft) return;
@@ -66,7 +68,7 @@ public class VoteManager extends PFolder {
     }
 
     public Vote getVote(String id) {
-        return voteMap.getOrDefault(id, null);
+        return voteMap.get(id);
     }
 
     public Vote getNewest() {
@@ -75,6 +77,46 @@ public class VoteManager extends PFolder {
         if (votes.isEmpty()) return null;
         votes.sort(Comparator.comparing(Vote::getTimestamp).reversed());
         return votes.get(0);
+    }
+
+    public List<Vote> list(String filter) {
+        Predicate<Vote> predicate = vote -> true;
+        String[] dataSet = filter.split("[ ]");
+        for (String voteFilter : dataSet) {
+            String[] data = voteFilter.split("[:]");
+            if (data.length != 2) continue;
+            VoteFilter key = EnumUtil.valueOf(VoteFilter.class, data[0].toUpperCase());
+            String param = data[1];
+
+            switch (key) {
+                case OPEN:
+                    boolean open = Boolean.parseBoolean(param);
+                    predicate = predicate.and(vote -> vote.open == open);
+                    break;
+                case TIME:
+                    long time = System.currentTimeMillis() - Vote.getDurationTimestamp(param);
+                    predicate = predicate.and(vote -> vote.startTime >= time);
+                    break;
+                case OWNER:
+                    if (VoteUpPlaceholder.UUID_PATTERN.matcher(param).matches())
+                        predicate = predicate.and(vote -> vote.isOwner(UUID.fromString(param)));
+                    else
+                        predicate = predicate.and(vote -> vote.isOwner(param));
+                    break;
+                case VOTER:
+                    if (VoteUpPlaceholder.UUID_PATTERN.matcher(param).matches())
+                        predicate = predicate.and(vote -> vote.isVoted(UUID.fromString(param)));
+                    else
+                        predicate = predicate.and(vote -> vote.isOwner(param));
+                    break;
+                case RESULT:
+                    Vote.Result result = EnumUtil.valueOf(Vote.Result.class, param);
+                    if (result == null) break;
+                    predicate = predicate.and(vote -> vote.result() == result);
+                    break;
+            }
+        }
+        return list(predicate);
     }
 
     public List<Vote> list(Predicate<Vote> filter) {

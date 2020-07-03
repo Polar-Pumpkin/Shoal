@@ -463,8 +463,10 @@ public class Vote implements PData, Owned, Timestamp {
 
     public enum Duration {
         // yyyy-MM-dd HH:mm:ss
-        DAY('d', "天", 86400),
-        HOUR('H', "时", 3600),
+        YEAR('y', "年", 60 * 60 * 24 * 365),
+        MONTH('M', "月", 60 * 60 * 24 * 30),
+        DAY('d', "天", 60 * 60 * 24),
+        HOUR('H', "时", 60 * 60),
         MINUTE('m', "分", 60),
         SECOND('s', "秒", 1);
 

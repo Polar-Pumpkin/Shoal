@@ -76,7 +76,7 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
 
     @Override
     public FileConfiguration getFile() {
-        return VoteUpAPI.GUI_MANAGER.get(GuiManager.GuiKey.VOTE_PARTICIPANTS.filename);
+        return VoteUpAPI.GUI_MANAGER.get(GUI_KEY.filename);
     }
 
     @Override
@@ -102,11 +102,26 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
             if (keyWord == KeyWord.BACK)
                 ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
 
-            List<Vote.Participant> participantList = vote.participants;
-            Iterator<Vote.Participant> iterator = participantList.iterator();
-
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
             if (targetSlotSection == null) continue;
+
+            List<Vote.Participant> participantList = vote.participants;
+
+            if (keyWord == KeyWord.PARTICIPANT && participantList.isEmpty()) {
+                ItemStack noResult = new ItemStack(Material.BARRIER);
+                ConfigurationSection nothing = file.getConfigurationSection("Settings.Nothing");
+                if (nothing != null) noResult = ItemUtil.build(plugin, nothing);
+
+                String nothingX = targetSlotSection.getString("X", "5");
+                String nothingY = targetSlotSection.getString("Y", "4");
+
+                if (nothingX == null || nothingX.length() == 0 || nothingY == null || nothingY.length() == 0) break;
+                for (Integer nothingSlot : Position.getPositionList(nothingX, nothingY))
+                    inv.setItem(nothingSlot, noResult);
+                continue;
+            }
+
+            Iterator<Vote.Participant> iterator = participantList.iterator();
 
             String x = targetSlotSection.getString("X");
             String y = targetSlotSection.getString("Y");
@@ -153,7 +168,7 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
     @Override
     public void execute(InventoryClickEvent event) {
         event.setCancelled(true);
-        KeyWord keyWord = slotItemMap.getOrDefault(event.getSlot(), null);
+        KeyWord keyWord = slotItemMap.get(event.getSlot());
         if (keyWord == null) return;
 
         Player user = (Player) event.getWhoClicked();

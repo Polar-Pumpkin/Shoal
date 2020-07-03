@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 public class VoteUpPlaceholder {
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("[%]([^%]+)[%]");
+    public static final Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}");
 
     public static String parse(Vote vote, String text) {
         if (text == null) return null;

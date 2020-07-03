@@ -1,6 +1,18 @@
 Settings:
   Title: "投票参与者"
   Row: 6
+  Nothing:
+    ItemStack:
+      Display: "&c暂无参与者"
+      Material: BARRIER
+      Lore:
+        - ''
+        - '  &7&o暂时没有人,'
+        - '  &7&o参与该投票.'
+        - ''
+    Position:
+      X: 5
+      Y: 4
 Items:
   GLASS:
     ItemStack:
