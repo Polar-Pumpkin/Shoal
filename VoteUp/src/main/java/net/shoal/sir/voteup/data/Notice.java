@@ -4,7 +4,6 @@ import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -104,7 +103,7 @@ public class Notice implements Timestamp {
             case VOTE:
             case VOTE_END:
             default:
-                List<String> admins = plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path);
+                List<String> admins = VoteUpAPI.CONFIG.admins;
                 List<String> announced = new ArrayList<>();
                 this.announced.forEach(uuid -> announced.add(uuid.toString()));
                 return announced.equals(admins);

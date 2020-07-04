@@ -5,7 +5,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.VoteInventoryExecutor;
@@ -86,15 +86,15 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
                         boolean enable;
                         switch (keyWord) {
                             case ALLOW_ANONYMOUS:
-                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_ANONYMOUS.path, true);
+                                unlock = VoteUpAPI.CONFIG.allow_anonymous;
                                 enable = vote.allowAnonymous;
                                 break;
                             case PUBLIC_MODE:
-                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_PUBLIC.path, true);
+                                unlock = VoteUpAPI.CONFIG.allow_public;
                                 enable = vote.isPublic;
                                 break;
                             case ALLOW_EDIT:
-                                unlock = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_EDIT_PARTICIPANT.path, true);
+                                unlock = VoteUpAPI.CONFIG.allow_edit_participant;
                                 enable = vote.allowEdit;
                                 break;
                             default:
@@ -191,13 +191,13 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
                 );
                 break;
             case ALLOW_ANONYMOUS:
-                if (validate(user, Vote.Data.ANONYMOUS) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_ANONYMOUS.path, true))
+                if (validate(user, Vote.Data.ANONYMOUS) || !VoteUpAPI.CONFIG.allow_anonymous)
                     break;
                 vote.allowAnonymous = !vote.allowAnonymous;
                 refresh(inv);
                 break;
             case PUBLIC_MODE:
-                if (validate(user, Vote.Data.PUBLIC) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_PUBLIC.path, true))
+                if (validate(user, Vote.Data.PUBLIC) || !VoteUpAPI.CONFIG.allow_public)
                     break;
                 vote.isPublic = !vote.isPublic;
                 refresh(inv);
@@ -232,7 +232,7 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
                 ConversationUtil.start(plugin, user, new SetResultPrompt(user, vote, Vote.Result.PASS), 300);
                 break;
             case ALLOW_EDIT:
-                if (validate(user, Vote.Data.EDITABLE) || !plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_ALLOW_EDIT_PARTICIPANT.path, true))
+                if (validate(user, Vote.Data.EDITABLE) || !VoteUpAPI.CONFIG.allow_edit_participant)
                     break;
                 vote.allowEdit = !vote.allowEdit;
                 refresh(inv);
@@ -246,12 +246,12 @@ public class CreateInventoryHolder<T> implements VoteInventoryExecutor {
                 VoteUpAPI.VOTE_MANAGER.delete(vote.voteID);
                 break;
         }
-        VoteUpAPI.SOUND.ding(user);
+        VoteUpSound.ding(user);
     }
 
     private boolean validate(@NonNull Player user, Vote.Data type) {
         if (!VoteUpPerm.EDIT.hasPermission(user, type)) {
-            VoteUpAPI.SOUND.fail(user);
+            VoteUpSound.fail(user);
             I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_NO_PERM.msg));
             return true;
         }

@@ -12,6 +12,10 @@ import org.serverct.parrot.parrotx.command.PCommand;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class ViewCmd implements PCommand {
     @Override
     public String getPermission() {
@@ -24,13 +28,25 @@ public class ViewCmd implements PCommand {
     }
 
     @Override
+    public String[] getParams(int arg) {
+        List<String> params = new ArrayList<>(Collections.singletonList("latest"));
+        VoteUpAPI.VOTE_MANAGER.list(vote -> true).forEach(vote -> params.add(vote.voteID));
+        return params.toArray(new String[0]);
+    }
+
+    @Override
     public boolean execute(PPlugin plugin, CommandSender sender, String[] args) {
         // /vote view voteID
         if (sender instanceof Player) {
             Player user = (Player) sender;
             if (VoteUpPerm.VIEW.hasPermission(user)) {
                 if (args.length == 2) {
-                    Vote vote = VoteUpAPI.VOTE_MANAGER.getVote(args[1]);
+                    Vote vote;
+                    if ("latest".equalsIgnoreCase(args[1]))
+                        vote = VoteUpAPI.VOTE_MANAGER.getNewest();
+                    else
+                        vote = VoteUpAPI.VOTE_MANAGER.getVote(args[1]);
+
                     if (vote != null)
                         BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, null).getInventory());
                     else

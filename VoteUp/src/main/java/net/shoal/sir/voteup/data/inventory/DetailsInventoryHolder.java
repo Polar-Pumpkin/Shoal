@@ -5,7 +5,6 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.VoteInventoryExecutor;
@@ -81,13 +80,13 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
             }
 
             if (keyWord == KeyWord.BACK) ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
-            else if (keyWord == KeyWord.AUTOCAST && (!(plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_ENABLE.path, true) || vote.autocast.isEmpty())))
+            else if (keyWord == KeyWord.AUTOCAST && (!VoteUpAPI.CONFIG.autocast_enable || vote.autocast.isEmpty()))
                 continue;
             else if ((keyWord == KeyWord.EDIT || keyWord == KeyWord.CANCEL) && !(VoteUpPerm.ADMIN.hasPermission(viewer) || vote.isOwner(viewer.getUniqueId())))
                 continue;
             else if ((keyWord == KeyWord.VOTE_ACCEPT || keyWord == KeyWord.VOTE_NEUTRAL || keyWord == KeyWord.VOTE_REFUSE) && !VoteUpPerm.VOTE.hasPermission(viewer, EnumUtil.valueOf(Vote.Choice.class, keyWord.name().split("[_]")[1])))
                 continue;
-            else if (keyWord == KeyWord.PARTICIPANT && !vote.isPublic && vote.isOwner(viewer.getUniqueId()))
+            else if (keyWord == KeyWord.PARTICIPANT && !vote.isPublic && !(VoteUpPerm.ADMIN.hasPermission(viewer) || vote.isOwner(viewer.getUniqueId())))
                 continue;
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");

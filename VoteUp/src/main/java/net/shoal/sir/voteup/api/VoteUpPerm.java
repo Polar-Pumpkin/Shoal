@@ -12,6 +12,7 @@ public enum VoteUpPerm {
     REASON("VoteUp.vote.reason"),
     CREATE("VoteUp.create"),
     VIEW("VoteUp.view"),
+    SEARCH("VoteUp.search"),
     ANONYMOUS("VoteUp.view.anonymous"),
     EDIT("VoteUp.edit."),
     NOTICE("VoteUp.notice"),

@@ -7,7 +7,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.data.Notice;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.Msg;
@@ -32,13 +32,13 @@ public class PlayerJoinListener implements Listener {
         Vote newest = VoteUpAPI.VOTE_MANAGER.getNewest();
         if (newest != null) {
             if (!newest.isVoted(user.getUniqueId())) {
-                VoteUpAPI.SOUND.ding(user);
+                VoteUpSound.ding(user);
                 BasicUtil.broadcastTitle(
                         "",
                         VoteUpPlaceholder.parse(newest, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Join.Subtitle")),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                        VoteUpAPI.CONFIG.title_fadeIn,
+                        VoteUpAPI.CONFIG.title_stay,
+                        VoteUpAPI.CONFIG.title_fadeOut
                 );
                 user.spigot().sendMessage(JsonChatUtil.buildClickText(
                         VoteUpPlaceholder.parse(newest, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Join.Broadcast")),
@@ -48,7 +48,7 @@ public class PlayerJoinListener implements Listener {
             }
         }
 
-        List<String> admins = plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path);
+        List<String> admins = VoteUpAPI.CONFIG.admins;
 
         String uuid = user.getUniqueId().toString();
         boolean inList = admins.contains(uuid);
@@ -57,8 +57,7 @@ public class PlayerJoinListener implements Listener {
         if (inList && !hasPerm) admins.remove(uuid);
         else if (!inList && hasPerm) admins.add(uuid);
 
-        plugin.pConfig.getConfig().set(ConfPath.Path.ADMIN.path, admins);
-        plugin.pConfig.save();
+        VoteUpAPI.CONFIG.admins = admins;
 
         for (Notice.Type type : Notice.Type.values()) VoteUpAPI.CACHE_MANAGER.report(type, user);
     }

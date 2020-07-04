@@ -108,12 +108,14 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
             List<Vote.Participant> participantList = vote.participants;
 
             if (keyWord == KeyWord.PARTICIPANT && participantList.isEmpty()) {
-                ItemStack noResult = new ItemStack(Material.BARRIER);
                 ConfigurationSection nothing = file.getConfigurationSection("Settings.Nothing");
-                if (nothing != null) noResult = ItemUtil.build(plugin, nothing);
+                if (nothing == null) continue;
+                ItemStack noResult = ItemUtil.build(plugin, nothing);
 
-                String nothingX = targetSlotSection.getString("X", "5");
-                String nothingY = targetSlotSection.getString("Y", "4");
+                ConfigurationSection nothingSlotSection = nothing.getConfigurationSection("Position");
+                if (nothingSlotSection == null) continue;
+                String nothingX = nothingSlotSection.getString("X", "5");
+                String nothingY = nothingSlotSection.getString("Y", "4");
 
                 if (nothingX == null || nothingX.length() == 0 || nothingY == null || nothingY.length() == 0) break;
                 for (Integer nothingSlot : Position.getPositionList(nothingX, nothingY))

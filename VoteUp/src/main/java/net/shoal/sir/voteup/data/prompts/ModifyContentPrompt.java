@@ -5,7 +5,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
-import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.conversations.ConversationContext;
@@ -58,13 +58,13 @@ public class ModifyContentPrompt extends StringPrompt {
         }
 
         if (!targetDesc) {
-            if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_ENABLE.path, true)) {
+            if (VoteUpAPI.CONFIG.autocast_enable) {
                 String[] inputArgs = input.split(" ");
-                List<String> commandList = plugin.pConfig.getConfig().getStringList(ConfPath.Path.AUTOCAST_LIST.path);
-                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true);
+                List<String> commandList = VoteUpAPI.CONFIG.autocast_list;
+                boolean usermode = VoteUpAPI.CONFIG.autocast_userMode;
 
                 if (!usermode) {
-                    boolean blackMode = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_BLACKLIST.path, false);
+                    boolean blackMode = VoteUpAPI.CONFIG.autocast_blackList;
 
                     if ((blackMode && commandList.contains(inputArgs[0])) || (!blackMode && !commandList.contains(inputArgs[0]))) {
                         I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_AUTOCAST_IGNORE.msg));
@@ -92,7 +92,7 @@ public class ModifyContentPrompt extends StringPrompt {
         if (targetDesc) vote.description = list;
         else vote.autocast = list;
         BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(Msg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
-        VoteUpAPI.SOUND.success(user);
+        VoteUpSound.success(user);
 
         JsonChatUtil.sendEditableList(
                 user,

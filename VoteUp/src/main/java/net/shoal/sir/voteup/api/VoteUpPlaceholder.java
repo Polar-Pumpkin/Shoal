@@ -1,7 +1,6 @@
 package net.shoal.sir.voteup.api;
 
 import net.shoal.sir.voteup.VoteUp;
-import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.ChatColor;
@@ -80,14 +79,14 @@ public class VoteUpPlaceholder {
                 if (choice == null) return Msg.ERROR_PLACEHOLDER_REQUEST.msg;
                 return vote.choices.getOrDefault(choice, ChatColor.BLUE + choice.name);
             case AUTOCAST:
-                boolean usermode = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true);
-                boolean blacklist = plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_BLACKLIST.path, true);
+                boolean usermode = VoteUpAPI.CONFIG.autocast_userMode;
+                boolean blacklist = VoteUpAPI.CONFIG.autocast_blackList;
                 if ("mode".equalsIgnoreCase(params))
                     return usermode ? Msg.AUTOCAST_MODE_USERMODE.msg : (blacklist ? Msg.AUTOCAST_MODE_BLACKLIST.msg : Msg.AUTOCAST_MODE_WHITELIST.msg);
                 else if ("desc".equalsIgnoreCase(params))
                     return blacklist ? Msg.AUTOCAST_MODE_BLACKLIST_DESC.msg : Msg.AUTOCAST_MODE_WHITELIST_DESC.msg;
                 else if ("content".equalsIgnoreCase(params))
-                    return usermode ? Msg.AUTOCAST_MODE_USERMODE_DESC.msg : Arrays.toString(plugin.pConfig.getConfig().getStringList(ConfPath.Path.AUTOCAST_LIST.path).toArray());
+                    return usermode ? Msg.AUTOCAST_MODE_USERMODE_DESC.msg : Arrays.toString(VoteUpAPI.CONFIG.autocast_list.toArray());
                 return String.format(Msg.VOTE_VALUE_AUTOCAST.msg, vote.autocast.size());
             case RESULT:
                 Vote.Result result = EnumUtil.valueOf(Vote.Result.class, params.toUpperCase());

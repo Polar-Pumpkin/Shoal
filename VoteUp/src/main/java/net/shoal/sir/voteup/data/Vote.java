@@ -3,7 +3,6 @@ package net.shoal.sir.voteup.data;
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
-import net.shoal.sir.voteup.config.ConfPath;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -130,7 +129,7 @@ public class Vote implements PData, Owned, Timestamp {
         int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
         int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
 
-        if (all < plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5))
+        if (all < VoteUpAPI.CONFIG.setting_participantLeast)
             return false;
 
         switch (type) {
@@ -171,7 +170,7 @@ public class Vote implements PData, Owned, Timestamp {
         int all = participants.size();
         int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
         int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
-        int least = plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 5);
+        int least = VoteUpAPI.CONFIG.setting_participantLeast;
 
         int rate;
         if (all >= least) {

@@ -9,10 +9,14 @@ import net.shoal.sir.voteup.data.Vote;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.enums.Position;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
@@ -69,12 +73,14 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
             if (targetSlotSection == null) continue;
 
             if (keyWord == KeyWord.VOTE && vote.isEmpty()) {
-                ItemStack noResult = new ItemStack(Material.BARRIER);
                 ConfigurationSection nothing = file.getConfigurationSection("Settings.Nothing");
-                if (nothing != null) noResult = ItemUtil.build(plugin, nothing);
+                if (nothing == null) continue;
+                ItemStack noResult = ItemUtil.build(plugin, nothing);
 
-                String nothingX = targetSlotSection.getString("X", "5");
-                String nothingY = targetSlotSection.getString("Y", "4");
+                ConfigurationSection nothingSlotSection = nothing.getConfigurationSection("Position");
+                if (nothingSlotSection == null) continue;
+                String nothingX = nothingSlotSection.getString("X", "5");
+                String nothingY = nothingSlotSection.getString("Y", "4");
 
                 if (nothingX == null || nothingX.length() == 0 || nothingY == null || nothingY.length() == 0) break;
                 for (Integer nothingSlot : Position.getPositionList(nothingX, nothingY))
@@ -93,6 +99,22 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
                     if (!iterator.hasNext()) break;
                     ItemStack resultItem = item.clone();
                     Vote target = iterator.next();
+
+                    if (!target.open) {
+                        resultItem.setType(Material.WRITTEN_BOOK);
+                        ItemMeta meta = resultItem.getItemMeta();
+                        if (meta != null) {
+                            BookMeta bookMeta = (BookMeta) meta;
+                            bookMeta.setGeneration(BookMeta.Generation.ORIGINAL);
+                            bookMeta.setAuthor(target.getOwnerName());
+
+                            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 10, true);
+                            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+
+                            resultItem.setItemMeta(bookMeta);
+                        }
+                    }
+
                     inv.setItem(slot, VoteUpPlaceholder.applyPlaceholder(resultItem, target));
                     voteMap.put(slot, target);
                 } else inv.setItem(slot, item);

@@ -8,6 +8,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.data.Notice;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.inventory.CreateInventoryHolder;
@@ -128,7 +129,7 @@ public class VoteManager extends PFolder {
     }
 
     public Vote create(UUID uuid) {
-        Vote vote = new Vote(plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_PARTICIPANT_LEAST.path, 3), uuid, "1d");
+        Vote vote = new Vote(VoteUpAPI.CONFIG.setting_participantLeast, uuid, "1d");
         voteMap.put(vote.voteID, vote);
         return vote;
     }
@@ -153,14 +154,14 @@ public class VoteManager extends PFolder {
         vote.isDraft = false;
         startCountdown(vote.voteID);
 
-        VoteUpAPI.SOUND.voteEvent(true);
-        if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTESTART.path, true))
+        VoteUpSound.voteEvent(true);
+        if (VoteUpAPI.CONFIG.title_start)
             BasicUtil.broadcastTitle(
                     "",
                     VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                    plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                    VoteUpAPI.CONFIG.title_fadeIn,
+                    VoteUpAPI.CONFIG.title_stay,
+                    VoteUpAPI.CONFIG.title_fadeOut
             );
         Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(JsonChatUtil.buildClickText(
                 VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Start.Broadcast")),
@@ -211,7 +212,7 @@ public class VoteManager extends PFolder {
                 I18n.send(starter, VoteUpPlaceholder.parse(vote, announce));
         }
 
-        plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path).forEach(
+        VoteUpAPI.CONFIG.admins.forEach(
                 adminID -> {
                     Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
                     if (admin != null) {
@@ -231,24 +232,24 @@ public class VoteManager extends PFolder {
             vote.save();
 
             if (vote.isPassed())
-                if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.AUTOCAST_USERMODE.path, true)) {
+                if (VoteUpAPI.CONFIG.autocast_userMode) {
                     Player owner = Bukkit.getPlayer(vote.getOwner());
                     if (owner != null) vote.autocast.forEach(owner::performCommand);
                     else VoteUpAPI.CACHE_MANAGER.log(Notice.Type.AUTOCAST_WAIT_EXECUTE, voteID, new HashMap<>());
                 } else vote.autocast.forEach(cmd -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd));
-            VoteUpAPI.SOUND.voteEvent(false);
-            if (plugin.pConfig.getConfig().getBoolean(ConfPath.Path.SETTINGS_BROADCAST_TITLE_VOTEEND.path, false))
+            VoteUpSound.voteEvent(false);
+            if (VoteUpAPI.CONFIG.title_end)
                 BasicUtil.broadcastTitle(
                         "",
                         VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEIN.path, 5),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_STAY.path, 10),
-                        plugin.pConfig.getConfig().getInt(ConfPath.Path.SETTINGS_BROADCAST_TITLE_FADEOUT.path, 7)
+                        VoteUpAPI.CONFIG.title_fadeIn,
+                        VoteUpAPI.CONFIG.title_stay,
+                        VoteUpAPI.CONFIG.title_fadeOut
                 );
             BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.End.Broadcast")));
 
             Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
-            plugin.pConfig.getConfig().getStringList(ConfPath.Path.ADMIN.path).forEach(
+            VoteUpAPI.CONFIG.admins.forEach(
                     adminID -> {
                         Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
                         if (admin != null) {

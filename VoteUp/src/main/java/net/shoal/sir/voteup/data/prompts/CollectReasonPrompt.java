@@ -4,6 +4,7 @@ import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.conversations.ConversationContext;
@@ -49,7 +50,7 @@ public class CollectReasonPrompt extends StringPrompt {
         }
 
         VoteUpAPI.VOTE_MANAGER.vote(vote.voteID, user, type, anonymous, input);
-        VoteUpAPI.SOUND.ding(user);
+        VoteUpSound.ding(user);
         return Prompt.END_OF_CONVERSATION;
     }
 }

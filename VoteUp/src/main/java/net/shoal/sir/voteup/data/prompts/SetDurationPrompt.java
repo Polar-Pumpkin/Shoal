@@ -4,6 +4,7 @@ import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
+import net.shoal.sir.voteup.api.VoteUpSound;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.enums.Msg;
 import org.bukkit.conversations.ConversationContext;
@@ -36,7 +37,7 @@ public class SetDurationPrompt extends ValidatingPrompt {
             if (r.matcher(input).matches()) return true;
         }
         I18n.sendAsync(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_EDIT_DURATION.msg));
-        VoteUpAPI.SOUND.fail(user);
+        VoteUpSound.fail(user);
         return false;
     }
 
@@ -60,7 +61,7 @@ public class SetDurationPrompt extends ValidatingPrompt {
 
         vote.duration = input;
         BasicUtil.send(plugin, user, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, String.format(I18n.color(Msg.VOTE_EDIT_SUCCESS.msg), TARGET.name)));
-        VoteUpAPI.SOUND.success(user);
+        VoteUpSound.success(user);
         VoteUpAPI.VOTE_MANAGER.back(user);
         return Prompt.END_OF_CONVERSATION;
     }

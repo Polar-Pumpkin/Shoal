@@ -2,7 +2,7 @@ package net.shoal.sir.voteup;
 
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.command.VoteUpCmd;
-import net.shoal.sir.voteup.config.ConfPath;
+import net.shoal.sir.voteup.config.VoteUpConfig;
 import net.shoal.sir.voteup.enums.Msg;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import org.bstats.bukkit.Metrics;
@@ -20,7 +20,7 @@ public final class VoteUp extends PPlugin {
 
     @Override
     protected void preload() {
-        this.pConfig = new ConfPath();
+        this.pConfig = new VoteUpConfig();
         this.pConfig.init();
     }
 
@@ -30,7 +30,7 @@ public final class VoteUp extends PPlugin {
         VoteUpAPI.GUI_MANAGER.init();
         VoteUpAPI.CACHE_MANAGER.init();
 
-        if (pConfig.getConfig().getBoolean(ConfPath.Path.BSTATS.path, true)) {
+        if (VoteUpAPI.CONFIG.bStats) {
             Metrics metrics = new Metrics(this, PLUGIN_ID);
             metrics.addCustomChart(new Metrics.SingleLineChart("totalVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft).size()));
             metrics.addCustomChart(new Metrics.SingleLineChart("openVote", () -> VoteUpAPI.VOTE_MANAGER.list(vote -> !vote.isDraft && vote.open).size()));

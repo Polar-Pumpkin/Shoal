@@ -4,6 +4,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.command.subcommands.CreateCmd;
 import net.shoal.sir.voteup.command.subcommands.ModifyCmd;
+import net.shoal.sir.voteup.command.subcommands.SearchCmd;
 import net.shoal.sir.voteup.command.subcommands.ViewCmd;
 import org.serverct.parrot.parrotx.command.CommandHandler;
 import org.serverct.parrot.parrotx.command.subcommands.HelpCommand;
@@ -40,5 +41,6 @@ public class VoteUpCmd extends CommandHandler {
         registerSubCommand("reload", new ReloadCommand(plugin, VoteUpPerm.ADMIN.node));
         registerSubCommand("modify", new ModifyCmd());
         registerSubCommand("view", new ViewCmd());
+        registerSubCommand("search", new SearchCmd());
     }
 }
