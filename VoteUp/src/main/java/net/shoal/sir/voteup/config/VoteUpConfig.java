@@ -2,6 +2,7 @@ package net.shoal.sir.voteup.config;
 
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
+import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.config.PConfig;
 import org.serverct.parrot.parrotx.utils.I18n;
 
@@ -32,6 +33,7 @@ public class VoteUpConfig extends PConfig {
     public boolean allow_public;
     public boolean allow_edit_participant;
     public boolean allow_edit_vote;
+    public List<String> weights;
 
     public boolean title_start;
     public boolean title_end;
@@ -81,7 +83,6 @@ public class VoteUpConfig extends PConfig {
     }
 
     // TODO 可 GUI 编辑的配置文件。
-    // TODO Weight 加权系统。
 
     public enum DataType {
         STRING("字符串"),
@@ -122,6 +123,7 @@ public class VoteUpConfig extends PConfig {
         SETTINGS_ALLOW_PUBLIC("公开进度功能", "Settings.Allow.Public", DataType.BOOLEAN, "allow_public"),
         SETTINGS_ALLOW_EDIT_VOTE("投票编辑功能", "Settings.Allow.Edit.Vote", DataType.BOOLEAN, "allow_edit_vote"),
         SETTINGS_ALLOW_EDIT_PARTICIPANT("参与者编辑功能", "Settings.Allow.Edit.Participant", DataType.BOOLEAN, "allow_edit_participant"),
+        SETTINGS_WEIGHT("投票权重", "Settings.Weight", DataType.LIST, "weights"),
         ;
 
         public final String name;
@@ -141,5 +143,15 @@ public class VoteUpConfig extends PConfig {
         List<UUID> admins = new ArrayList<>();
         this.admins.forEach(uuid -> admins.add(UUID.fromString(uuid)));
         return admins;
+    }
+
+    public int weight(@NonNull Player user) {
+        int weight = 0;
+        for (String line : this.weights) {
+            String[] dataSet = line.split("[;]");
+            if (dataSet.length == 2) if (user.hasPermission("VoteUp.weight." + dataSet[0]))
+                weight = Math.max(Integer.parseInt(dataSet[1]), weight);
+        }
+        return weight;
     }
 }

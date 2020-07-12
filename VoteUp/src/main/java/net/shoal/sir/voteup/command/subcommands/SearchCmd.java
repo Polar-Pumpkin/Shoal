@@ -1,6 +1,8 @@
 package net.shoal.sir.voteup.command.subcommands;
 
+import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
+import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.inventory.ListInventoryHolder;
 import net.shoal.sir.voteup.enums.Msg;
 import net.shoal.sir.voteup.enums.VoteFilter;
@@ -40,18 +42,23 @@ public class SearchCmd implements PCommand {
             Player user = (Player) sender;
             if (VoteUpPerm.SEARCH.hasPermission(user)) {
                 if (args.length >= 2) {
+                    String data = null;
+
                     if ("me".equalsIgnoreCase(args[1]))
-                        BasicUtil.openInventory(plugin, user, new ListInventoryHolder<>("owner:" + user.getUniqueId(), user, null).getInventory());
+                        data = "owner:" + user.getUniqueId();
                     else if ("open".equalsIgnoreCase(args[1]))
-                        BasicUtil.openInventory(plugin, user, new ListInventoryHolder<>("open:true", user, null).getInventory());
+                        data = "open:true";
                     else {
                         StringBuilder filter = new StringBuilder();
                         for (int index = args.length - 1; index >= 1; index--) {
                             filter.append(args[index]);
                             if (index != 1) filter.append(" ");
                         }
-                        BasicUtil.openInventory(plugin, user, new ListInventoryHolder<>(filter.toString(), user, null).getInventory());
+                        data = filter.toString();
                     }
+
+                    BasicUtil.openInventory(plugin, user, new ListInventoryHolder<>(data, user).getInventory());
+                    VoteUpAPI.GUI_MANAGER.getNavigator(user).chain(GuiManager.GuiKey.VOTE_LIST, data);
                 } else I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
             }
         } else

@@ -30,7 +30,7 @@ public class Vote implements PData, Owned, Timestamp {
     public boolean cancelled;
     public boolean isDraft;
     public boolean allowAnonymous;
-    public boolean isPublic; // TODO 还有投票全服公告没写
+    public boolean isPublic;
     public boolean allowEdit; // TODO 允许投票后编辑
     public Type type;
     public int goal;
@@ -126,8 +126,10 @@ public class Vote implements PData, Owned, Timestamp {
 
     public boolean isPassed() {
         int all = participants.size();
-        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
-        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
+        int accept = 0;
+        for (Participant agreer : listParticipants(user -> user.choice == Choice.ACCEPT)) accept += agreer.weight;
+        int refuse = 0;
+        for (Participant refuser : listParticipants(user -> user.choice == Choice.REFUSE)) refuse += refuser.weight;
 
         if (all < VoteUpAPI.CONFIG.setting_participantLeast)
             return false;
@@ -147,8 +149,13 @@ public class Vote implements PData, Owned, Timestamp {
     public Result result() {
         if (cancelled) return Result.CANCEL;
 
+        int accept = 0;
+        for (Participant agreer : listParticipants(user -> user.choice == Choice.ACCEPT)) accept += agreer.weight;
+        int refuse = 0;
+        for (Participant refuser : listParticipants(user -> user.choice == Choice.REFUSE)) refuse += refuser.weight;
+
         if (type == Type.NORMAL)
-            if (listParticipants(user -> user.choice == Choice.ACCEPT).size() == listParticipants(user -> user.choice == Choice.REFUSE).size())
+            if (accept == refuse)
                 return Result.DRAW;
 
         if (isPassed()) return Result.PASS;
@@ -168,15 +175,17 @@ public class Vote implements PData, Owned, Timestamp {
 
     public int getProcess() {
         int all = participants.size();
-        int accept = listParticipants(user -> user.choice == Choice.ACCEPT).size();
-        int refuse = listParticipants(user -> user.choice == Choice.REFUSE).size();
         int least = VoteUpAPI.CONFIG.setting_participantLeast;
+        int accept = 0;
+        for (Participant agreer : listParticipants(user -> user.choice == Choice.ACCEPT)) accept += agreer.weight;
+        int refuse = 0;
+        for (Participant refuser : listParticipants(user -> user.choice == Choice.REFUSE)) refuse += refuser.weight;
 
         int rate;
         if (all >= least) {
             switch (type) {
                 case NORMAL:
-                    rate = (int) ((accept / (double) all) * 100);
+                    rate = (int) ((accept / (double) Math.max(refuse, accept)) * 100);
                     break;
                 case REACHAMOUNT:
                     rate = (int) ((accept / (double) goal) * 100);
@@ -311,7 +320,7 @@ public class Vote implements PData, Owned, Timestamp {
                     if (choice != null) {
                         ConfigurationSection targetOldSection = participantSection.getConfigurationSection(uuid);
                         for (String oldUUID : targetOldSection.getKeys(false))
-                            this.participants.add(new Participant(UUID.fromString(oldUUID), choice, false, targetOldSection.getString(oldUUID)));
+                            this.participants.add(new Participant(UUID.fromString(oldUUID), choice, false, targetOldSection.getString(oldUUID), 1));
                         continue;
                     }
 
@@ -406,9 +415,9 @@ public class Vote implements PData, Owned, Timestamp {
     }
 
     public enum Type {
-        NORMAL(0, "普通投票", "同意人数大于反对人数"),
-        REACHAMOUNT(1, "多数同意投票", "同意人数需达到指定数量"),
-        LEASTNOT(2, "否决投票", "反对人数不超过指定数量");
+        NORMAL(0, "普通投票", "同意票数大于反对票数"),
+        REACHAMOUNT(1, "多数同意投票", "同意票数需达到指定数量"),
+        LEASTNOT(2, "否决投票", "反对票数不超过指定数量");
 
         public final String desc;
         public final String name;
@@ -495,7 +504,7 @@ public class Vote implements PData, Owned, Timestamp {
         PUBLIC("公开投票进度"),
         EDITABLE("可编辑所投票"),
         TYPE("投票类型"),
-        GOAL("目标人数"),
+        GOAL("目标票数"),
         OWNER("发起者"),
         STARTTIME("发起时间"),
         DURATION("持续时间"),
@@ -519,13 +528,15 @@ public class Vote implements PData, Owned, Timestamp {
         public final Choice choice;
         public final boolean anonymous;
         public final String reason;
+        public final int weight;
         public long timestamp;
 
-        public Participant(UUID uuid, Choice choice, boolean anonymous, String reason) {
+        public Participant(UUID uuid, Choice choice, boolean anonymous, String reason, int weight) {
             this.uuid = uuid;
             this.choice = choice;
             this.anonymous = anonymous;
             this.reason = reason;
+            this.weight = weight;
             this.timestamp = System.currentTimeMillis();
         }
 
@@ -534,6 +545,7 @@ public class Vote implements PData, Owned, Timestamp {
             this.choice = EnumUtil.valueOf(Choice.class, section.getString("Choice"));
             this.anonymous = section.getBoolean("Anonymous", false);
             this.reason = section.getString("Reason", Msg.REASON_NOT_YET.msg);
+            this.weight = section.getInt("Weight", 1);
             this.timestamp = section.getLong("Timestamp");
         }
 
@@ -542,6 +554,7 @@ public class Vote implements PData, Owned, Timestamp {
             userSection.set("Choice", choice.name());
             userSection.set("Anonymous", anonymous);
             userSection.set("Reason", reason);
+            userSection.set("Weight", weight);
             userSection.set("Timestamp", timestamp);
         }
 

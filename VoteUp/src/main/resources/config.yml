@@ -25,6 +25,12 @@ Settings:
       FadeIn: 3
       Stay: 10
       FadeOut: 5
+  # 使用 权限节点;权重 的格式定义
+  # 例如 vip;2 代表
+  # 拥有 VoteUp.weight.vip 权限的玩家一票顶 2 票
+  # 若拥有多个权限则取最大值
+  Weight:
+    - 'vip;2'
 Autocast:
   Enable: true
   Usermode: true

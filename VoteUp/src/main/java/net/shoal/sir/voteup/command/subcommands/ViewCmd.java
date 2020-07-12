@@ -2,6 +2,7 @@ package net.shoal.sir.voteup.command.subcommands;
 
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
+import net.shoal.sir.voteup.config.GuiManager;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.inventory.DetailsInventoryHolder;
 import net.shoal.sir.voteup.enums.Msg;
@@ -47,9 +48,10 @@ public class ViewCmd implements PCommand {
                     else
                         vote = VoteUpAPI.VOTE_MANAGER.getVote(args[1]);
 
-                    if (vote != null)
-                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, null).getInventory());
-                    else
+                    if (vote != null) {
+                        BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user).getInventory());
+                        VoteUpAPI.GUI_MANAGER.getNavigator(user).chain(GuiManager.GuiKey.VOTE_DETAILS, vote);
+                    } else
                         I18n.send(user, plugin.lang.build(plugin.localeKey, I18n.Type.WARN, Msg.ERROR_GET_VOTE.msg));
                 } else I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.WARN, "Plugin", "UnknownCmd"));
             }

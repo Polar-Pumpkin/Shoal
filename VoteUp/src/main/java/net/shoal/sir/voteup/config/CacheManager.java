@@ -85,16 +85,18 @@ public class CacheManager extends PConfig {
         this.notices.forEach(
                 (voteID, map) -> map.forEach(
                         (number, notice) -> {
-                            String append = notice.announce(user.getUniqueId());
-                            if (append != null) content.add(append);
-                            if (notice.isOver()) map.remove(number);
+                            if (notice.type == type) {
+                                String append = notice.announce(user.getUniqueId());
+                                if (append != null) content.add("&b▶ " + append);
+                                if (notice.isOver()) map.remove(number);
+                            }
                         }
                 )
         );
         if (content.isEmpty()) return;
 
         TextComponent text = JsonChatUtil.getFromLegacy(
-                plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Notice." + type.name() + ".Head")
+                plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Notice.Head")
                         .replace("%amount%", String.valueOf(content.size()))
         );
 

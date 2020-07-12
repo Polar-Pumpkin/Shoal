@@ -6,6 +6,7 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.GuiManager;
+import net.shoal.sir.voteup.data.Navigator;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.VoteInventoryExecutor;
 import org.bukkit.Bukkit;
@@ -64,13 +65,11 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
     protected T data;
     protected Inventory inventory;
     protected Player viewer;
-    protected GuiManager.GuiKey lastGui;
 
-    public ParticipantInventoryHolder(T data, @NonNull Player player, GuiManager.GuiKey lastGui) {
+    public ParticipantInventoryHolder(T data, @NonNull Player player) {
         this.plugin = VoteUp.getInstance();
         this.data = data;
         this.viewer = player;
-        this.lastGui = lastGui;
         this.inventory = construct();
     }
 
@@ -99,8 +98,10 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
             if (targetItemSection == null) continue;
             ItemStack item = ItemUtil.build(plugin, targetItemSection);
 
-            if (keyWord == KeyWord.BACK)
+            if (keyWord == KeyWord.BACK) {
+                GuiManager.GuiKey lastGui = VoteUpAPI.GUI_MANAGER.getNavigator(viewer).last();
                 ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
+            }
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
             if (targetSlotSection == null) continue;
@@ -176,22 +177,16 @@ public class ParticipantInventoryHolder<T> implements VoteInventoryExecutor {
         Player user = (Player) event.getWhoClicked();
         Vote vote = (Vote) data;
         Inventory inv = event.getInventory();
+        Navigator navigator = VoteUpAPI.GUI_MANAGER.getNavigator(viewer);
 
         switch (keyWord) {
             case BACK:
-                if (lastGui != null) {
-                    switch (lastGui) {
-                        case VOTE_DETAILS:
-                            BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, GUI_KEY).getInventory());
-                            break;
-                        case MAIN_MENU:
-                        case VOTE_CREATE:
-                        case VOTE_LIST:
-                        case VOTE_PARTICIPANTS:
-                        default:
-                            break;
-                    }
-                } else BasicUtil.closeInventory(plugin, user);
+                GuiManager.GuiKey lastGui = navigator.last();
+                if (lastGui != null) BasicUtil.openInventory(plugin, user, navigator.back());
+                else {
+                    BasicUtil.closeInventory(plugin, user);
+                    navigator.end();
+                }
                 break;
             case PARTICIPANT:
             default:

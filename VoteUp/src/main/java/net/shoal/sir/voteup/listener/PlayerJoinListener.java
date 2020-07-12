@@ -16,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.serverct.parrot.parrotx.PPlugin;
-import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
 
@@ -33,7 +32,7 @@ public class PlayerJoinListener implements Listener {
         if (newest != null) {
             if (!newest.isVoted(user.getUniqueId())) {
                 VoteUpSound.ding(user);
-                BasicUtil.broadcastTitle(
+                user.sendTitle(
                         "",
                         VoteUpPlaceholder.parse(newest, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Join.Subtitle")),
                         VoteUpAPI.CONFIG.title_fadeIn,
@@ -52,7 +51,7 @@ public class PlayerJoinListener implements Listener {
 
         String uuid = user.getUniqueId().toString();
         boolean inList = admins.contains(uuid);
-        boolean hasPerm = VoteUpPerm.NOTICE.hasPermission(user);
+        boolean hasPerm = VoteUpPerm.ADMIN.hasPermission(user);
 
         if (inList && !hasPerm) admins.remove(uuid);
         else if (!inList && hasPerm) admins.add(uuid);

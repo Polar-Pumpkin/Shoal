@@ -189,7 +189,8 @@ public class VoteManager extends PFolder {
                         uuid,
                         choice,
                         anonymous,
-                        VoteUpPerm.REASON.hasPermission(user) ? (reason.length() == 0 ? Msg.REASON_NOT_YET.msg : reason) : Msg.REASON_NO_PERM.msg
+                        VoteUpPerm.REASON.hasPermission(user) ? (reason.length() == 0 ? Msg.REASON_NOT_YET.msg : reason) : Msg.REASON_NO_PERM.msg,
+                        VoteUpAPI.CONFIG.weight(user)
                 )
         );
         vote.save();
@@ -197,7 +198,6 @@ public class VoteManager extends PFolder {
         I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name()));
 
         if (anonymous) return;
-        Player starter = Bukkit.getPlayer(vote.owner);
         Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
             {
                 put("Voter", user.getName());
@@ -206,22 +206,20 @@ public class VoteManager extends PFolder {
             }
         });
 
-        if (starter != null && starter.isOnline()) {
-            String announce = notice.announce(user.getUniqueId());
-            if (announce != null)
-                I18n.send(starter, VoteUpPlaceholder.parse(vote, announce));
+        List<UUID> receiver = new ArrayList<>();
+
+        if (vote.isPublic) Bukkit.getOnlinePlayers().forEach(player -> receiver.add(player.getUniqueId()));
+        else {
+            receiver.add(vote.getOwner());
+            VoteUpAPI.CONFIG.admins.forEach(adminID -> receiver.add(UUID.fromString(adminID)));
         }
 
-        VoteUpAPI.CONFIG.admins.forEach(
-                adminID -> {
-                    Player admin = Bukkit.getPlayer(UUID.fromString(adminID));
-                    if (admin != null) {
-                        String announce = notice.announce(admin.getUniqueId());
-                        if (announce != null) // TODO 这里有一个发错误格式的收到新投票信息的问题。
-                            I18n.send(admin, VoteUpPlaceholder.parse(vote, announce));
-                    }
-                }
-        );
+
+        if (!receiver.isEmpty()) {
+            String announce = notice.announce(user.getUniqueId());
+            if (announce != null)
+                receiver.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).forEach(target -> I18n.send(target, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, VoteUpPlaceholder.parse(vote, announce))));
+        }
     }
 
     public void endVote(String voteID) {

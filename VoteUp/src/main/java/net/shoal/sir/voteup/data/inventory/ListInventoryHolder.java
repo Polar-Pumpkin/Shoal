@@ -5,6 +5,7 @@ import net.shoal.sir.voteup.VoteUp;
 import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.GuiManager;
+import net.shoal.sir.voteup.data.Navigator;
 import net.shoal.sir.voteup.data.Vote;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -36,13 +37,11 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
     protected T data;
     protected Inventory inventory;
     protected Player viewer;
-    protected GuiManager.GuiKey lastGui;
 
-    public ListInventoryHolder(T data, @NonNull Player player, GuiManager.GuiKey lastGui) {
+    public ListInventoryHolder(T data, @NonNull Player player) {
         this.plugin = VoteUp.getInstance();
         this.data = data;
         this.viewer = player;
-        this.lastGui = lastGui;
         this.inventory = construct();
     }
 
@@ -66,8 +65,10 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
             if (targetItemSection == null) continue;
             ItemStack item = ItemUtil.build(plugin, targetItemSection);
 
-            if (keyWord == KeyWord.BACK)
+            if (keyWord == KeyWord.BACK) {
+                GuiManager.GuiKey lastGui = VoteUpAPI.GUI_MANAGER.getNavigator(viewer).last();
                 ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
+            }
 
             ConfigurationSection targetSlotSection = targetItemSection.getConfigurationSection("Position");
             if (targetSlotSection == null) continue;
@@ -107,6 +108,7 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
                             BookMeta bookMeta = (BookMeta) meta;
                             bookMeta.setGeneration(BookMeta.Generation.ORIGINAL);
                             bookMeta.setAuthor(target.getOwnerName());
+                            bookMeta.setTitle(target.title + "(投票日志)");
 
                             meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 10, true);
                             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -133,13 +135,20 @@ public class ListInventoryHolder<T> implements net.shoal.sir.voteup.data.ListInv
         Player user = (Player) event.getWhoClicked();
         Vote vote = voteMap.get(event.getSlot());
         Inventory inv = event.getInventory();
+        Navigator navigator = VoteUpAPI.GUI_MANAGER.getNavigator(viewer);
 
         switch (keyWord) {
             case BACK:
-                // TODO 完善导航链条。
+                GuiManager.GuiKey lastGui = navigator.last();
+                if (lastGui != null) BasicUtil.openInventory(plugin, user, navigator.back());
+                else {
+                    BasicUtil.closeInventory(plugin, user);
+                    navigator.end();
+                }
                 break;
             case VOTE:
-                BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user, GUI_KEY).getInventory());
+                BasicUtil.openInventory(plugin, user, new DetailsInventoryHolder<>(vote, user).getInventory());
+                navigator.chain(GuiManager.GuiKey.VOTE_DETAILS, vote);
                 break;
             default:
                 break;

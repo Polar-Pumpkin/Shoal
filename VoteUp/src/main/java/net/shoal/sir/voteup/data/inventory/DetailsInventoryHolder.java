@@ -6,6 +6,7 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.api.VoteUpPerm;
 import net.shoal.sir.voteup.api.VoteUpPlaceholder;
 import net.shoal.sir.voteup.config.GuiManager;
+import net.shoal.sir.voteup.data.Navigator;
 import net.shoal.sir.voteup.data.Vote;
 import net.shoal.sir.voteup.data.VoteInventoryExecutor;
 import net.shoal.sir.voteup.data.prompts.CollectReasonPrompt;
@@ -37,13 +38,11 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
     protected T data;
     protected Inventory inventory;
     protected Player viewer;
-    protected GuiManager.GuiKey lastGui;
 
-    public DetailsInventoryHolder(T data, @NonNull Player player, GuiManager.GuiKey lastGui) {
+    public DetailsInventoryHolder(T data, @NonNull Player player) {
         this.plugin = VoteUp.getInstance();
         this.data = data;
         this.viewer = player;
-        this.lastGui = lastGui;
         this.inventory = construct();
     }
 
@@ -79,8 +78,10 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
                 }
             }
 
-            if (keyWord == KeyWord.BACK) ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
-            else if (keyWord == KeyWord.AUTOCAST && (!VoteUpAPI.CONFIG.autocast_enable || vote.autocast.isEmpty()))
+            if (keyWord == KeyWord.BACK) {
+                GuiManager.GuiKey lastGui = VoteUpAPI.GUI_MANAGER.getNavigator(viewer).last();
+                ItemUtil.replace(item, "%BACK%", lastGui != null ? lastGui.guiname : "无");
+            } else if (keyWord == KeyWord.AUTOCAST && (!VoteUpAPI.CONFIG.autocast_enable || vote.autocast.isEmpty()))
                 continue;
             else if ((keyWord == KeyWord.EDIT || keyWord == KeyWord.CANCEL) && !(VoteUpPerm.ADMIN.hasPermission(viewer) || vote.isOwner(viewer.getUniqueId())))
                 continue;
@@ -167,6 +168,7 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
         Player user = (Player) event.getWhoClicked();
         Vote vote = (Vote) data;
         Inventory inv = event.getInventory();
+        Navigator navigator = VoteUpAPI.GUI_MANAGER.getNavigator(viewer);
         boolean anonymous = vote.allowAnonymous && (event.getClick() == ClickType.DROP);
 
         switch (keyWord) {
@@ -193,24 +195,17 @@ public class DetailsInventoryHolder<T> implements VoteInventoryExecutor {
                 if (participant == null) break;
                 ConversationUtil.start(plugin, user, new CollectReasonPrompt(user, vote, participant.choice, participant.anonymous), 300);
                 break;
-            case BACK: // TODO 导航链条优化，不能只记上一个菜单，会造成覆写死循环。
-                if (lastGui != null) {
-                    switch (lastGui) {
-                        case MAIN_MENU:
-                            // TODO 返回主菜单。
-                            break;
-                        case VOTE_LIST:
-                            // TODO 返回检索菜单。
-                            break;
-                        case VOTE_DETAILS:
-                        case VOTE_CREATE:
-                        case VOTE_PARTICIPANTS:
-                            break;
-                    }
-                } else BasicUtil.closeInventory(plugin, user);
+            case BACK:
+                GuiManager.GuiKey lastGui = navigator.last();
+                if (lastGui != null) BasicUtil.openInventory(plugin, user, navigator.back());
+                else {
+                    BasicUtil.closeInventory(plugin, user);
+                    navigator.end();
+                }
                 break;
             case PARTICIPANT:
-                BasicUtil.openInventory(plugin, user, new ParticipantInventoryHolder<>(vote, user, GUI_KEY).getInventory());
+                BasicUtil.openInventory(plugin, user, new ParticipantInventoryHolder<>(vote, user).getInventory());
+                navigator.chain(GuiManager.GuiKey.VOTE_PARTICIPANTS, vote);
                 break;
             case CANCEL:
                 // TODO 取消投票的实现

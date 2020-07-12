@@ -4,9 +4,11 @@ import net.shoal.sir.voteup.api.VoteUpAPI;
 import net.shoal.sir.voteup.command.VoteUpCmd;
 import net.shoal.sir.voteup.config.VoteUpConfig;
 import net.shoal.sir.voteup.enums.Msg;
+import net.shoal.sir.voteup.listener.InventoryCloseListener;
 import net.shoal.sir.voteup.listener.PlayerJoinListener;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 import org.serverct.parrot.parrotx.PPlugin;
 import org.serverct.parrot.parrotx.utils.I18n;
 
@@ -15,7 +17,9 @@ public final class VoteUp extends PPlugin {
 
     @Override
     protected void registerListener() {
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        PluginManager manager = Bukkit.getPluginManager();
+        manager.registerEvents(new PlayerJoinListener(), this);
+        manager.registerEvents(new InventoryCloseListener(), this);
     }
 
     @Override

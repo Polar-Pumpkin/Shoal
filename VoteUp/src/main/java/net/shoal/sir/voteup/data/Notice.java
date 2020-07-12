@@ -84,7 +84,7 @@ public class Notice implements Timestamp {
                         .replace("%time%", TimeUtil.getDescriptionTimeFromTimestamp(time) + " &7[" + getTime() + "]");
                 break;
             case AUTOCAST_WAIT_EXECUTE:
-                if (uuid != vote.getOwner() || this.announced.contains(uuid)) return null;
+                if (!vote.isOwner(uuid) || this.announced.contains(uuid)) return null;
                 this.announced.add(uuid);
                 Player owner = Bukkit.getPlayer(vote.getOwner());
                 if (owner == null) break;

@@ -2,18 +2,22 @@ package net.shoal.sir.voteup.config;
 
 import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
+import net.shoal.sir.voteup.data.Navigator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.config.PFolder;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class GuiManager extends PFolder {
 
     private final Map<String, FileConfiguration> guiMap = new HashMap<>();
+    public final Map<UUID, Navigator> navigatorMap = new HashMap<>();
 
     public GuiManager() {
         super(VoteUp.getInstance(), "Guis", "Gui 配置文件夹");
@@ -31,8 +35,12 @@ public class GuiManager extends PFolder {
                 plugin.saveResource("Guis/" + key.filename + ".yml", false);
     }
 
+    public Navigator getNavigator(@NonNull Player user) {
+        return this.navigatorMap.getOrDefault(user.getUniqueId(), new Navigator(user));
+    }
+
     public FileConfiguration get(String filename) {
-        return guiMap.get(filename);
+        return this.guiMap.get(filename);
     }
 
     public enum GuiKey {
