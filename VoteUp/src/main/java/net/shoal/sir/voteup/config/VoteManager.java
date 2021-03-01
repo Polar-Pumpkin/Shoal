@@ -21,20 +21,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.serverct.parrot.parrotx.config.PFolder;
 import org.serverct.parrot.parrotx.utils.BasicUtil;
 import org.serverct.parrot.parrotx.utils.EnumUtil;
-import org.serverct.parrot.parrotx.utils.I18n;
 import org.serverct.parrot.parrotx.utils.JsonChatUtil;
+import org.serverct.parrot.parrotx.utils.i18n.I18n;
 
 import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class VoteManager extends PFolder {
+public class VoteManager extends PFolder<Vote> {
 
     private final Map<String, Vote> voteMap = new HashMap<>();
     private final Map<String, Integer> endTaskMap = new HashMap<>();
 
     public VoteManager() {
-        super(VoteUp.getInstance(), "Votes", "投票数据文件夹");
+        super(VoteUp.getInstance(), "Votes", "投票数据文件夹", "vote");
     }
 
     @Override
@@ -158,13 +158,13 @@ public class VoteManager extends PFolder {
         if (VoteUpAPI.CONFIG.title_start)
             BasicUtil.broadcastTitle(
                     "",
-                    VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
+                    VoteUpPlaceholder.parse(vote, lang.data.get(plugin.localeKey, "Vote", "Event.Start.Subtitle")),
                     VoteUpAPI.CONFIG.title_fadeIn,
                     VoteUpAPI.CONFIG.title_stay,
                     VoteUpAPI.CONFIG.title_fadeOut
             );
         Bukkit.getOnlinePlayers().forEach(player -> player.spigot().sendMessage(JsonChatUtil.buildClickText(
-                VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.Start.Broadcast")),
+                VoteUpPlaceholder.parse(vote, lang.data.getInfo("Vote", "Event.Start.Broadcast")),
                 new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote view " + vote.voteID),
                 new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(I18n.color(Msg.VOTE_CLICK.msg)))
         )));
@@ -175,13 +175,13 @@ public class VoteManager extends PFolder {
         Vote vote = getVote(voteID);
         if (vote == null) return;
         if (!vote.open) {
-            I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Closed"));
+            I18n.send(user, lang.data.getInfo("Vote", "Vote.Fail.Closed"));
             return;
         }
         if (!VoteUpPerm.VOTE.hasPermission(user, choice)) return;
 
         if (vote.isVoted(uuid))
-            I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote.Fail.Logged"));
+            I18n.send(user, lang.data.getInfo("Vote", "Vote.Fail.Logged"));
 
         vote.participants.removeIf(participant -> participant.uuid == uuid);
         vote.participants.add(
@@ -195,7 +195,7 @@ public class VoteManager extends PFolder {
         );
         vote.save();
 
-        I18n.send(user, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Vote." + choice.name()));
+        I18n.send(user, lang.data.getInfo("Vote", "Vote." + choice.name()));
 
         if (anonymous) return;
         Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE, voteID, new HashMap<String, Object>() {
@@ -218,7 +218,7 @@ public class VoteManager extends PFolder {
         if (!receiver.isEmpty()) {
             String announce = notice.announce(user.getUniqueId());
             if (announce != null)
-                receiver.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).forEach(target -> I18n.send(target, plugin.lang.build(plugin.localeKey, I18n.Type.INFO, VoteUpPlaceholder.parse(vote, announce))));
+                receiver.stream().map(Bukkit::getPlayer).filter(Objects::nonNull).forEach(target -> I18n.send(target, lang.data.build(I18n.Type.INFO, VoteUpPlaceholder.parse(vote, announce))));
         }
     }
 
@@ -239,12 +239,12 @@ public class VoteManager extends PFolder {
             if (VoteUpAPI.CONFIG.title_end)
                 BasicUtil.broadcastTitle(
                         "",
-                        VoteUpPlaceholder.parse(vote, plugin.lang.getRaw(plugin.localeKey, "Vote", "Event.End.Subtitle")),
+                        VoteUpPlaceholder.parse(vote, lang.data.get(plugin.localeKey, "Vote", "Event.End.Subtitle")),
                         VoteUpAPI.CONFIG.title_fadeIn,
                         VoteUpAPI.CONFIG.title_stay,
                         VoteUpAPI.CONFIG.title_fadeOut
                 );
-            BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, plugin.lang.get(plugin.localeKey, I18n.Type.INFO, "Vote", "Event.End.Broadcast")));
+            BasicUtil.broadcast(VoteUpPlaceholder.parse(vote, lang.data.getInfo("Vote", "Event.End.Broadcast")));
 
             Notice notice = VoteUpAPI.CACHE_MANAGER.log(Notice.Type.VOTE_END, voteID, new HashMap<>());
             VoteUpAPI.CONFIG.admins.forEach(
@@ -258,15 +258,5 @@ public class VoteManager extends PFolder {
                     }
             );
         }
-    }
-
-    @Override
-    public void saveAll() {
-        voteMap.forEach((voteID, vote) -> vote.save());
-    }
-
-    @Override
-    public void delete(String id) {
-        voteMap.remove(id);
     }
 }

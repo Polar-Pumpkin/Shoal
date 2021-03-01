@@ -4,7 +4,7 @@ import lombok.NonNull;
 import net.shoal.sir.voteup.VoteUp;
 import org.bukkit.entity.Player;
 import org.serverct.parrot.parrotx.config.PConfig;
-import org.serverct.parrot.parrotx.utils.I18n;
+import org.serverct.parrot.parrotx.utils.i18n.I18n;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -13,40 +13,35 @@ import java.util.List;
 import java.util.UUID;
 
 public class VoteUpConfig extends PConfig {
-    public VoteUpConfig() {
-        super(VoteUp.getInstance(), "config", "主配置文件");
-    }
-
     public boolean debug;
     public boolean bStats;
     public String language;
-
     public boolean sound_enable;
     public String action_start;
     public String action_success;
     public String action_failure;
     public String vote_start;
     public String vote_end;
-
     public int setting_participantLeast;
     public boolean allow_anonymous;
     public boolean allow_public;
     public boolean allow_edit_participant;
     public boolean allow_edit_vote;
     public List<String> weights;
-
     public boolean title_start;
     public boolean title_end;
     public int title_fadeIn;
     public int title_stay;
     public int title_fadeOut;
-
     public boolean autocast_enable;
     public boolean autocast_userMode;
     public boolean autocast_blackList;
     public List<String> autocast_list;
-
     public List<String> admins;
+
+    public VoteUpConfig() {
+        super(VoteUp.getInstance(), "config", "主配置文件");
+    }
 
     @Override
     public void load(@NonNull File file) {
@@ -58,7 +53,7 @@ public class VoteUpConfig extends PConfig {
                 field.set(this, config.get(key.path));
             }
         } catch (Throwable e) {
-            plugin.lang.logError(I18n.LOAD, getTypeName(), e, null);
+            lang.log.error(I18n.LOAD, name(), e, null);
         }
     }
 
@@ -72,7 +67,7 @@ public class VoteUpConfig extends PConfig {
                 config.set(key.path, field.get(this));
             }
         } catch (Throwable e) {
-            plugin.lang.logError(I18n.SAVE, getTypeName(), e, null);
+            lang.log.error(I18n.SAVE, name(), e, null);
         }
         super.save();
     }
@@ -83,6 +78,22 @@ public class VoteUpConfig extends PConfig {
     }
 
     // TODO 可 GUI 编辑的配置文件。
+
+    public List<UUID> admins() {
+        List<UUID> admins = new ArrayList<>();
+        this.admins.forEach(uuid -> admins.add(UUID.fromString(uuid)));
+        return admins;
+    }
+
+    public int weight(@NonNull Player user) {
+        int weight = 0;
+        for (String line : this.weights) {
+            String[] dataSet = line.split("[;]");
+            if (dataSet.length == 2) if (user.hasPermission("VoteUp.weight." + dataSet[0]))
+                weight = Math.max(Integer.parseInt(dataSet[1]), weight);
+        }
+        return weight;
+    }
 
     public enum DataType {
         STRING("字符串"),
@@ -137,21 +148,5 @@ public class VoteUpConfig extends PConfig {
             this.dataType = type;
             this.fieldName = fieldName;
         }
-    }
-
-    public List<UUID> admins() {
-        List<UUID> admins = new ArrayList<>();
-        this.admins.forEach(uuid -> admins.add(UUID.fromString(uuid)));
-        return admins;
-    }
-
-    public int weight(@NonNull Player user) {
-        int weight = 0;
-        for (String line : this.weights) {
-            String[] dataSet = line.split("[;]");
-            if (dataSet.length == 2) if (user.hasPermission("VoteUp.weight." + dataSet[0]))
-                weight = Math.max(Integer.parseInt(dataSet[1]), weight);
-        }
-        return weight;
     }
 }

@@ -4,25 +4,25 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.shoal.sir</groupId>
-    <artifactId>VoteUp</artifactId>
-    <version>2.0.5-BETA</version>
+    <groupId>net.shoal.parrot</groupId>
+    <artifactId>PrefixMe</artifactId>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
-    <name>VoteUp</name>
+    <name>PrefixMe</name>
 
+    <description>一个玩家自给自足的称号插件</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
-        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -31,13 +31,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.4</version>
                 <configuration>
                     <relocations>
                         <relocation>
-                            <pattern>org.bstats</pattern>
-                            <!-- Replace this with your package! -->
-                            <shadedPattern>org.serverct.parrot</shadedPattern>
+                            <pattern>net.wesjd</pattern>
+                            <shadedPattern>net.shoal.parrot.prefixme.util</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.serverct.parrot</pattern>
+                            <shadedPattern>net.shoal.parrot.prefixme.util</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.cryptomorin</pattern>
+                            <shadedPattern>net.shoal.parrot.prefixme.util</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>parsii</pattern>
+                            <shadedPattern>net.shoal.parrot.prefixme.util.parsii</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -65,15 +76,15 @@
     <repositories>
         <repository>
             <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>CodeMC</id>
-            <url>https://repo.codemc.org/repository/maven-public</url>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
 
@@ -81,25 +92,25 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.14.4-R0.1-SNAPSHOT</version>
+            <version>1.16.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.10.9</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.Polar-Pumpkin</groupId>
             <artifactId>ParrotX</artifactId>
-            <version>d49b81d756</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>1.7</version>
+            <version>v1.4.7.3-alpha</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

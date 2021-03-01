@@ -1,0 +1,18 @@
+Plugin:
+  Prefix: ""
+  INFO: ""
+  WARN: ""
+  ERROR: ""
+  NoPerm: "您没有权限"
+Anvil:
+  Title: "设置称号"
+  Text: "命名物品为称号"
+Message:
+  TargetNotExist: "目标玩家不在线"
+  Empty: "得输入一点内容"
+  Success: "设置终了: {0}"
+  Deprefix: "已清除"
+  Limit: "超过长度限制"
+  Cancel: "已取消"
+  Set: "已修改称号为 {0}"
+  Force: "已修改 {0} 的称号为 {1}"

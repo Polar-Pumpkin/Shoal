@@ -1,0 +1,11 @@
+name: SignItem
+version: ${project.version}
+main: net.shoal.parrot.signitem.SignItem
+api-version: 1.16
+authors: [ EntityParrot_ ]
+description: 丰富多彩的物品签名工具。
+commands:
+  signitem:
+    aliases: [ si ]
+  sign:
+  unsign:

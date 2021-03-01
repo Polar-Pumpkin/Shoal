@@ -1,0 +1,20 @@
+Debug: false
+Language: Chinese
+CharacterLimit: 10
+Item:
+  Prefix:
+    ItemStack:
+      Display: "示例称号物品"
+      Material: NAME_TAG
+      Lore:
+        - 'for'
+        - 'example'
+    Sound: ENTITY_VILLAGER_WORK_CARTOGRAPHER
+  Deprefix:
+    ItemStack:
+      Display: "示例祛称号物品"
+      Material: NAME_TAG
+      Lore:
+        - 'for'
+        - 'example'
+    Sound: ENTITY_ITEM_BREAK

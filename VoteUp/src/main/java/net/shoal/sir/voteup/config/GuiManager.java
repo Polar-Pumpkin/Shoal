@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GuiManager extends PFolder {
+public class GuiManager extends PFolder<> {
 
     private final Map<String, FileConfiguration> guiMap = new HashMap<>();
     public final Map<UUID, Navigator> navigatorMap = new HashMap<>();

@@ -1,0 +1,9 @@
+name: PrefixMe
+version: ${project.version}
+main: net.shoal.parrot.prefixme.PrefixMe
+api-version: 1.16
+authors: [ EntityParrot_ ]
+description: 一个玩家自给自足的称号插件
+depend: [ PlaceholderAPI ]
+commands:
+  prefixme:
