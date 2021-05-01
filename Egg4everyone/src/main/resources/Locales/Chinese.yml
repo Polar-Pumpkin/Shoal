@@ -1,0 +1,7 @@
+Plugin:
+  Prefix: ""
+  INFO: ""
+  WARN: ""
+  ERROR: ""
+Drop: "你拿到了一颗蛋, 但是它掉了!"
+Get: "你拿到了一颗蛋!"
