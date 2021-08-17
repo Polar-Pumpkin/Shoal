@@ -10,7 +10,6 @@ import java.util.List;
 public class ConfigManager extends PConfig {
 
     public static List<String> identifies;
-    public static boolean strictColor;
     public static String timeFormat;
     public static int descLength;
     public static Sound success;
@@ -23,11 +22,6 @@ public class ConfigManager extends PConfig {
                         .path("Settings.Identify")
                         .type(AutoLoadItem.DataType.LIST)
                         .field("identifies")
-                        .build(),
-                AutoLoadItem.builder()
-                        .path("Settings.ColorStrict")
-                        .type(AutoLoadItem.DataType.BOOLEAN)
-                        .field("strictColor")
                         .build(),
                 AutoLoadItem.builder()
                         .path("Settings.DescriptionLength")

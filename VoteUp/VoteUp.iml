@@ -19,7 +19,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:2f9131cf7d" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:21.0" level="project" />
@@ -27,9 +26,10 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.13-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.23" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.8" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:2f9131cf7d" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.Polar-Pumpkin:ParrotX:d49b81d756" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.scireum:parsii:1.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.WesJD.AnvilGUI:anvilgui:99a504a3bb" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.cryptomorin:XSeries:7.1.3" level="project" />
     <orderEntry type="library" name="Maven: org.bstats:bstats-bukkit:1.7" level="project" />
   </component>
 </module>

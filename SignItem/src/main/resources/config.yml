@@ -7,7 +7,6 @@ Settings:
     - '&7⚑ &f{time}'
   DescriptionLength: 10
   TimeFormat: "yyyy-MM-dd HH:mm:ss"
-  ColorStrict: false
 Sound:
   Success: BLOCK_ANVIL_USE
   Failure: ENTITY_VILLAGER_NO

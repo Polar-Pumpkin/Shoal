@@ -5,6 +5,8 @@ import net.shoal.parrot.signitem.config.ConfigManager;
 import net.shoal.parrot.signitem.utils.SignUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.serverct.parrot.parrotx.command.BaseCommand;
 import org.serverct.parrot.parrotx.utils.TimeUtil;
 
@@ -33,6 +35,13 @@ public class SignCommand extends BaseCommand {
         final String desc = (String) convert(0, args);
         final ItemStack item = user.getInventory().getItemInMainHand();
 
+        final Map<String, String> exist = SignUtil.getSign(item);
+        if (!exist.isEmpty()) {
+            lang.sender.warn(user, "Action.Exist");
+            user.playSound(user.getLocation(), ConfigManager.failure, 1, 1);
+            return;
+        }
+
         if (Objects.isNull(desc) || desc.isEmpty()) {
             lang.sender.warn(user, "Action.Empty");
             user.playSound(user.getLocation(), ConfigManager.failure, 1, 1);
@@ -57,5 +66,13 @@ public class SignCommand extends BaseCommand {
         SignUtil.sign(item, content);
         lang.sender.info(user, "Action.Success");
         user.playSound(user.getLocation(), ConfigManager.success, 1, 1);
+
+        final ItemMeta meta = item.getItemMeta();
+        if (Objects.isNull(meta)) {
+            return;
+        }
+
+        meta.getPersistentDataContainer().set(SignItem.DESC, PersistentDataType.STRING, desc);
+        item.setItemMeta(meta);
     }
 }

@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.serverct.parrot.parrotx.command.BaseCommand;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class UnSignCommand extends BaseCommand {
     public UnSignCommand() {
@@ -22,6 +23,13 @@ public class UnSignCommand extends BaseCommand {
 
         if (item.getType() == Material.AIR) {
             lang.sender.warn(user, "Action.Air");
+            user.playSound(user.getLocation(), ConfigManager.failure, 1, 1);
+            return;
+        }
+
+        final Map<String, String> exist = SignUtil.getSign(item);
+        if (!exist.isEmpty() && !user.getName().equals(exist.get("name"))) {
+            lang.sender.warn(user, "Action.NotOwner");
             user.playSound(user.getLocation(), ConfigManager.failure, 1, 1);
             return;
         }
