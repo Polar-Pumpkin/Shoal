@@ -1,0 +1,46 @@
+Debug: false
+bStats: true
+Language: Chinese
+Sound:
+  Enable: true
+  Action:
+    Start: ENTITY_ARROW_HIT_PLAYER
+    Success: ENTITY_VILLAGER_YES
+    Failure: BLOCK_ANVIL_DESTROY
+  Vote:
+    Start: ENTITY_ARROW_HIT_PLAYER
+    End: BLOCK_ANVIL_HIT
+Settings:
+  ParticipantLeast: 5
+  Allow:
+    Anonymous: true
+    Public: true
+    Edit:
+      Vote: true
+      Participant: true
+  Broadcast:
+    Title:
+      VoteStart: true
+      VoteEnd: false
+      FadeIn: 3
+      Stay: 10
+      FadeOut: 5
+  # 使用 权限节点;权重 的格式定义
+  # 例如 vip;2 代表
+  # 拥有 VoteUp.weight.vip 权限的玩家一票顶 2 票
+  # 若拥有多个权限则取最大值
+  Weight:
+    - 'vip;2'
+Autocast:
+  Enable: true
+  Usermode: true
+  Blacklist: false
+  List:
+    - 'op'
+    - 'gamemode'
+    - 'gm'
+    - 'godmode'
+    - 'give'
+    - 'kill'
+    - 'sudo'
+Admin: []

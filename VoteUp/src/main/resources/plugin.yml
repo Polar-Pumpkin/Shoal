@@ -1,0 +1,11 @@
+name: VoteUp
+version: ${project.version}
+main: net.shoal.sir.voteup.VoteUp
+api-version: 1.13
+authors: [EntityParrot_]
+depend: [ParrotX]
+commands:
+  voteup:
+    aliases:
+      - vote
+      - votes

@@ -1,0 +1,13 @@
+Debug: false
+Language: Chinese
+Settings:
+  Identify:
+    - '&7✎ &3{name}'
+    - '&7✍ &7&o{desc}'
+    - '&7⚑ &f{time}'
+  DescriptionLength: 10
+  TimeFormat: "yyyy-MM-dd HH:mm:ss"
+Sound:
+  Success: BLOCK_ANVIL_USE
+  Failure: ENTITY_VILLAGER_NO
+  Erasing: ITEM_SHOVEL_FLATTEN

@@ -1,0 +1,13 @@
+Plugin:
+  Prefix: ""
+  INFO: "&a"
+  WARN: "&e"
+  ERROR: "&c"
+Action:
+  Exist: "已经存在签名"
+  Limit: "超过长度限制..."
+  Air: "无法操作空气..."
+  Empty: "签名签个内容嘛..."
+  Success: "签名完成"
+  Erasing: "签名已抹去"
+  NotOwner: "不能抹去他人签名"

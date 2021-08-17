@@ -1,0 +1,37 @@
+Plugin:
+  Prefix: "&7[&6&lVote Up&7] "
+  INFO: "&a&l&o>> "
+  WARN: "&e&l&o>> "
+  ERROR: "&c&l&o>> "
+  NoPerm: "&7您没有权限这么做."
+  UnknownCmd: "&7未知命令, 使用 &d/vote help &7查看帮助."
+Vote:
+  Status:
+    Processing: "&a进行中"
+    End: "&e已结束"
+  Event:
+    Join:
+      Subtitle: "&7您未参与过的投票 &c%TITLE% &7正在进行中"
+      Broadcast: "&7您未参与过的投票 &c%TITLE% &7正在进行中. (点击查看)"
+    Start:
+      Subtitle: "&7投票 &c%TITLE% &7已开始"
+      Broadcast: "&7投票 &c%TITLE% &7已开始. (点击查看)"
+    End:
+      Subtitle: "&7投票 &c%TITLE% &7已结束"
+      Broadcast: "&7投票 &c%TITLE% &7%RESULT%&7."
+      Starter: "&7您的投票 &c%TITLE% &7已结束, 投票结果: %RESULT%&7."
+  Notice:
+    Head: "&b&l欢迎回来! &7在您不在的这段时间中有 &c%amount% &7个 VoteUp 通知. (查看详细信息)"
+    VOTE:
+      Starter: "&a%voter% &7在投票 &c%TITLE% &7中投了 &c%choice% &7票. &9-> &7&o%reason%"
+      Noticer: "&a%voter% &7在投票 &c%TITLE%&7(由 &a%OWNER% &7发起) 中投了 &c%choice% &7票. &9-> &7&o%reason%"
+    VOTE_END:
+      Starter: "&7投票 &c%TITLE% &7已结束 &9-> &c%RESULT% &7(&c%time%&7)"
+      Noticer: "&7投票 &c%TITLE%&7(由 &a%OWNER% &7发起) 已结束 &9-> &c%RESULT% &7(&c%time%&7)"
+  Vote:
+    ACCEPT: "&7成功投出一张 &a&l同意 &7票."
+    NEUTRAL: "&7成功投出一张 &e&l中立 &7票."
+    REFUSE: "&7成功投出一张 &c&l反对 &7票."
+    Fail:
+      Closed: "&7该投票已结束."
+      Logged: "&7您已经投过票了."

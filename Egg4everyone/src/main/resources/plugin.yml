@@ -1,0 +1,10 @@
+name: Egg4everyone
+version: ${project.version}
+main: net.shoal.parrot.egg4everyone.Egg4everyone
+api-version: 1.16
+softdepend: [ ParrotX ]
+authors: [ EntityParrot_ ]
+description: 每个人都能拿到龙蛋！
+commands:
+  egg4everyone:
+
