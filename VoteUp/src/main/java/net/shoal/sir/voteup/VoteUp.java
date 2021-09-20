@@ -11,6 +11,7 @@ import org.bstats.bukkit.Metrics;
 import org.serverct.parrot.parrotx.PPlugin;
 
 public final class VoteUp extends PPlugin {
+    
     @Getter private static VoteUp instance;
     public final static int PLUGIN_ID = 7972;
 
